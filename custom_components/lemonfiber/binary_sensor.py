@@ -4,11 +4,8 @@
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Final, override
 
-from homeassistant.components.binary_sensor import (
-    BinarySensorDeviceClass,
-    BinarySensorEntity,
-    BinarySensorEntityDescription,
-)
+from homeassistant.components.binary_sensor import BinarySensorEntity, BinarySensorEntityDescription
+from homeassistant.components.binary_sensor.const import BinarySensorDeviceClass
 from homeassistant.core import callback
 
 from . import readings

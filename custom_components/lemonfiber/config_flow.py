@@ -8,7 +8,7 @@ is never asked for.
 
 from typing import TYPE_CHECKING, Any, Final, override
 
-import voluptuous as vol
+import probatio as vol
 from homeassistant.config_entries import ConfigFlow, ConfigFlowResult
 from homeassistant.const import CONF_API_KEY, CONF_URL
 
