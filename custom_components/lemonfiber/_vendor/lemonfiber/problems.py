@@ -10,7 +10,7 @@ alone where it carries none (`ARCH-R138`).
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from lemonfiber._generated.contract import Problem, RefusalCode
+    from lemonfiber._generated import Problem, RefusalCode
 
 
 class LemonfiberError(Exception):

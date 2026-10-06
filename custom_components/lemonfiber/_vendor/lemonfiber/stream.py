@@ -22,7 +22,7 @@ from lemonfiber.reads import EVENTS
 if TYPE_CHECKING:
     from collections.abc import Callable
 
-    from lemonfiber._generated.contract import Envelope
+    from lemonfiber._generated import Envelope
     from lemonfiber.credential import Credential
 
 HEARTBEAT: Final = 15.0

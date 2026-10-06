@@ -30,7 +30,7 @@ if TYPE_CHECKING:
     from collections.abc import AsyncGenerator, AsyncIterator, Callable, Mapping
     from types import TracebackType
 
-    from lemonfiber._generated.contract import Envelope, JobEnvelope
+    from lemonfiber._generated import Envelope, JobEnvelope
     from lemonfiber.address import Address, Route
     from lemonfiber.capabilities import CapabilitySet
     from lemonfiber.credential import Credential

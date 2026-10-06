@@ -1,0 +1,539 @@
+# Copyright (c) 2026 NightWorksIO
+"""Some of the shapes only `dashboard` carries; `kinds.dashboard` gathers them all.
+
+Generated from `contract/web-api.contract.json`. Do not edit: `just generate` rewrites it,
+and CI fails on any difference.
+"""
+
+import typing
+
+from ...shared.dashboard__doctor__error__plugins import ProblemSeverity
+from ...shared.dashboard__front_door import FrontDoorReport
+from ...shared.dashboard__household import HouseholdReport
+from ...shared.dashboard__lifecycle__status import Service
+
+
+class Affected(typing.TypedDict):
+    """One thing that is wrong, as the expanded summary lists it."""
+
+    check: str
+    """The check that raised it."""
+    downstream: list[str]
+    """What is also wrong because of this, counted with it rather than again."""
+    exit: typing.NotRequired[int | None]
+    """How the service it is about exited, where it has and the engine said.
+
+    The technical half of what happened, kept out of the summary so the plain
+    words lead, and here for whoever wants the code.
+    """
+    meaning: str
+    """What it costs the operator. The line expands to items an operator can act
+    on, and an item that states only the event leaves the judgement it was
+    supposed to save them.
+    """
+    onset: str
+    """When the stack first saw it wrong since it last saw it right, in whole
+    seconds since the epoch.
+
+    The condition's own stamp, kept between runs, so every surface that reports
+    the check names the same moment and a restart does not make an old fault new.
+    """
+    remedies: list[str]
+    """What to do about it, most likely first."""
+    severity: ProblemSeverity
+    """How bad it is."""
+    summary: str
+    """What is wrong, in one line."""
+
+
+class Alert(typing.TypedDict):
+    """One interruption: what happened, which way, and how much it matters."""
+
+    affected: list[str]
+    """Every check this alert speaks for, the first being [`Self::check`]. More
+    than one where the same event was grouped across several services.
+    """
+    check: str
+    """The check this came from, so an alert and its condition cannot drift apart.
+    Where several were grouped, the first of them.
+    """
+    exit: typing.NotRequired[int | None]
+    """How the service it is about exited, where it has and the engine said;
+    where several were grouped, how the first of them did.
+
+    The technical half of what happened, kept out of the summary so the plain
+    words lead, and here for whoever wants the code.
+    """
+    kind: str
+    """What kind of event it is, shared by every instance of it."""
+    meaning: str
+    """What it costs the operator, which is the half between the event and the
+    fix. \"The tunnel dropped\" and \"restart the gateway\" leave whoever reads
+    them to work out for themselves whether anything leaked.
+    """
+    moment: Moment
+    """Which way it went."""
+    remedies: list[str]
+    """What to do about it, most likely first. An alert that says what happened
+    and not what to do is a notification, which is a different and worse thing.
+    """
+    severity: ProblemSeverity
+    """How much it matters. A resolution takes the severity of what resolved,
+    because \"the critical thing is over\" is itself worth the attention the
+    critical thing had.
+    """
+    summary: str
+    """What happened, in the words the condition was raised with."""
+
+
+type DashboardProtocol = typing.Literal["usenet", "torrent"]
+"""Which protocol a transfer is moving over, since the same download reads
+differently on each — a Usenet download has no peers, a torrent has no server.
+"""
+
+
+type DashboardReading = DashboardReadingKnown | DashboardReadingStale | DashboardReadingUnknown
+"""A figure a source reports, kept apart from the two ways it can be missing.
+
+Zero is a value a source gave; stale is the last value a source that has since
+gone quiet gave; unknown is a source that never answered at all. Collapsing any
+two of them sends an operator after the wrong problem — a stalled download and
+a dashboard that simply stopped polling look identical only if the code lets
+them.
+"""
+
+
+class DashboardReadingKnown(typing.TypedDict):
+    """The source answered this refresh with a value — which may legitimately be
+    zero.
+    """
+
+    reading: typing.Literal["known"]
+    value: int
+
+
+class DashboardReadingStale(typing.TypedDict):
+    """The source did not answer this refresh; this is the last value it gave."""
+
+    reading: typing.Literal["stale"]
+    value: int
+
+
+class DashboardReadingUnknown(typing.TypedDict):
+    """The source has never answered, so nothing can be said about it."""
+
+    reading: typing.Literal["unknown"]
+
+
+class Duration(typing.TypedDict):
+    nanos: int
+    secs: int
+
+
+type Hardlink = typing.Literal["linking", "copying", "unknown"]
+"""Whether imports are hardlinking or copying — the difference between an import
+that is free and one that doubles the disk it uses.
+"""
+
+
+type HealthStanding = typing.Literal[
+    "healthy", "stopped", "unconfigured", "advisory", "degraded", "broken", "critical", "unknown"
+]
+"""What the stack amounts to.
+
+Ordered from best to worst, so the worst of several is a `max` and there is no
+second place to encode the ranking.
+"""
+
+
+class HealthSummary(typing.TypedDict):
+    """The one-line summary, and what it expands to."""
+
+    affected: list[Affected]
+    """Everything that is wrong, worst first, so the line expands to the affected
+    items and their remedies rather than to a number nobody can act on.
+    """
+    standing: HealthStanding
+    """The one word."""
+    wanting_attention: int
+    """How many things are wrong — root causes, counted once each, so a disk that
+    filled and the nine imports that then failed is one thing and not ten.
+    """
+    worst: typing.NotRequired[str | None]
+    """The worst thing, named, so the line says something rather than only
+    grading. Absent where nothing is wrong.
+    """
+
+
+type Moment = typing.Literal["onset", "resolved"]
+"""Which way a condition went.
+
+Both directions are worth saying and neither is worth saying twice. An operator
+told a disk filled up and never told it was resolved goes on believing it — so
+resolution is an alert in its own right rather than the absence of one.
+"""
+
+
+type PanelArray_of_Queue = PanelArray_of_QueueReady | PanelArray_of_QueueUnavailable
+"""A panel's content, or the reason its source could not fill it.
+
+The difference between \"this panel is up to date\" and \"this panel's source is
+unreachable\" is the whole of degrading honestly: an unavailable panel says so,
+in its own words, rather than showing stale data as current or blank data as
+zero — and the panels beside it stay live.
+"""
+
+
+class PanelArray_of_QueueReady(typing.TypedDict):
+    """The source answered; here is the panel."""
+
+    data: list[Queue]
+    panel: typing.Literal["ready"]
+
+
+class PanelArray_of_QueueUnavailable(typing.TypedDict):
+    """The source could not be reached, for this stated reason."""
+
+    data: PanelArray_of_QueueUnavailableData
+    panel: typing.Literal["unavailable"]
+
+
+class PanelArray_of_QueueUnavailableData(typing.TypedDict):
+    reason: str
+    """Why the panel could not be filled, in the operator's terms."""
+
+
+type PanelArray_of_Service = PanelArray_of_ServiceReady | PanelArray_of_ServiceUnavailable
+"""A panel's content, or the reason its source could not fill it.
+
+The difference between \"this panel is up to date\" and \"this panel's source is
+unreachable\" is the whole of degrading honestly: an unavailable panel says so,
+in its own words, rather than showing stale data as current or blank data as
+zero — and the panels beside it stay live.
+"""
+
+
+class PanelArray_of_ServiceReady(typing.TypedDict):
+    """The source answered; here is the panel."""
+
+    data: list[Service]
+    panel: typing.Literal["ready"]
+
+
+class PanelArray_of_ServiceUnavailable(typing.TypedDict):
+    """The source could not be reached, for this stated reason."""
+
+    data: PanelArray_of_ServiceUnavailableData
+    panel: typing.Literal["unavailable"]
+
+
+class PanelArray_of_ServiceUnavailableData(typing.TypedDict):
+    reason: str
+    """Why the panel could not be filled, in the operator's terms."""
+
+
+type PanelArray_of_Transfer = PanelArray_of_TransferReady | PanelArray_of_TransferUnavailable
+"""A panel's content, or the reason its source could not fill it.
+
+The difference between \"this panel is up to date\" and \"this panel's source is
+unreachable\" is the whole of degrading honestly: an unavailable panel says so,
+in its own words, rather than showing stale data as current or blank data as
+zero — and the panels beside it stay live.
+"""
+
+
+class PanelArray_of_TransferReady(typing.TypedDict):
+    """The source answered; here is the panel."""
+
+    data: list[Transfer]
+    panel: typing.Literal["ready"]
+
+
+class PanelArray_of_TransferUnavailable(typing.TypedDict):
+    """The source could not be reached, for this stated reason."""
+
+    data: PanelArray_of_TransferUnavailableData
+    panel: typing.Literal["unavailable"]
+
+
+class PanelArray_of_TransferUnavailableData(typing.TypedDict):
+    reason: str
+    """Why the panel could not be filled, in the operator's terms."""
+
+
+type PanelFrontDoorReport = PanelFrontDoorReportReady | PanelFrontDoorReportUnavailable
+"""A panel's content, or the reason its source could not fill it.
+
+The difference between \"this panel is up to date\" and \"this panel's source is
+unreachable\" is the whole of degrading honestly: an unavailable panel says so,
+in its own words, rather than showing stale data as current or blank data as
+zero — and the panels beside it stay live.
+"""
+
+
+class PanelFrontDoorReportReady(typing.TypedDict):
+    """The source answered; here is the panel."""
+
+    data: FrontDoorReport
+    panel: typing.Literal["ready"]
+
+
+class PanelFrontDoorReportUnavailable(typing.TypedDict):
+    """The source could not be reached, for this stated reason."""
+
+    data: PanelFrontDoorReportUnavailableData
+    panel: typing.Literal["unavailable"]
+
+
+class PanelFrontDoorReportUnavailableData(typing.TypedDict):
+    reason: str
+    """Why the panel could not be filled, in the operator's terms."""
+
+
+type PanelHouseholdReport = PanelHouseholdReportReady | PanelHouseholdReportUnavailable
+"""A panel's content, or the reason its source could not fill it.
+
+The difference between \"this panel is up to date\" and \"this panel's source is
+unreachable\" is the whole of degrading honestly: an unavailable panel says so,
+in its own words, rather than showing stale data as current or blank data as
+zero — and the panels beside it stay live.
+"""
+
+
+class PanelHouseholdReportReady(typing.TypedDict):
+    """The source answered; here is the panel."""
+
+    data: HouseholdReport
+    panel: typing.Literal["ready"]
+
+
+class PanelHouseholdReportUnavailable(typing.TypedDict):
+    """The source could not be reached, for this stated reason."""
+
+    data: PanelHouseholdReportUnavailableData
+    panel: typing.Literal["unavailable"]
+
+
+class PanelHouseholdReportUnavailableData(typing.TypedDict):
+    reason: str
+    """Why the panel could not be filled, in the operator's terms."""
+
+
+type PanelStorage = PanelStorageReady | PanelStorageUnavailable
+"""A panel's content, or the reason its source could not fill it.
+
+The difference between \"this panel is up to date\" and \"this panel's source is
+unreachable\" is the whole of degrading honestly: an unavailable panel says so,
+in its own words, rather than showing stale data as current or blank data as
+zero — and the panels beside it stay live.
+"""
+
+
+class PanelStorageReady(typing.TypedDict):
+    """The source answered; here is the panel."""
+
+    data: Storage
+    panel: typing.Literal["ready"]
+
+
+class PanelStorageUnavailable(typing.TypedDict):
+    """The source could not be reached, for this stated reason."""
+
+    data: PanelStorageUnavailableData
+    panel: typing.Literal["unavailable"]
+
+
+class PanelStorageUnavailableData(typing.TypedDict):
+    reason: str
+    """Why the panel could not be filled, in the operator's terms."""
+
+
+type PanelVpn = PanelVpnReady | PanelVpnUnavailable
+"""A panel's content, or the reason its source could not fill it.
+
+The difference between \"this panel is up to date\" and \"this panel's source is
+unreachable\" is the whole of degrading honestly: an unavailable panel says so,
+in its own words, rather than showing stale data as current or blank data as
+zero — and the panels beside it stay live.
+"""
+
+
+class PanelVpnReady(typing.TypedDict):
+    """The source answered; here is the panel."""
+
+    data: Vpn
+    panel: typing.Literal["ready"]
+
+
+class PanelVpnUnavailable(typing.TypedDict):
+    """The source could not be reached, for this stated reason."""
+
+    data: PanelVpnUnavailableData
+    panel: typing.Literal["unavailable"]
+
+
+class PanelVpnUnavailableData(typing.TypedDict):
+    reason: str
+    """Why the panel could not be filled, in the operator's terms."""
+
+
+class Queue(typing.TypedDict):
+    """One `*arr`'s queue, and how much of it is stuck."""
+
+    depth: int
+    """How many items are queued."""
+    service: str
+    """The service whose queue this is."""
+    stuck: int
+    """How many of them are stuck rather than progressing."""
+
+
+type Stall = typing.Literal[
+    "redownload-loop",
+    "repeated-import-failure",
+    "completed-not-imported",
+    "orphaned",
+    "stalled-download",
+    "waiting-indefinitely",
+    "slow",
+]
+"""Why an item is not moving.
+
+Ordered by how much of the operator's attention each deserves, worst first, so
+a summary that leads with the worst category needs no second ranking.
+"""
+
+
+class Storage(typing.TypedDict):
+    """The storage picture: what is free, when it runs out, and whether imports link."""
+
+    exhaustion: typing.NotRequired[Duration | None]
+    """The time until the disk fills at the current rate of the queue draining
+    onto it, or `None` where it is not projected to fill.
+    """
+    free: DashboardReading
+    """Bytes free on the data volume — a [`Reading`], since a volume that could
+    not be read this refresh must not render as zero free.
+    """
+    hardlink: Hardlink
+    """Whether imports are linking or copying."""
+
+
+class Stuck(typing.TypedDict):
+    """One thing that is wrong, and why."""
+
+    blocking: typing.NotRequired[str | None]
+    """What the service said was blocking it, in its own words, where it said
+    anything. A permission denial from an import log is worth more than any
+    interpretation of it, and it is the difference between \"stuck\" and
+    something an operator can fix.
+    """
+    held_for: int
+    """How long it has been that way, in seconds — what turns \"stuck\" into a
+    sentence an operator can weigh.
+    """
+    items: int
+    """How many items this stands for. One in the ordinary case; more where they
+    share a cause and the cause is what is wrong — twenty downloads stopped by
+    a full disk are one thing to fix, and twenty alerts about it are how an
+    operator learns to mute the queue check.
+    """
+    name: str
+    """Which item — or, where several share one cause, that cause."""
+    stall: Stall
+    """What is wrong with it."""
+
+
+type Telemetry = typing.Literal["live", "degraded", "disconnected", "no-stack", "unconfigured"]
+"""How the screen itself is doing, which is a different question from how the
+stack is doing.
+
+The stack's own verdict is [`crate::health::Standing`]; this is only whether the
+picture can be trusted to be current. Kept apart because they disagree in both
+directions: a healthy stack can be shown through half-failing telemetry, and a
+perfectly refreshing screen can be reporting a stack that is on fire.
+"""
+
+
+class Transfer(typing.TypedDict):
+    """One active download, as the dashboard shows it."""
+
+    eta: typing.NotRequired[Duration | None]
+    """The time left, or `None` where it is stalled and there is none to give."""
+    name: str
+    """What is being downloaded."""
+    progress: int
+    """How far along, as a percentage from zero to a hundred."""
+    protocol: DashboardProtocol
+    """How it is being downloaded."""
+    speed: DashboardReading
+    """The current speed in bytes per second — a [`Reading`], because a genuine
+    zero (stalled) and a source that has gone quiet mean opposite things here,
+    and this is the very figure that difference is about.
+    """
+
+
+class Vpn(typing.TypedDict):
+    """What the VPN is doing, and whether the download client is actually behind it."""
+
+    country: str
+    """The country that address is in."""
+    egress_matches: bool
+    """Whether the download client's own egress address matches the tunnel's —
+    the one thing that proves traffic is genuinely leaving through it.
+    """
+    exit_ip: str
+    """The tunnel's exit address as the outside world sees it."""
+    forwarded_port: typing.NotRequired[int | None]
+    """The port the provider forwards, where forwarding is on."""
+
+
+__all__ = [
+    "Affected",
+    "Alert",
+    "DashboardProtocol",
+    "DashboardReading",
+    "DashboardReadingKnown",
+    "DashboardReadingStale",
+    "DashboardReadingUnknown",
+    "Duration",
+    "Hardlink",
+    "HealthStanding",
+    "HealthSummary",
+    "Moment",
+    "PanelArray_of_Queue",
+    "PanelArray_of_QueueReady",
+    "PanelArray_of_QueueUnavailable",
+    "PanelArray_of_QueueUnavailableData",
+    "PanelArray_of_Service",
+    "PanelArray_of_ServiceReady",
+    "PanelArray_of_ServiceUnavailable",
+    "PanelArray_of_ServiceUnavailableData",
+    "PanelArray_of_Transfer",
+    "PanelArray_of_TransferReady",
+    "PanelArray_of_TransferUnavailable",
+    "PanelArray_of_TransferUnavailableData",
+    "PanelFrontDoorReport",
+    "PanelFrontDoorReportReady",
+    "PanelFrontDoorReportUnavailable",
+    "PanelFrontDoorReportUnavailableData",
+    "PanelHouseholdReport",
+    "PanelHouseholdReportReady",
+    "PanelHouseholdReportUnavailable",
+    "PanelHouseholdReportUnavailableData",
+    "PanelStorage",
+    "PanelStorageReady",
+    "PanelStorageUnavailable",
+    "PanelStorageUnavailableData",
+    "PanelVpn",
+    "PanelVpnReady",
+    "PanelVpnUnavailable",
+    "PanelVpnUnavailableData",
+    "Queue",
+    "Stall",
+    "Storage",
+    "Stuck",
+    "Telemetry",
+    "Transfer",
+    "Vpn",
+]

@@ -1,0 +1,22 @@
+# Copyright (c) 2026 NightWorksIO
+"""The `start` envelope, and the shapes only `start` carries.
+
+Generated from `contract/web-api.contract.json`. Do not edit: `just generate` rewrites it,
+and CI fails on any difference.
+"""
+
+import typing
+
+
+class StartEnvelope(typing.TypedDict):
+    """The envelope carrying `start`."""
+
+    api_version: int
+    data: str
+    host: typing.NotRequired[str | None]
+    kind: typing.Literal["start"]
+
+
+__all__ = [
+    "StartEnvelope",
+]

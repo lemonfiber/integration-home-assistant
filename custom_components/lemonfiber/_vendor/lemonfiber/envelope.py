@@ -4,7 +4,7 @@
 import json
 from typing import TYPE_CHECKING, Final, TypeIs, cast
 
-from lemonfiber._generated.contract import CONTRACT_API_VERSION, KINDS, Envelope, Kind, KindNarrowing
+from lemonfiber._generated import CONTRACT_API_VERSION, KINDS, Envelope, Kind, KindNarrowing
 from lemonfiber.problems import (
     ApiVersionMismatchError,
     UnexpectedKindError,
