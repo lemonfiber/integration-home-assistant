@@ -31,6 +31,9 @@ STANDINGS: Final[tuple[HealthStanding, ...]] = tuple(
 SEVERITIES: Final[tuple[ProblemSeverity, ...]] = typing.get_args(ProblemSeverity.__value__)
 """Every severity a finding can carry, least first."""
 
+LEAST_SEVERE: Final = SEVERITIES[0]
+"""The severity whose findings are advice rather than something wrong, counted by an entity left off until enabled."""
+
 
 def known(reading: DashboardReading) -> int | None:
     """Return a reading's value where the source gave it this time."""

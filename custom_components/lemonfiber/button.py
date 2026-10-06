@@ -42,7 +42,7 @@ class RunTheDoctor(StackEntity[StreamCoordinator], ButtonEntity):
 
     def __init__(self, technical: Technical, entry: LemonfiberConfigEntry) -> None:
         """Attach the button to the stack's stream, and to the findings it has read again."""
-        super().__init__(technical.stream, entry, technical.version, RUN_THE_DOCTOR)
+        super().__init__(technical.stream, entry, technical, RUN_THE_DOCTOR)
         self._diagnosis: DiagnosisCoordinator = technical.diagnosis
 
     @override

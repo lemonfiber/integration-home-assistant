@@ -32,7 +32,7 @@ async def async_setup_entry(
     """Add the downloads switch, where the key may both pause and resume them."""
     connected = entry.runtime_data.connected
     if connected.may_call(PAUSE) and connected.may_call(RESUME):
-        async_add_entities([DownloadsPaused(technical.stream, entry, technical.version, DOWNLOADS_PAUSED)])
+        async_add_entities([DownloadsPaused(technical.stream, entry, technical, DOWNLOADS_PAUSED)])
 
 
 class DownloadsPaused(StackEntity[StreamCoordinator], SwitchEntity):

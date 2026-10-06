@@ -8,6 +8,7 @@ from typing import Final, cast
 
 import pytest
 
+from custom_components.lemonfiber import REPAIRABLE
 from custom_components.lemonfiber.binary_sensor import DASHBOARD_BINARY_SENSORS
 from custom_components.lemonfiber.button import RUN_THE_DOCTOR
 from custom_components.lemonfiber.connection import Reason
@@ -56,6 +57,12 @@ def test_every_string_is_translated_with_the_same_placeholders(language: str) ->
 def test_every_reason_is_said_on_the_form_and_as_a_failure(reason: Reason) -> None:
     assert f"config.error.{reason}" in ENGLISH
     assert f"exceptions.{reason}.message" in ENGLISH
+
+
+@pytest.mark.parametrize("reason", sorted(REPAIRABLE))
+def test_every_repair_has_a_title_and_a_description(reason: Reason) -> None:
+    assert f"issues.{reason}.title" in ENGLISH
+    assert f"issues.{reason}.description" in ENGLISH
 
 
 @pytest.mark.parametrize("standing", STANDINGS)

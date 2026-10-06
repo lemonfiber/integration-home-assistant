@@ -6,6 +6,7 @@ from typing import TYPE_CHECKING, Final
 import pytest
 from homeassistant.const import STATE_OFF, STATE_ON, STATE_UNKNOWN
 from homeassistant.helpers import device_registry as dr
+from homeassistant.helpers import entity_registry as er
 
 from custom_components.lemonfiber.const import DOMAIN, MANUFACTURER, MODEL
 from tests.conftest import VERSION, dashboard, reading, ready, serve, transfer, unavailable, until
@@ -74,8 +75,10 @@ async def test_the_findings_are_counted_by_severity_and_say_what_happened(
     ]
     assert state(hass, "sensor", "warning_findings") == "1"
     assert state(hass, "sensor", "error_findings") == "0"
-    assert state(hass, "sensor", "advisory_findings") == "0"
-    assert attributes(hass, "sensor", "advisory_findings")["findings"] == []
+    advisory = er.async_get(hass).async_get(f"sensor.{PREFIX}_advisory_findings")
+    assert advisory is not None
+    assert advisory.disabled_by is er.RegistryEntryDisabler.INTEGRATION
+    assert hass.states.get(f"sensor.{PREFIX}_advisory_findings") is None
 
 
 async def test_a_stack_wanting_attention_names_the_worst_of_it(

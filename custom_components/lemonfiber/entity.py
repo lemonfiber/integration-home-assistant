@@ -1,7 +1,7 @@
 # Copyright (c) 2026 NightWorksIO
 """What every entity of a stack shares: its device, and how it is named and identified."""
 
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, override
 
 from homeassistant.helpers.device_registry import DeviceInfo
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
@@ -16,6 +16,7 @@ if TYPE_CHECKING:
     from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
     from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
 
+    from .coordinator import StreamCoordinator
     from .runtime import LemonfiberConfigEntry, Technical
 
 type PlatformSetup = Callable[
@@ -63,7 +64,11 @@ def device_of(entry: LemonfiberConfigEntry, version: str) -> DeviceInfo:
 
 
 class StackEntity[CoordinatorT: DataUpdateCoordinator[Any]](CoordinatorEntity[CoordinatorT]):
-    """An entity of the stack, named by its translation and identified within its entry."""
+    """An entity of the stack, named by its translation and identified within its entry.
+
+    It is unavailable whenever the stream has a gap, whatever its own coordinator
+    holds: a value gathered before the gap is not shown as current.
+    """
 
     _attr_has_entity_name = True
 
@@ -71,11 +76,23 @@ class StackEntity[CoordinatorT: DataUpdateCoordinator[Any]](CoordinatorEntity[Co
         self,
         coordinator: CoordinatorT,
         entry: LemonfiberConfigEntry,
-        version: str,
+        technical: Technical,
         description: EntityDescription,
     ) -> None:
-        """Describe the entity and attach it to the stack's device."""
+        """Describe the entity, attach it to the stack's device, and follow the stream's gaps."""
         super().__init__(coordinator)
         self.entity_description = description
         self._attr_unique_id = f"{entry.entry_id}-{description.key}"
-        self._attr_device_info = device_of(entry, version)
+        self._attr_device_info = device_of(entry, technical.version)
+        self._stream: StreamCoordinator = technical.stream
+
+    @property
+    @override
+    def available(self) -> bool:
+        return super().available and self._stream.last_update_success
+
+    @override
+    async def async_added_to_hass(self) -> None:
+        await super().async_added_to_hass()
+        if self.coordinator is not self._stream:
+            self.async_on_remove(self._stream.async_add_listener(self.async_write_ha_state))

@@ -185,5 +185,19 @@
     "refused": {
       "message": "De stack weigerde: {sentence}"
     }
+  },
+  "issues": {
+    "pin_mismatch": {
+      "title": "Het certificaat van {title} is veranderd",
+      "description": "De stack op {title} liet een ander certificaat zien dan het vastgepinde, dus er wordt niets naartoe gestuurd. Als het certificaat van de stack veranderd is, geef dan de nieuwe pin via Opnieuw configureren van de integratie."
+    },
+    "not_lemonfiber": {
+      "title": "Voor {title} antwoordt iets anders dan lemonfiber",
+      "description": "Wat op het adres van {title} antwoordt, is niet lemonfiber. Geef het adres van de stack via Opnieuw configureren van de integratie."
+    },
+    "version_mismatch": {
+      "title": "{title} spreekt een andere versie van de interface van lemonfiber",
+      "description": "Deze integratie spreekt versie {spoken} van de interface van lemonfiber en de stack op {title} spreekt versie {served}. Werk de oudste van de twee bij."
+    }
   }
 }

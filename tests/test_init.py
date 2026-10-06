@@ -5,9 +5,11 @@ from typing import TYPE_CHECKING
 
 from homeassistant.config_entries import ConfigEntryState
 from homeassistant.helpers import entity_registry as er
+from homeassistant.helpers import issue_registry as ir
 
 from custom_components.lemonfiber import coordinator
 from custom_components.lemonfiber.connection import Reason, Scope
+from custom_components.lemonfiber.const import DOMAIN
 from tests.conftest import reauthenticating, serve
 from tests.stack import Feed, Reply, event, problem
 
@@ -101,6 +103,38 @@ async def test_a_stack_out_of_reach_is_tried_again(
     await set_up(hass, entry)
     assert entry.state is ConfigEntryState.SETUP_RETRY
     assert entry.error_reason_translation_key == Reason.PIN_MISMATCH
+
+
+async def test_what_only_the_person_can_put_right_is_raised_as_a_repair_until_setup_reaches_the_stack(
+    hass: HomeAssistant,
+    stack: Stack,
+    entry: MockConfigEntry,
+) -> None:
+    serve(stack)
+    pin = entry.data["pin"]
+    hass.config_entries.async_update_entry(entry, data={**entry.data, "pin": "0" * 64})
+    await set_up(hass, entry)
+    issues = ir.async_get(hass)
+    raised = issues.async_get_issue(DOMAIN, f"{entry.entry_id}_{Reason.PIN_MISMATCH}")
+    assert raised is not None
+    assert raised.translation_key == Reason.PIN_MISMATCH
+    assert raised.translation_placeholders == {"title": entry.title}
+    hass.config_entries.async_update_entry(entry, data={**entry.data, "pin": pin})
+    await hass.config_entries.async_reload(entry.entry_id)
+    await hass.async_block_till_done()
+    assert entry.state is ConfigEntryState.LOADED
+    assert issues.async_get_issue(DOMAIN, f"{entry.entry_id}_{Reason.PIN_MISMATCH}") is None
+
+
+async def test_a_failure_another_try_may_cure_raises_no_repair(
+    hass: HomeAssistant,
+    stack: Stack,
+    entry: MockConfigEntry,
+) -> None:
+    serve(stack)
+    stack.reply("/api/version", Reply(500, problem("FAIL-1", "The engine is not answering.")))
+    await set_up(hass, entry)
+    assert ir.async_get(hass).issues == {}
 
 
 async def test_a_version_that_cannot_be_read_is_tried_again(
