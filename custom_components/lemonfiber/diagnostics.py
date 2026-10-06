@@ -77,5 +77,6 @@ async def async_get_config_entry_diagnostics(
             "state": technical.stream.state,
             "dashboard": technical.stream.data,
             "diagnosis": technical.diagnosis.data,
+            "versions": technical.versions.data,
         }
     return cast("dict[str, object]", withheld(said))

@@ -40,6 +40,7 @@ With a `read` or `act` key, one device for the stack, carrying:
 | Data disk free | The bytes free on the data volume |
 | VPN | Whether downloads leave through the tunnel; present only where the stack has a VPN |
 | Advisory, warning, error and critical findings | How many of the doctor's findings carry each severity, with what each says happened as an attribute |
+| Update of each service | The version a service stands on and the version this build of lemonfiber pins it at, for every service the dashboard names |
 
 A member's key adds the entry and no entity.
 
@@ -47,7 +48,7 @@ A member's key adds the entry and no entity.
 
 The health, the downloads, the disk and the VPN come from the stack's event stream as the stack sends them. When the stream breaks, every one of them shows unavailable until the stream says what it is now; a value from before the break is never shown as current. A figure the stack itself cannot read at the moment shows unknown.
 
-The doctor's findings are read when the entry starts, every hour, and whenever the stream says the stack's health moved.
+The doctor's findings are read when the entry starts, every hour, and whenever the stream says the stack's health moved. The services' versions are read when the entry starts and every hour.
 
 When the key is refused, Home Assistant asks for a new one; only the key is asked for. When the stack cannot be reached, the entry is set up again with Home Assistant's own retry. The address and pin can be changed from the entry's **Reconfigure** without removing it.
 
@@ -55,7 +56,7 @@ When the key is refused, Home Assistant asks for a new one; only the key is aske
 
 - A member's key yields no entity.
 - Disk free is shown for the data volume, the one the event stream carries.
-- There are no controls, no alert events and no entities for updates or active streams.
+- There are no controls and no alert events, an update entity shows an update without installing it, and there is no entity for active streams.
 
 ## Troubleshooting
 

@@ -22,3 +22,6 @@ FIRST_SNAPSHOT_WITHIN: Final = SILENCE_ALLOWED * 2
 
 DIAGNOSIS_EVERY: Final = timedelta(hours=1)
 """How often the doctor's findings are read again when the dashboard has given no reason to sooner."""
+
+VERSIONS_EVERY: Final = timedelta(hours=1)
+"""How often the version of each service is read again."""

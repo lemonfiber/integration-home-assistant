@@ -131,6 +131,11 @@
       "vpn": {
         "name": "VPN"
       }
+    },
+    "update": {
+      "service_update": {
+        "name": "Update of {service}"
+      }
     }
   },
   "exceptions": {

@@ -8,16 +8,17 @@ from homeassistant.config_entries import ConfigEntry
 
 if TYPE_CHECKING:
     from .connection import Connected
-    from .coordinator import DiagnosisCoordinator, StreamCoordinator
+    from .coordinator import DiagnosisCoordinator, StreamCoordinator, VersionsCoordinator
 
 
 @dataclass(frozen=True, slots=True)
 class Technical:
-    """What a `read` or `act` key follows: the version the stack runs, its stream and the doctor's findings."""
+    """What a `read` or `act` key follows: the version the stack runs, its stream, the doctor's findings and the services' versions."""
 
     version: str
     stream: StreamCoordinator
     diagnosis: DiagnosisCoordinator
+    versions: VersionsCoordinator
 
 
 @dataclass(frozen=True, slots=True)
