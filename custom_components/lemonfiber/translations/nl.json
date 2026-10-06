@@ -136,6 +136,16 @@
       "service_update": {
         "name": "Update van {service}"
       }
+    },
+    "button": {
+      "run_the_doctor": {
+        "name": "Dokter laten kijken"
+      }
+    },
+    "switch": {
+      "downloads_paused": {
+        "name": "Downloads gepauzeerd"
+      }
     }
   },
   "exceptions": {

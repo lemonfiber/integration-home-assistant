@@ -28,6 +28,7 @@ from lemonfiber import (
     UnreachableError,
     UnreadableResponseError,
     expect,
+    is_key_callable,
 )
 from lemonfiber.address import ENCRYPTED, split
 
@@ -45,6 +46,9 @@ BASE: Final = "base"
 
 UNPERMITTED: Final[CapabilityState] = "unpermitted"
 """What a capability comes to for a credential whose scope does not reach it."""
+
+AVAILABLE: Final[CapabilityState] = "available"
+"""What a capability comes to for a credential that may use it now."""
 
 KEY_IN_THE_CLEAR: Final = next(
     code for code, listed in REFUSAL_CODES.items() if listed.name == "KEY_IN_THE_CLEAR"
@@ -153,6 +157,10 @@ class Connected:
     pin: CertificatePin = field(repr=False)
     capabilities: CapabilitySet
     scope: Scope
+
+    def may_call(self, action: str) -> bool:
+        """Tell whether this key may call an action now: one the contract lets a key call, available to it."""
+        return is_key_callable(action) and self.capabilities.of_action(action) == AVAILABLE
 
     @property
     def technical(self) -> bool:

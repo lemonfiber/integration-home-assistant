@@ -136,6 +136,16 @@
       "service_update": {
         "name": "Update of {service}"
       }
+    },
+    "button": {
+      "run_the_doctor": {
+        "name": "Run the doctor"
+      }
+    },
+    "switch": {
+      "downloads_paused": {
+        "name": "Downloads paused"
+      }
     }
   },
   "exceptions": {
