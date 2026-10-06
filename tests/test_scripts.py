@@ -72,12 +72,12 @@ def tree(tmp_path: pathlib.Path) -> pathlib.Path:
 
 def take(sdk: pathlib.Path, tree: pathlib.Path, revision: str) -> int:
     """Vendor a commit of the stand-in into the tree."""
-    return vendor_sdk.run(["--source", str(sdk), "take", revision], tree)
+    return vendor_sdk.run(["take", revision], tree, str(sdk))
 
 
 def check(sdk: pathlib.Path, tree: pathlib.Path) -> int:
     """Check the tree's copy against the stand-in."""
-    return vendor_sdk.run(["--source", str(sdk), "check"], tree)
+    return vendor_sdk.run(["check"], tree, str(sdk))
 
 
 def test_a_commit_is_vendored_byte_for_byte_beside_its_revision(

@@ -11,7 +11,7 @@ sdk-python's `main` has changed what the copy holds since.
     python3 scripts/vendor_sdk.py take <commit>
     python3 scripts/vendor_sdk.py check
 
-Each reads sdk-python from a bare clone made for the run, or from `--source`.
+Each reads sdk-python from a bare clone of its repository made for the run.
 """
 
 import argparse
@@ -161,10 +161,9 @@ def cloned(destination: pathlib.Path, source: str) -> pathlib.Path:
     return clone
 
 
-def run(arguments: list[str], root: pathlib.Path = ROOT) -> int:
-    """Take or check the copy as the arguments say, and say what was found."""
+def run(arguments: list[str], root: pathlib.Path = ROOT, source: str = SDK) -> int:
+    """Take or check the copy as the arguments say, reading sdk-python from `source`, and say what was found."""
     parser = argparse.ArgumentParser(description="Vendor sdk-python at one commit, and check the copy.")
-    parser.add_argument("--source", default=SDK, help="where sdk-python is cloned from")
     commands = parser.add_subparsers(dest="command", required=True)
     commands.add_parser("check", help="check the copy against its commit and against main")
     taking = commands.add_parser("take", help="replace the copy with the package at a commit")
@@ -172,7 +171,7 @@ def run(arguments: list[str], root: pathlib.Path = ROOT) -> int:
     asked = parser.parse_args(arguments)
     with tempfile.TemporaryDirectory() as scratch:
         try:
-            git = git_in(cloned(pathlib.Path(scratch), asked.source))
+            git = git_in(cloned(pathlib.Path(scratch), source))
             said = take(root, git, asked.commit) if asked.command == "take" else check(root, git)
         except VendorError as fault:
             sys.stderr.write(f"::error::{fault}\n")
