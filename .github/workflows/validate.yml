@@ -42,10 +42,13 @@ jobs:
     steps:
       # `brands` and `topics` are set where the repository is described rather
       # than in this tree: the integration's icon in Home Assistant's brands
-      # repository, and the repository's topics on GitHub.
+      # repository, and the repository's topics on GitHub. `license` admits a
+      # license GitHub names by its SPDX identifier, and the Hippocratic License
+      # 3.0 this repository carries has none; HACS installs a custom repository
+      # whatever its license.
       - uses: hacs/action@d556e736723344f83838d08488c983a15381059a # 22.5.0
         with:
           category: integration
-          ignore: brands topics
+          ignore: brands license topics
           # The verdict is this check's; it writes nothing on the pull request.
           comment: "false"
