@@ -6,12 +6,16 @@ on:
   # Main's analysis is what every pull request's new code is measured against.
   push:
     branches: [main]
-# Every `uv` a recipe runs inside these steps syncs as the steps do: from the
-# lockfile and nothing else. Source distributions are built, because two locked
-# packages are published as nothing else: `mock-open`, which the test harness
-# needs, and `pyric`, which Home Assistant needs.
+# The environment is installed once, from the lockfile and nothing else,
+# building no source distribution, and no `uv` a recipe runs syncs it again.
+# Two locked packages are published only as source and nothing the suite runs
+# imports them: `mock-open`, which the test harness declares, and `pyric`, which
+# Home Assistant's Bluetooth support declares. They are left out rather than
+# built.
 env:
   UV_LOCKED: "1"
+  UV_NO_BUILD: "1"
+  UV_NO_SYNC: "1"
 
 # Read-only for the workflow. The one job that writes — the gate, which posts its
 # verdict on the pull request — asks for that itself.
@@ -43,11 +47,11 @@ jobs:
           persist-credentials: false
       - uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
       - name: Install exactly what the lockfile says
-        run: uv sync --locked
+        run: uv sync --locked --no-build --no-install-package mock-open --no-install-package pyric
       # The same recipe the `tests and coverage` job runs, so the coverage the scan
       # reports is the coverage the gate held to 100%.
       - name: The suite, with 100% line and branch coverage
-        run: uv run --locked just coverage
+        run: uv run --locked --no-build --no-sync just coverage
       # The report names its source roots by absolute path, which is the same path
       # in the scan job's checkout: both run in this repository's workspace.
       - name: Hand the report to the scan

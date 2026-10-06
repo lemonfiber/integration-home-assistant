@@ -103,9 +103,7 @@ def findings(report: DoctorReport, severity: ProblemSeverity) -> list[str]:
     """Return what each finding of a severity says happened, in the order the checks produced them."""
     said: list[str] = []
     for finding in report["findings"]:
-        match finding["verdict"]:
-            case {"outcome": "fail" | "warn", "severity": carried, "summary": summary} if carried == severity:
-                said.append(summary)
-            case _:
-                pass
+        verdict = finding["verdict"]
+        if (verdict["outcome"] == "fail" or verdict["outcome"] == "warn") and verdict["severity"] == severity:
+            said.append(verdict["summary"])
     return said

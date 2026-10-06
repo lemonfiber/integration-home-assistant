@@ -9,10 +9,45 @@ from homeassistant.helpers.update_coordinator import CoordinatorEntity
 from .const import DOMAIN, MANUFACTURER, MODEL
 
 if TYPE_CHECKING:
+    from collections.abc import Callable, Coroutine
+
+    from homeassistant.core import HomeAssistant
     from homeassistant.helpers.entity import EntityDescription
+    from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
     from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
 
-    from .runtime import LemonfiberConfigEntry
+    from .runtime import LemonfiberConfigEntry, Technical
+
+type PlatformSetup = Callable[
+    [HomeAssistant, LemonfiberConfigEntry, AddConfigEntryEntitiesCallback],
+    Coroutine[Any, Any, None],
+]
+"""A platform's `async_setup_entry`, as Home Assistant calls it."""
+
+type TechnicalSetup = Callable[
+    [LemonfiberConfigEntry, Technical, AddConfigEntryEntitiesCallback],
+    Coroutine[Any, Any, None],
+]
+"""What a platform adds of the stack's technical side."""
+
+
+def technical_side(adds: TechnicalSetup) -> PlatformSetup:
+    """Return a platform's setup that adds its entities only where the key reaches the stack's technical side.
+
+    A member's key yields no technical entity, so a platform built this way adds
+    nothing for one.
+    """
+
+    async def async_setup_entry(
+        _hass: HomeAssistant,
+        entry: LemonfiberConfigEntry,
+        async_add_entities: AddConfigEntryEntitiesCallback,
+    ) -> None:
+        technical = entry.runtime_data.technical
+        if technical is not None:
+            await adds(entry, technical, async_add_entities)
+
+    return async_setup_entry
 
 
 def device_of(entry: LemonfiberConfigEntry, version: str) -> DeviceInfo:

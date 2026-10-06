@@ -2,8 +2,10 @@
 """What an entry hands over for a diagnosis, with the key, the address and the pin withheld."""
 
 from collections.abc import Mapping
+from pathlib import Path
 from typing import TYPE_CHECKING, Final, cast
 
+import lemonfiber
 from homeassistant.components.diagnostics import REDACTED
 from homeassistant.const import CONF_API_KEY, CONF_URL
 
@@ -30,6 +32,14 @@ WITHHELD: Final = frozenset(
 )
 """Every field withheld wherever it appears in what is handed over."""
 
+REVISION: Final = Path(lemonfiber.__file__).parent / "REVISION"
+"""Where the client this integration runs records the sdk-python commit it was copied from."""
+
+
+def revision() -> str:
+    """Return the sdk-python commit the client was copied from."""
+    return REVISION.read_text(encoding="ascii").strip()
+
 
 def withheld(value: object) -> object:
     """Return a value with every withheld field that holds anything replaced, at any depth.
@@ -49,13 +59,14 @@ def withheld(value: object) -> object:
 
 
 async def async_get_config_entry_diagnostics(
-    _hass: HomeAssistant,
+    hass: HomeAssistant,
     entry: LemonfiberConfigEntry,
 ) -> dict[str, object]:
-    """Return the entry, the key's scope and what the stack last said, with nothing that identifies or admits."""
+    """Return the client, the entry, the key's scope and what the stack last said, with nothing that identifies or admits."""
     runtime = entry.runtime_data
     technical = runtime.technical
     said: dict[str, object] = {
+        "client": await hass.async_add_executor_job(revision),
         "entry": entry.as_dict(),
         "scope": runtime.connected.scope,
         "capabilities": dict(runtime.connected.capabilities.states),

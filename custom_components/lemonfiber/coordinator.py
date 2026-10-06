@@ -14,7 +14,7 @@ from .const import DIAGNOSIS_EVERY, DOMAIN, FIRST_SNAPSHOT_WITHIN, LOGGER
 
 if TYPE_CHECKING:
     from homeassistant.core import HomeAssistant
-    from lemonfiber import AsyncClient, AsyncStream, Envelope
+    from lemonfiber import Arrival, AsyncClient, AsyncStream
     from lemonfiber.contract import DoctorReport, Snapshot
 
     from .connection import Connected
@@ -37,9 +37,11 @@ class State(StrEnum):
     """The stack did not answer at the address, or the pin did not match."""
 
 
-def dashboard_in(envelope: Envelope) -> Snapshot | None:
-    """Return the dashboard an envelope carries, or None where it carries another kind."""
-    return expect(envelope, DASHBOARD)["data"] if envelope["kind"] == DASHBOARD else None
+def dashboard_in(arrival: Arrival) -> Snapshot | None:
+    """Return the dashboard an arrival carries live, or None where it is anything else."""
+    if not isinstance(arrival, Live) or arrival.envelope["kind"] != DASHBOARD:
+        return None
+    return expect(arrival.envelope, DASHBOARD)["data"]
 
 
 async def first_snapshot(stream: AsyncStream) -> Snapshot:
@@ -47,11 +49,8 @@ async def first_snapshot(stream: AsyncStream) -> Snapshot:
     try:
         async with asyncio.timeout(FIRST_SNAPSHOT_WITHIN):
             while True:
-                match await anext(stream):
-                    case Live(envelope) if (snapshot := dashboard_in(envelope)) is not None:
-                        return snapshot
-                    case _:
-                        pass
+                if (snapshot := dashboard_in(await anext(stream))) is not None:
+                    return snapshot
     except TimeoutError:
         await stream.aclose()
         raise NotConnectedError(Reason.NO_DASHBOARD) from None
@@ -124,13 +123,11 @@ class StreamCoordinator(DataUpdateCoordinator["Snapshot"]):
         """
         try:
             while True:
-                match await anext(self._stream):
-                    case Live(envelope) if (snapshot := dashboard_in(envelope)) is not None:
-                        self._carried(snapshot)
-                    case Gap():
-                        self._lost(State.STALE)
-                    case _:
-                        pass
+                arrival = await anext(self._stream)
+                if isinstance(arrival, Gap):
+                    self._lost(State.STALE)
+                elif (snapshot := dashboard_in(arrival)) is not None:
+                    self._carried(snapshot)
         except NotAdmittedError:
             self._lost(State.REFUSED)
             self.config_entry.async_start_reauth(self.hass)

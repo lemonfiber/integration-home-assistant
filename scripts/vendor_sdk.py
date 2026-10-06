@@ -151,7 +151,7 @@ def cloned(destination: pathlib.Path, source: str) -> pathlib.Path:
     """Return a bare clone of sdk-python made in a directory."""
     clone = destination / "sdk-python.git"
     done = subprocess.run(
-        ["git", "clone", "--bare", "--quiet", source, str(clone)],
+        ["git", "clone", "--bare", "--quiet", "--", source, str(clone)],
         capture_output=True,
         check=False,
     )

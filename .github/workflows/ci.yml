@@ -5,12 +5,16 @@ on:
   push:
     branches: [main]
 
-# Every `uv` a recipe runs inside these steps syncs as the steps do: from the
-# lockfile and nothing else. Source distributions are built, because two locked
-# packages are published as nothing else: `mock-open`, which the test harness
-# needs, and `pyric`, which Home Assistant needs.
+# The environment is installed once, from the lockfile and nothing else,
+# building no source distribution, and no `uv` a recipe runs syncs it again.
+# Two locked packages are published only as source and nothing the suite runs
+# imports them: `mock-open`, which the test harness declares, and `pyric`, which
+# Home Assistant's Bluetooth support declares. They are left out rather than
+# built.
 env:
   UV_LOCKED: "1"
+  UV_NO_BUILD: "1"
+  UV_NO_SYNC: "1"
 
 permissions:
   contents: read
@@ -146,11 +150,11 @@ jobs:
           persist-credentials: false
       - uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
       - name: Install exactly what the lockfile says
-        run: uv sync --locked
+        run: uv sync --locked --no-build --no-install-package mock-open --no-install-package pyric
       - name: Formatting and lint
-        run: uv run --locked just lint
+        run: uv run --locked --no-build --no-sync just lint
       - name: Strict types
-        run: uv run --locked just types
+        run: uv run --locked --no-build --no-sync just types
 
   tests:
     name: tests and coverage
@@ -164,9 +168,9 @@ jobs:
           persist-credentials: false
       - uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
       - name: Install exactly what the lockfile says
-        run: uv sync --locked
+        run: uv sync --locked --no-build --no-install-package mock-open --no-install-package pyric
       - name: The suite, with 100% line and branch coverage
-        run: uv run --locked just coverage
+        run: uv run --locked --no-build --no-sync just coverage
 
   # The most expensive gate, so the most guarded: only on a pull request, and
   # only once the tests have passed. Mutating code whose tests already fail
@@ -191,14 +195,14 @@ jobs:
           persist-credentials: false
       - uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
       - name: Install exactly what the lockfile says
-        run: uv sync --locked
+        run: uv sync --locked --no-build --no-install-package mock-open --no-install-package pyric
       - name: Mutate, and hold the score to its minimum
-        run: uv run --locked just mutation
+        run: uv run --locked --no-build --no-sync just mutation
       - name: The mutants that survived, each as the change it made
         if: ${{ !cancelled() }}
         run: |
           set -euo pipefail
-          survived="$(uv run --locked mutmut results | awk -F: '/: survived$/ { gsub(/^[ \t]+/, "", $1); print $1 }')"
+          survived="$(uv run --locked --no-build --no-sync mutmut results | awk -F: '/: survived$/ { gsub(/^[ \t]+/, "", $1); print $1 }')"
           for mutant in ${survived}; do
-            uv run --locked mutmut show "${mutant}"
+            uv run --locked --no-build --no-sync mutmut show "${mutant}"
           done

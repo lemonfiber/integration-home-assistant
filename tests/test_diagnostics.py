@@ -2,6 +2,7 @@
 """What an entry hands over for a diagnosis, and that the key, the address and the pin are never in it."""
 
 import json
+import pathlib
 from typing import TYPE_CHECKING, Any, cast
 
 import pytest
@@ -9,6 +10,14 @@ from homeassistant.components.diagnostics import REDACTED
 
 from custom_components.lemonfiber.diagnostics import async_get_config_entry_diagnostics
 from tests.conftest import KEY, VERSION, serve, until
+
+VENDOR = (
+    pathlib.Path(__file__).resolve().parent.parent
+    / "custom_components"
+    / "lemonfiber"
+    / "_vendor"
+    / "lemonfiber"
+)
 
 if TYPE_CHECKING:
     from homeassistant.core import HomeAssistant
@@ -46,6 +55,7 @@ async def test_what_the_stack_said_is_handed_over_with_its_scope_and_state(
 ) -> None:
     serve(stack)
     said = await handed_over(hass, entry)
+    assert said["client"] == (VENDOR / "REVISION").read_text(encoding="ascii").strip()
     assert said["scope"] == "read"
     assert said["state"] == "connected"
     assert said["version"] == VERSION

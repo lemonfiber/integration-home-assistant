@@ -13,16 +13,15 @@ from homeassistant.core import callback
 
 from . import readings
 from .coordinator import StreamCoordinator
-from .entity import StackEntity
+from .entity import StackEntity, technical_side
 
 if TYPE_CHECKING:
     from collections.abc import Callable
 
-    from homeassistant.core import HomeAssistant
     from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
     from lemonfiber.contract import Snapshot
 
-    from .runtime import LemonfiberConfigEntry
+    from .runtime import LemonfiberConfigEntry, Technical
 
 PARALLEL_UPDATES: Final = 0
 """Every entity here is updated by its coordinator, so none of them asks the stack anything itself."""
@@ -58,15 +57,13 @@ DASHBOARD_BINARY_SENSORS: Final = (
 )
 
 
+@technical_side
 async def async_setup_entry(
-    _hass: HomeAssistant,
     entry: LemonfiberConfigEntry,
+    technical: Technical,
     async_add_entities: AddConfigEntryEntitiesCallback,
 ) -> None:
-    """Add the stack's yes-or-no answers that apply to it, where the key reaches its technical side."""
-    technical = entry.runtime_data.technical
-    if technical is None:
-        return
+    """Add the stack's yes-or-no answers that apply to it."""
     async_add_entities(
         DashboardBinarySensor(technical.stream, entry, technical.version, one)
         for one in DASHBOARD_BINARY_SENSORS
