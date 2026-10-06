@@ -30,6 +30,19 @@
       "vpn": {
         "default": "mdi:vpn"
       }
+    },
+    "button": {
+      "run_the_doctor": {
+        "default": "mdi:stethoscope"
+      }
+    },
+    "switch": {
+      "downloads_paused": {
+        "default": "mdi:pause-circle-outline",
+        "state": {
+          "off": "mdi:play-circle-outline"
+        }
+      }
     }
   }
 }

@@ -9,9 +9,11 @@ from typing import Final, cast
 import pytest
 
 from custom_components.lemonfiber.binary_sensor import DASHBOARD_BINARY_SENSORS
+from custom_components.lemonfiber.button import RUN_THE_DOCTOR
 from custom_components.lemonfiber.connection import Reason
 from custom_components.lemonfiber.readings import SEVERITIES, STANDINGS
 from custom_components.lemonfiber.sensor import DASHBOARD_SENSORS, FINDINGS_SENSORS
+from custom_components.lemonfiber.switch import DOWNLOADS_PAUSED
 from custom_components.lemonfiber.update import SERVICE_UPDATE
 
 INTEGRATION: Final = pathlib.Path(__file__).resolve().parent.parent / "custom_components" / "lemonfiber"
@@ -71,3 +73,6 @@ def test_every_entity_has_its_name_and_icon() -> None:
     for one in DASHBOARD_BINARY_SENSORS:
         assert f"entity.binary_sensor.{one.translation_key}.name" in ENGLISH
     assert f"entity.update.{SERVICE_UPDATE}.name" in ENGLISH
+    for platform, one in (("button", RUN_THE_DOCTOR), ("switch", DOWNLOADS_PAUSED)):
+        assert f"entity.{platform}.{one.translation_key}.name" in ENGLISH
+        assert f"entity.{platform}.{one.translation_key}.default" in icons

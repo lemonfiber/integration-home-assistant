@@ -26,7 +26,13 @@ if TYPE_CHECKING:
 
     from .connection import Connected
 
-PLATFORMS: Final = [Platform.BINARY_SENSOR, Platform.SENSOR, Platform.UPDATE]
+PLATFORMS: Final = [
+    Platform.BINARY_SENSOR,
+    Platform.BUTTON,
+    Platform.SENSOR,
+    Platform.SWITCH,
+    Platform.UPDATE,
+]
 
 
 def not_set_up(refusal: NotConnectedError) -> ConfigEntryAuthFailed | ConfigEntryNotReady:

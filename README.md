@@ -42,6 +42,15 @@ With a `read` or `act` key, one device for the stack, carrying:
 | Advisory, warning, error and critical findings | How many of the doctor's findings carry each severity, with what each says happened as an attribute |
 | Update of each service | The version a service stands on and the version this build of lemonfiber pins it at, for every service the dashboard names |
 
+With an `act` key, where the stack says the key may call the action, also:
+
+| Entity | What it does |
+|---|---|
+| Run the doctor | Runs every check, follows the run to its end, and reads the findings again |
+| Downloads paused | Pauses every download client when turned on, and resumes them when turned off. The stack does not report whether they are paused, so the switch shows what it last asked for |
+
+A control follows the job it started to its end. A failure is shown in the stack's own words, and every outcome is fired as a `lemonfiber_job` event carrying the entry, the action, the job's name where it started one, the outcome (`finished`, `ended` or `failed`) and, for a failure, the stack's sentence.
+
 A member's key adds the entry and no entity.
 
 ## How it stays current
@@ -56,7 +65,7 @@ When the key is refused, Home Assistant asks for a new one; only the key is aske
 
 - A member's key yields no entity.
 - Disk free is shown for the data volume, the one the event stream carries.
-- There are no controls and no alert events, an update entity shows an update without installing it, and there is no entity for active streams.
+- There is no restart button and no alert events, an update entity shows an update without installing it, and there is no entity for active streams.
 
 ## Troubleshooting
 
