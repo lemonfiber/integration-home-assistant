@@ -99,7 +99,7 @@ FINDINGS_SENSORS: Final = tuple(
 
 
 async def async_setup_entry(
-    hass: HomeAssistant,
+    _hass: HomeAssistant,
     entry: LemonfiberConfigEntry,
     async_add_entities: AddConfigEntryEntitiesCallback,
 ) -> None:
@@ -111,7 +111,7 @@ async def async_setup_entry(
         [
             *(DashboardSensor(technical.stream, entry, technical.version, one) for one in DASHBOARD_SENSORS),
             *(FindingsSensor(technical.diagnosis, entry, technical.version, one) for one in FINDINGS_SENSORS),
-        ]
+        ],
     )
 
 

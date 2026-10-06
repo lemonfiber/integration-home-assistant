@@ -18,7 +18,10 @@ PACKAGE = {"__init__.py": b"from lemonfiber.client import Client\n", "client.py"
 def git(where: pathlib.Path, *arguments: str) -> str:
     """Run git in a directory and return what it printed."""
     return subprocess.run(
-        ["git", "-C", str(where), *arguments], capture_output=True, check=True, text=True
+        ["git", "-C", str(where), *arguments],
+        capture_output=True,
+        check=True,
+        text=True,
     ).stdout.strip()
 
 
@@ -51,7 +54,11 @@ def sdk(tmp_path: pathlib.Path) -> pathlib.Path:
     repository = tmp_path / "sdk-python"
     repository.mkdir()
     git(repository, "init", "-q", "-b", "main")
-    commit(repository, {f"src/lemonfiber/{name}": content for name, content in PACKAGE.items()}, "the package")
+    commit(
+        repository,
+        {f"src/lemonfiber/{name}": content for name, content in PACKAGE.items()},
+        "the package",
+    )
     return repository
 
 
@@ -73,7 +80,10 @@ def check(sdk: pathlib.Path, tree: pathlib.Path) -> int:
     return vendor_sdk.run(["--source", str(sdk), "check"], tree)
 
 
-def test_a_commit_is_vendored_byte_for_byte_beside_its_revision(sdk: pathlib.Path, tree: pathlib.Path) -> None:
+def test_a_commit_is_vendored_byte_for_byte_beside_its_revision(
+    sdk: pathlib.Path,
+    tree: pathlib.Path,
+) -> None:
     head = git(sdk, "rev-parse", "HEAD")
     assert take(sdk, tree, head) == 0
     copy = tree / vendor_sdk.COPY
@@ -88,7 +98,11 @@ def test_taking_a_commit_replaces_the_copy_whole(sdk: pathlib.Path, tree: pathli
     second = commit(sdk, {"src/lemonfiber/stream.py": b"STREAM = 1\n"}, "a module moves")
     assert take(sdk, tree, first) == 0
     assert take(sdk, tree, second) == 0
-    assert sorted(path.name for path in (tree / vendor_sdk.COPY).iterdir()) == ["REVISION", "__init__.py", "stream.py"]
+    assert sorted(path.name for path in (tree / vendor_sdk.COPY).iterdir()) == [
+        "REVISION",
+        "__init__.py",
+        "stream.py",
+    ]
 
 
 @pytest.mark.parametrize("revision", ["main", "4a1dd3a", "z" * 40])
@@ -118,7 +132,9 @@ def vendored(sdk: pathlib.Path, tree: pathlib.Path) -> pathlib.Path:
 
 
 def test_a_hand_edit_to_the_copy_is_found(
-    sdk: pathlib.Path, tree: pathlib.Path, capsys: pytest.CaptureFixture[str]
+    sdk: pathlib.Path,
+    tree: pathlib.Path,
+    capsys: pytest.CaptureFixture[str],
 ) -> None:
     (vendored(sdk, tree) / "client.py").write_bytes(b"class Client: pass\n")
     assert check(sdk, tree) == 1
@@ -126,7 +142,9 @@ def test_a_hand_edit_to_the_copy_is_found(
 
 
 def test_a_file_gone_from_the_copy_is_found(
-    sdk: pathlib.Path, tree: pathlib.Path, capsys: pytest.CaptureFixture[str]
+    sdk: pathlib.Path,
+    tree: pathlib.Path,
+    capsys: pytest.CaptureFixture[str],
 ) -> None:
     (vendored(sdk, tree) / "client.py").unlink()
     assert check(sdk, tree) == 1
@@ -134,7 +152,9 @@ def test_a_file_gone_from_the_copy_is_found(
 
 
 def test_a_file_added_to_the_copy_is_found(
-    sdk: pathlib.Path, tree: pathlib.Path, capsys: pytest.CaptureFixture[str]
+    sdk: pathlib.Path,
+    tree: pathlib.Path,
+    capsys: pytest.CaptureFixture[str],
 ) -> None:
     (vendored(sdk, tree) / "extra.py").write_bytes(b"\n")
     assert check(sdk, tree) == 1
@@ -149,7 +169,9 @@ def test_compiled_files_beside_the_copy_are_not_part_of_it(sdk: pathlib.Path, tr
 
 
 def test_main_changing_the_package_is_drift(
-    sdk: pathlib.Path, tree: pathlib.Path, capsys: pytest.CaptureFixture[str]
+    sdk: pathlib.Path,
+    tree: pathlib.Path,
+    capsys: pytest.CaptureFixture[str],
 ) -> None:
     vendored(sdk, tree)
     head = commit(sdk, {"src/lemonfiber/client.py": b"class Client:\n    pass\n"}, "the client changes")
@@ -166,7 +188,9 @@ def test_main_changing_only_what_is_not_shipped_is_not_drift(sdk: pathlib.Path, 
 
 
 def test_a_copy_naming_no_commit_is_refused(
-    sdk: pathlib.Path, tree: pathlib.Path, capsys: pytest.CaptureFixture[str]
+    sdk: pathlib.Path,
+    tree: pathlib.Path,
+    capsys: pytest.CaptureFixture[str],
 ) -> None:
     (vendored(sdk, tree) / "REVISION").unlink()
     assert check(sdk, tree) == 1
@@ -174,7 +198,9 @@ def test_a_copy_naming_no_commit_is_refused(
 
 
 def test_a_copy_naming_something_else_is_refused(
-    sdk: pathlib.Path, tree: pathlib.Path, capsys: pytest.CaptureFixture[str]
+    sdk: pathlib.Path,
+    tree: pathlib.Path,
+    capsys: pytest.CaptureFixture[str],
 ) -> None:
     (vendored(sdk, tree) / "REVISION").write_text("main\n", encoding="ascii")
     assert check(sdk, tree) == 1
@@ -189,7 +215,10 @@ def write_score(root: pathlib.Path, stats: dict[str, int], minimum: int = 90) ->
     """Leave a mutation run's stats and a minimum where the score script reads them."""
     (root / "mutants").mkdir()
     (root / "mutants/mutmut-cicd-stats.json").write_text(json.dumps(stats), encoding="utf-8")
-    (root / "pyproject.toml").write_text(f"[tool.lemonfiber.mutation]\nminimum-score = {minimum}\n", encoding="utf-8")
+    (root / "pyproject.toml").write_text(
+        f"[tool.lemonfiber.mutation]\nminimum-score = {minimum}\n",
+        encoding="utf-8",
+    )
 
 
 def test_a_score_at_the_minimum_passes(tmp_path: pathlib.Path, capsys: pytest.CaptureFixture[str]) -> None:

@@ -26,7 +26,9 @@ async def set_up(hass: HomeAssistant, entry: MockConfigEntry) -> None:
 
 
 async def test_a_read_key_follows_the_stream_and_builds_the_entities(
-    hass: HomeAssistant, stack: Stack, entry: MockConfigEntry
+    hass: HomeAssistant,
+    stack: Stack,
+    entry: MockConfigEntry,
 ) -> None:
     serve(stack)
     await set_up(hass, entry)
@@ -41,7 +43,9 @@ async def test_a_read_key_follows_the_stream_and_builds_the_entities(
 
 
 async def test_an_act_key_is_known_by_the_actions_it_may_call(
-    hass: HomeAssistant, stack: Stack, entry: MockConfigEntry
+    hass: HomeAssistant,
+    stack: Stack,
+    entry: MockConfigEntry,
 ) -> None:
     serve(stack, "act")
     await set_up(hass, entry)
@@ -49,7 +53,9 @@ async def test_an_act_key_is_known_by_the_actions_it_may_call(
 
 
 async def test_a_members_key_yields_no_technical_entity_and_opens_no_stream(
-    hass: HomeAssistant, stack: Stack, entry: MockConfigEntry
+    hass: HomeAssistant,
+    stack: Stack,
+    entry: MockConfigEntry,
 ) -> None:
     serve(stack, "member")
     await set_up(hass, entry)
@@ -60,7 +66,11 @@ async def test_a_members_key_yields_no_technical_entity_and_opens_no_stream(
     assert stack.asked("/api/events") == stack.asked("/api/version") == 0
 
 
-async def test_a_refused_key_asks_for_a_new_one(hass: HomeAssistant, stack: Stack, entry: MockConfigEntry) -> None:
+async def test_a_refused_key_asks_for_a_new_one(
+    hass: HomeAssistant,
+    stack: Stack,
+    entry: MockConfigEntry,
+) -> None:
     serve(stack)
     stack.reply("/api/capabilities", Reply(403, problem("ADMIT-4", "Not admitted.")))
     await set_up(hass, entry)
@@ -70,7 +80,9 @@ async def test_a_refused_key_asks_for_a_new_one(hass: HomeAssistant, stack: Stac
 
 
 async def test_a_stream_refusing_the_key_asks_for_a_new_one(
-    hass: HomeAssistant, stack: Stack, entry: MockConfigEntry
+    hass: HomeAssistant,
+    stack: Stack,
+    entry: MockConfigEntry,
 ) -> None:
     serve(stack)
     stack.reply("/api/events", Reply(403, problem("ADMIT-4", "Not admitted.")))
@@ -79,7 +91,11 @@ async def test_a_stream_refusing_the_key_asks_for_a_new_one(
     assert reauthenticating(hass)
 
 
-async def test_a_stack_out_of_reach_is_tried_again(hass: HomeAssistant, stack: Stack, entry: MockConfigEntry) -> None:
+async def test_a_stack_out_of_reach_is_tried_again(
+    hass: HomeAssistant,
+    stack: Stack,
+    entry: MockConfigEntry,
+) -> None:
     serve(stack)
     hass.config_entries.async_update_entry(entry, data={**entry.data, "pin": "0" * 64})
     await set_up(hass, entry)
@@ -88,7 +104,9 @@ async def test_a_stack_out_of_reach_is_tried_again(hass: HomeAssistant, stack: S
 
 
 async def test_a_version_that_cannot_be_read_is_tried_again(
-    hass: HomeAssistant, stack: Stack, entry: MockConfigEntry
+    hass: HomeAssistant,
+    stack: Stack,
+    entry: MockConfigEntry,
 ) -> None:
     serve(stack)
     stack.reply("/api/version", Reply(500, problem("FAIL-1", "The engine is not answering.")))
@@ -99,7 +117,10 @@ async def test_a_version_that_cannot_be_read_is_tried_again(
 
 
 async def test_a_stream_carrying_no_dashboard_in_time_is_let_go_and_tried_again(
-    hass: HomeAssistant, stack: Stack, entry: MockConfigEntry, monkeypatch: pytest.MonkeyPatch
+    hass: HomeAssistant,
+    stack: Stack,
+    entry: MockConfigEntry,
+    monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     serve(stack)
     quiet = Feed()
@@ -112,7 +133,9 @@ async def test_a_stream_carrying_no_dashboard_in_time_is_let_go_and_tried_again(
 
 
 async def test_a_stream_in_another_version_is_tried_again(
-    hass: HomeAssistant, stack: Stack, entry: MockConfigEntry
+    hass: HomeAssistant,
+    stack: Stack,
+    entry: MockConfigEntry,
 ) -> None:
     serve(stack)
     feed = Feed()

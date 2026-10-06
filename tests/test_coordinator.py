@@ -39,19 +39,26 @@ async def set_up(hass: HomeAssistant, entry: MockConfigEntry) -> None:
 
 
 async def test_what_the_stream_carries_is_what_the_entities_show(
-    hass: HomeAssistant, stack: Stack, entry: MockConfigEntry
+    hass: HomeAssistant,
+    stack: Stack,
+    entry: MockConfigEntry,
 ) -> None:
     feed = serve(stack)
     await set_up(hass, entry)
     assert state(hass, QUEUE) == "5"
     feed.say(
-        event("dashboard", dashboard(queue={"panel": "ready", "data": [{"service": "x", "depth": 9, "stuck": 0}]}))
+        event(
+            "dashboard",
+            dashboard(queue={"panel": "ready", "data": [{"service": "x", "depth": 9, "stuck": 0}]}),
+        ),
     )
     await until(hass, lambda: state(hass, QUEUE) == "9")
 
 
 async def test_kinds_the_entities_are_not_built_from_pass_by(
-    hass: HomeAssistant, stack: Stack, entry: MockConfigEntry
+    hass: HomeAssistant,
+    stack: Stack,
+    entry: MockConfigEntry,
 ) -> None:
     feed = serve(stack)
     await set_up(hass, entry)
@@ -65,7 +72,10 @@ async def test_kinds_the_entities_are_not_built_from_pass_by(
 
 
 async def test_a_gap_shows_every_stream_built_entity_unavailable_until_the_stream_says_it_again(
-    hass: HomeAssistant, stack: Stack, entry: MockConfigEntry, caplog: pytest.LogCaptureFixture
+    hass: HomeAssistant,
+    stack: Stack,
+    entry: MockConfigEntry,
+    caplog: pytest.LogCaptureFixture,
 ) -> None:
     first, second = Feed(), Feed()
     serve(stack, "read", first, second)
@@ -95,7 +105,9 @@ async def test_a_gap_shows_every_stream_built_entity_unavailable_until_the_strea
 
 
 async def test_a_scope_that_changed_across_a_gap_reloads_the_entry(
-    hass: HomeAssistant, stack: Stack, entry: MockConfigEntry
+    hass: HomeAssistant,
+    stack: Stack,
+    entry: MockConfigEntry,
 ) -> None:
     first, second, reloaded = Feed(), Feed(), Feed()
     serve(stack, "read", first, second, reloaded)
@@ -106,11 +118,16 @@ async def test_a_scope_that_changed_across_a_gap_reloads_the_entry(
     await until(hass, lambda: stack.asked("/api/events") == 2)
     second.say(event("dashboard", dashboard()))
     await until(hass, lambda: stack.asked("/api/version") == 2)
-    await until(hass, lambda: entry.state is ConfigEntryState.LOADED and entry.runtime_data.connected.scope == "act")
+    await until(
+        hass,
+        lambda: entry.state is ConfigEntryState.LOADED and entry.runtime_data.connected.scope == "act",
+    )
 
 
 async def test_a_scope_that_cannot_be_read_again_leaves_the_entry_as_it_is(
-    hass: HomeAssistant, stack: Stack, entry: MockConfigEntry
+    hass: HomeAssistant,
+    stack: Stack,
+    entry: MockConfigEntry,
 ) -> None:
     first, second = Feed(), Feed()
     serve(stack, "read", first, second)
@@ -126,7 +143,9 @@ async def test_a_scope_that_cannot_be_read_again_leaves_the_entry_as_it_is(
 
 
 async def test_a_key_refused_when_the_stream_reopens_asks_for_a_new_one(
-    hass: HomeAssistant, stack: Stack, entry: MockConfigEntry
+    hass: HomeAssistant,
+    stack: Stack,
+    entry: MockConfigEntry,
 ) -> None:
     first = Feed()
     serve(stack, "read", first)
@@ -139,7 +158,9 @@ async def test_a_key_refused_when_the_stream_reopens_asks_for_a_new_one(
 
 
 async def test_a_stream_that_cannot_be_reopened_hands_the_entry_back_to_be_set_up_again(
-    hass: HomeAssistant, stack: Stack, entry: MockConfigEntry
+    hass: HomeAssistant,
+    stack: Stack,
+    entry: MockConfigEntry,
 ) -> None:
     first = Feed()
     serve(stack, "read", first)
@@ -152,7 +173,9 @@ async def test_a_stream_that_cannot_be_reopened_hands_the_entry_back_to_be_set_u
 
 
 async def test_the_health_moving_has_the_doctor_read_again(
-    hass: HomeAssistant, stack: Stack, entry: MockConfigEntry
+    hass: HomeAssistant,
+    stack: Stack,
+    entry: MockConfigEntry,
 ) -> None:
     feed = serve(stack)
     await set_up(hass, entry)
@@ -170,7 +193,11 @@ async def test_the_health_moving_has_the_doctor_read_again(
     await until(hass, lambda: stack.asked("/api/checks") == 2)
 
 
-async def test_the_doctor_is_read_again_every_hour(hass: HomeAssistant, stack: Stack, entry: MockConfigEntry) -> None:
+async def test_the_doctor_is_read_again_every_hour(
+    hass: HomeAssistant,
+    stack: Stack,
+    entry: MockConfigEntry,
+) -> None:
     serve(stack)
     await set_up(hass, entry)
     await until(hass, lambda: state(hass, CRITICAL) == "2")
@@ -179,7 +206,9 @@ async def test_the_doctor_is_read_again_every_hour(hass: HomeAssistant, stack: S
 
 
 async def test_a_doctor_that_cannot_be_read_leaves_its_findings_unavailable(
-    hass: HomeAssistant, stack: Stack, entry: MockConfigEntry
+    hass: HomeAssistant,
+    stack: Stack,
+    entry: MockConfigEntry,
 ) -> None:
     serve(stack)
     stack.reply("/api/checks", Reply(500, problem("FAIL-1", "The engine is not answering.")))
@@ -189,7 +218,9 @@ async def test_a_doctor_that_cannot_be_read_leaves_its_findings_unavailable(
 
 
 async def test_a_doctor_refusing_the_key_asks_for_a_new_one(
-    hass: HomeAssistant, stack: Stack, entry: MockConfigEntry
+    hass: HomeAssistant,
+    stack: Stack,
+    entry: MockConfigEntry,
 ) -> None:
     serve(stack)
     stack.reply("/api/checks", Reply(403, problem("ADMIT-4", "Not admitted.")))

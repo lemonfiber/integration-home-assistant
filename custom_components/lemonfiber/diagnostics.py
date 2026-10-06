@@ -26,7 +26,7 @@ WITHHELD: Final = frozenset(
         # household panel names its members.
         "door",
         "household",
-    }
+    },
 )
 """Every field withheld wherever it appears in what is handed over."""
 
@@ -40,14 +40,18 @@ def withheld(value: object) -> object:
     if isinstance(value, Mapping):
         fields = cast("Mapping[object, object]", value)
         return {
-            name: REDACTED if name in WITHHELD and held is not None else withheld(held) for name, held in fields.items()
+            name: REDACTED if name in WITHHELD and held is not None else withheld(held)
+            for name, held in fields.items()
         }
     if isinstance(value, list | tuple):
         return [withheld(item) for item in cast("list[object] | tuple[object, ...]", value)]
     return value
 
 
-async def async_get_config_entry_diagnostics(hass: HomeAssistant, entry: LemonfiberConfigEntry) -> dict[str, object]:
+async def async_get_config_entry_diagnostics(
+    _hass: HomeAssistant,
+    entry: LemonfiberConfigEntry,
+) -> dict[str, object]:
     """Return the entry, the key's scope and what the stack last said, with nothing that identifies or admits."""
     runtime = entry.runtime_data
     technical = runtime.technical

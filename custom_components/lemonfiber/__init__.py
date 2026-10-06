@@ -54,7 +54,11 @@ async def async_setup_entry(hass: HomeAssistant, entry: LemonfiberConfigEntry) -
     return True
 
 
-async def set_up_technical(hass: HomeAssistant, entry: LemonfiberConfigEntry, connected: Connected) -> Technical:
+async def set_up_technical(
+    hass: HomeAssistant,
+    entry: LemonfiberConfigEntry,
+    connected: Connected,
+) -> Technical:
     """Open the stream and wait for its first dashboard, so the entities are built from what the stack has."""
     version = await connected.version()
     stream = connected.client.events()

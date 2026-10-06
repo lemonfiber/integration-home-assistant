@@ -47,3 +47,5 @@ jobs:
         with:
           category: integration
           ignore: brands topics
+          # The verdict is this check's; it writes nothing on the pull request.
+          comment: "false"

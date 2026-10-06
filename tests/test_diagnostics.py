@@ -28,7 +28,10 @@ async def handed_over(hass: HomeAssistant, entry: MockConfigEntry) -> dict[str, 
 
 @pytest.mark.parametrize("scope", ["read", "member"])
 async def test_the_key_the_address_and_the_pin_appear_nowhere(
-    hass: HomeAssistant, stack: Stack, entry: MockConfigEntry, scope: str
+    hass: HomeAssistant,
+    stack: Stack,
+    entry: MockConfigEntry,
+    scope: str,
 ) -> None:
     serve(stack, scope)
     written = json.dumps(await handed_over(hass, entry), default=str)
@@ -37,7 +40,9 @@ async def test_the_key_the_address_and_the_pin_appear_nowhere(
 
 
 async def test_what_the_stack_said_is_handed_over_with_its_scope_and_state(
-    hass: HomeAssistant, stack: Stack, entry: MockConfigEntry
+    hass: HomeAssistant,
+    stack: Stack,
+    entry: MockConfigEntry,
 ) -> None:
     serve(stack)
     said = await handed_over(hass, entry)
@@ -54,7 +59,9 @@ async def test_what_the_stack_said_is_handed_over_with_its_scope_and_state(
 
 
 async def test_a_members_entry_hands_over_nothing_technical(
-    hass: HomeAssistant, stack: Stack, entry: MockConfigEntry
+    hass: HomeAssistant,
+    stack: Stack,
+    entry: MockConfigEntry,
 ) -> None:
     serve(stack, "member")
     said = await handed_over(hass, entry)

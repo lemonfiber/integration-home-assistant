@@ -41,7 +41,11 @@ class LemonfiberConfigFlow(ConfigFlow, domain=DOMAIN):
     MINOR_VERSION = 1
 
     async def _connect(
-        self, url: str, key: str, pin: str, schema: vol.Schema
+        self,
+        url: str,
+        key: str,
+        pin: str,
+        schema: vol.Schema,
     ) -> tuple[Connected | None, dict[str, str], dict[str, str]]:
         """Reach the stack, or return the error to show on the field to change, among the fields this form has."""
         try:
@@ -58,13 +62,17 @@ class LemonfiberConfigFlow(ConfigFlow, domain=DOMAIN):
         if user_input is not None:
             key = user_input[CONF_API_KEY]
             connected, errors, placeholders = await self._connect(
-                user_input[CONF_URL], key, user_input[CONF_PIN], SETUP
+                user_input[CONF_URL],
+                key,
+                user_input[CONF_PIN],
+                SETUP,
             )
             if connected is not None:
                 await self.async_set_unique_id(connected.client.address.base)
                 self._abort_if_unique_id_configured()
                 return self.async_create_entry(
-                    title=connected.client.address.host, data={**entered(connected), CONF_API_KEY: key}
+                    title=connected.client.address.host,
+                    data={**entered(connected), CONF_API_KEY: key},
                 )
         return self.async_show_form(
             step_id="user",
@@ -85,7 +93,10 @@ class LemonfiberConfigFlow(ConfigFlow, domain=DOMAIN):
         if user_input is not None:
             key = user_input[CONF_API_KEY]
             connected, errors, placeholders = await self._connect(
-                entry.data[CONF_URL], key, entry.data[CONF_PIN], REAUTHENTICATION
+                entry.data[CONF_URL],
+                key,
+                entry.data[CONF_PIN],
+                REAUTHENTICATION,
             )
             if connected is not None:
                 return self.async_update_reload_and_abort(entry, data_updates={CONF_API_KEY: key})
@@ -103,14 +114,21 @@ class LemonfiberConfigFlow(ConfigFlow, domain=DOMAIN):
         placeholders: dict[str, str] = {}
         if user_input is not None:
             connected, errors, placeholders = await self._connect(
-                user_input[CONF_URL], entry.data[CONF_API_KEY], user_input[CONF_PIN], RECONFIGURATION
+                user_input[CONF_URL],
+                entry.data[CONF_API_KEY],
+                user_input[CONF_PIN],
+                RECONFIGURATION,
             )
             if connected is not None:
                 address = connected.client.address.base
                 held = self.hass.config_entries.async_entry_for_domain_unique_id(DOMAIN, address)
                 if held is not None and held.entry_id != entry.entry_id:
                     return self.async_abort(reason="already_configured")
-                return self.async_update_reload_and_abort(entry, unique_id=address, data_updates=entered(connected))
+                return self.async_update_reload_and_abort(
+                    entry,
+                    unique_id=address,
+                    data_updates=entered(connected),
+                )
         return self.async_show_form(
             step_id="reconfigure",
             data_schema=self.add_suggested_values_to_schema(RECONFIGURATION, user_input or entry.data),

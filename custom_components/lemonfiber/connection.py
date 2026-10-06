@@ -46,7 +46,9 @@ BASE: Final = "base"
 UNPERMITTED: Final[CapabilityState] = "unpermitted"
 """What a capability comes to for a credential whose scope does not reach it."""
 
-KEY_IN_THE_CLEAR: Final = next(code for code, listed in REFUSAL_CODES.items() if listed.name == "KEY_IN_THE_CLEAR")
+KEY_IN_THE_CLEAR: Final = next(
+    code for code, listed in REFUSAL_CODES.items() if listed.name == "KEY_IN_THE_CLEAR"
+)
 """The refusal of a key sent from another machine without the TLS its pin verifies, looked up by its registry name."""
 
 
@@ -115,7 +117,10 @@ def refused(error: LemonfiberError) -> NotConnectedError:
     if isinstance(error, DeclinedError) and error.code == KEY_IN_THE_CLEAR:
         return NotConnectedError(Reason.KEY_IN_THE_CLEAR)
     if isinstance(error, ApiVersionMismatchError):
-        return NotConnectedError(Reason.VERSION_MISMATCH, {"spoken": str(error.spoken), "served": str(error.served)})
+        return NotConnectedError(
+            Reason.VERSION_MISMATCH,
+            {"spoken": str(error.spoken), "served": str(error.served)},
+        )
     for kind, reason in PLAIN:
         if isinstance(error, kind):
             return NotConnectedError(reason)

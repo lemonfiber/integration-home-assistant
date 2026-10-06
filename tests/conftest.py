@@ -36,11 +36,15 @@ def custom_integrations(enable_custom_integrations: None) -> None:
 def capabilities(scope: str) -> dict[str, object]:
     """Return what the stack says a key of a scope may ask for: every read, and an action a key may never call."""
     reads = {
-        read.path: "unpermitted" if scope == "member" and read not in MEMBER_READS else "available" for read in Read
+        read.path: "unpermitted" if scope == "member" and read not in MEMBER_READS else "available"
+        for read in Read
     }
     callable_by_scope = "available" if scope == "act" else "unpermitted"
     actions = {f"{ACTIONS}/{action}": callable_by_scope for action in KEY_CALLABLE}
-    return envelope("capabilities", {"capabilities": {**reads, **actions, f"{ACTIONS}/repair": "unpermitted"}})
+    return envelope(
+        "capabilities",
+        {"capabilities": {**reads, **actions, f"{ACTIONS}/repair": "unpermitted"}},
+    )
 
 
 def reading(value: int | None, state: str = "known") -> dict[str, object]:
@@ -70,7 +74,9 @@ def dashboard(**panels: object) -> dict[str, object]:
         "door": ready({"address": {"url": "https://127.0.0.1:8096"}, "beside": [], "meaning": "The door."}),
         "health": {"affected": [], "standing": "healthy", "wanting_attention": 0},
         "household": ready({"members": [{"name": "Ana"}]}),
-        "queue": ready([{"service": "sonarr", "depth": 3, "stuck": 0}, {"service": "radarr", "depth": 2, "stuck": 1}]),
+        "queue": ready(
+            [{"service": "sonarr", "depth": 3, "stuck": 0}, {"service": "radarr", "depth": 2, "stuck": 1}],
+        ),
         "services": ready([]),
         "storage": ready({"free": reading(500_000_000_000), "hardlink": "linking"}),
         "stuck": [],
@@ -86,7 +92,12 @@ def finding(outcome: str, severity: str | None = None, summary: str = "") -> dic
     verdict: dict[str, object] = {"outcome": outcome}
     if severity is not None:
         verdict |= {"severity": severity, "summary": summary, "meaning": "", "remedies": [], "code": "X-1"}
-    return {"category": "network", "check": f"check.{summary or outcome}", "title": summary, "verdict": verdict}
+    return {
+        "category": "network",
+        "check": f"check.{summary or outcome}",
+        "title": summary,
+        "verdict": verdict,
+    }
 
 
 def diagnosis(*findings: dict[str, object]) -> dict[str, object]:
@@ -115,11 +126,12 @@ def serve(stack: Stack, scope: str = "read", *feeds: Feed) -> Feed:
 
 
 @pytest.fixture
-async def stack(socket_enabled: None) -> AsyncIterator[Stack]:
+async def stack(hass: HomeAssistant, socket_enabled: None) -> AsyncIterator[Stack]:
     """Serve TLS on loopback, with a certificate no trust store holds and a pin that names it.
 
     Home Assistant's test harness refuses every socket until a test asks for them,
-    and still lets them reach loopback alone.
+    and still lets them reach loopback alone. It is started once Home Assistant
+    is, on the same event loop.
     """
     async with Stack() as serving:
         yield serving

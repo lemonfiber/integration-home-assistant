@@ -30,7 +30,7 @@ RULES: Final = frozenset(
         "reconfiguration-flow", "repair-issues", "stale-devices",
         # Platinum
         "async-dependency", "inject-websession", "strict-typing",
-    }
+    },
 )  # fmt: skip
 STATUSES: Final = frozenset({"done", "exempt", "todo"})
 

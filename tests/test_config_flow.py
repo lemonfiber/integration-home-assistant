@@ -52,7 +52,8 @@ def answers(stack: Stack, **changed: str) -> dict[str, str]:
 
 
 async def test_a_stack_is_added_once_the_address_key_and_pin_are_answered_for(
-    hass: HomeAssistant, stack: Stack
+    hass: HomeAssistant,
+    stack: Stack,
 ) -> None:
     serve(stack)
     result = await submit(hass, answers(stack, url=f" {stack.url}/ ", pin=stack.pin.upper()))
@@ -149,7 +150,9 @@ def test_a_failure_with_no_code_of_its_own_says_its_sentence() -> None:
 
 
 async def test_a_refused_key_is_replaced_by_asking_for_a_new_one_only(
-    hass: HomeAssistant, stack: Stack, entry: MockConfigEntry
+    hass: HomeAssistant,
+    stack: Stack,
+    entry: MockConfigEntry,
 ) -> None:
     serve(stack)
     stack.reply("/api/capabilities", REFUSED_KEY, Reply(body=capabilities("read")))
@@ -165,7 +168,9 @@ async def test_a_refused_key_is_replaced_by_asking_for_a_new_one_only(
 
 
 async def test_a_stack_out_of_reach_while_a_key_is_replaced_is_said_on_the_form(
-    hass: HomeAssistant, stack: Stack, entry: MockConfigEntry
+    hass: HomeAssistant,
+    stack: Stack,
+    entry: MockConfigEntry,
 ) -> None:
     hass.config_entries.async_update_entry(entry, data={**entry.data, CONF_PIN: OTHER_PIN})
     shown = said(await entry.start_reauth_flow(hass))
@@ -174,7 +179,9 @@ async def test_a_stack_out_of_reach_while_a_key_is_replaced_is_said_on_the_form(
 
 
 async def test_the_address_and_pin_move_without_removing_the_entry(
-    hass: HomeAssistant, stack: Stack, entry: MockConfigEntry
+    hass: HomeAssistant,
+    stack: Stack,
+    entry: MockConfigEntry,
 ) -> None:
     async with Stack() as moved:
         serve(moved)
@@ -191,7 +198,9 @@ async def test_the_address_and_pin_move_without_removing_the_entry(
 
 
 async def test_a_key_refused_while_the_address_moves_is_said_on_the_form(
-    hass: HomeAssistant, stack: Stack, entry: MockConfigEntry
+    hass: HomeAssistant,
+    stack: Stack,
+    entry: MockConfigEntry,
 ) -> None:
     serve(stack)
     stack.reply("/api/capabilities", REFUSED_KEY)
@@ -201,7 +210,9 @@ async def test_a_key_refused_while_the_address_moves_is_said_on_the_form(
 
 
 async def test_the_address_cannot_move_onto_a_stack_another_entry_holds(
-    hass: HomeAssistant, stack: Stack, entry: MockConfigEntry
+    hass: HomeAssistant,
+    stack: Stack,
+    entry: MockConfigEntry,
 ) -> None:
     async with Stack() as taken:
         serve(taken)

@@ -45,7 +45,11 @@ def attributes(hass: HomeAssistant, platform: str, name: str) -> dict[str, objec
     return dict(held.attributes)
 
 
-async def test_a_healthy_stack_shows_its_figures(hass: HomeAssistant, stack: Stack, entry: MockConfigEntry) -> None:
+async def test_a_healthy_stack_shows_its_figures(
+    hass: HomeAssistant,
+    stack: Stack,
+    entry: MockConfigEntry,
+) -> None:
     await shown(hass, stack, entry)
     assert state(hass, "sensor", "health") == "healthy"
     assert "worst" not in attributes(hass, "sensor", "health")
@@ -58,7 +62,9 @@ async def test_a_healthy_stack_shows_its_figures(hass: HomeAssistant, stack: Sta
 
 
 async def test_the_findings_are_counted_by_severity_and_say_what_happened(
-    hass: HomeAssistant, stack: Stack, entry: MockConfigEntry
+    hass: HomeAssistant,
+    stack: Stack,
+    entry: MockConfigEntry,
 ) -> None:
     await shown(hass, stack, entry)
     assert state(hass, "sensor", "critical_findings") == "2"
@@ -73,7 +79,9 @@ async def test_the_findings_are_counted_by_severity_and_say_what_happened(
 
 
 async def test_a_stack_wanting_attention_names_the_worst_of_it(
-    hass: HomeAssistant, stack: Stack, entry: MockConfigEntry
+    hass: HomeAssistant,
+    stack: Stack,
+    entry: MockConfigEntry,
 ) -> None:
     health: dict[str, object] = {
         "affected": [],
@@ -88,7 +96,9 @@ async def test_a_stack_wanting_attention_names_the_worst_of_it(
 
 
 async def test_a_stack_nothing_can_be_said_about_shows_unknown(
-    hass: HomeAssistant, stack: Stack, entry: MockConfigEntry
+    hass: HomeAssistant,
+    stack: Stack,
+    entry: MockConfigEntry,
 ) -> None:
     await shown(hass, stack, entry, health={"affected": [], "standing": "unknown", "wanting_attention": 0})
     assert state(hass, "sensor", "health") == STATE_UNKNOWN
@@ -107,40 +117,61 @@ async def test_a_stack_nothing_can_be_said_about_shows_unknown(
     ],
 )
 async def test_a_figure_the_stack_cannot_give_now_is_unknown_rather_than_shown(
-    hass: HomeAssistant, stack: Stack, entry: MockConfigEntry, panels: dict[str, object], name: str
+    hass: HomeAssistant,
+    stack: Stack,
+    entry: MockConfigEntry,
+    panels: dict[str, object],
+    name: str,
 ) -> None:
     await shown(hass, stack, entry, **panels)
     assert state(hass, "sensor", name) == STATE_UNKNOWN
 
 
-async def test_no_download_at_all_is_a_speed_of_zero(hass: HomeAssistant, stack: Stack, entry: MockConfigEntry) -> None:
+async def test_no_download_at_all_is_a_speed_of_zero(
+    hass: HomeAssistant,
+    stack: Stack,
+    entry: MockConfigEntry,
+) -> None:
     await shown(hass, stack, entry, transfers=ready([]))
     assert state(hass, "sensor", "download_speed") == "0.0"
 
 
 async def test_traffic_outside_the_tunnel_is_a_vpn_that_is_not_up(
-    hass: HomeAssistant, stack: Stack, entry: MockConfigEntry
+    hass: HomeAssistant,
+    stack: Stack,
+    entry: MockConfigEntry,
 ) -> None:
-    await shown(hass, stack, entry, vpn=ready({"country": "NL", "egress_matches": False, "exit_ip": "203.0.113.7"}))
+    await shown(
+        hass,
+        stack,
+        entry,
+        vpn=ready({"country": "NL", "egress_matches": False, "exit_ip": "203.0.113.7"}),
+    )
     assert state(hass, "binary_sensor", "vpn") == STATE_OFF
 
 
 async def test_a_tunnel_that_cannot_be_read_is_unknown(
-    hass: HomeAssistant, stack: Stack, entry: MockConfigEntry
+    hass: HomeAssistant,
+    stack: Stack,
+    entry: MockConfigEntry,
 ) -> None:
     await shown(hass, stack, entry, vpn=unavailable())
     assert state(hass, "binary_sensor", "vpn") == STATE_UNKNOWN
 
 
 async def test_a_stack_without_a_vpn_has_no_vpn_entity(
-    hass: HomeAssistant, stack: Stack, entry: MockConfigEntry
+    hass: HomeAssistant,
+    stack: Stack,
+    entry: MockConfigEntry,
 ) -> None:
     await shown(hass, stack, entry, vpn=None)
     assert hass.states.get(f"binary_sensor.{PREFIX}_vpn") is None
 
 
 async def test_the_stack_is_one_device_named_by_its_entry(
-    hass: HomeAssistant, stack: Stack, entry: MockConfigEntry
+    hass: HomeAssistant,
+    stack: Stack,
+    entry: MockConfigEntry,
 ) -> None:
     await shown(hass, stack, entry)
     [device] = dr.async_entries_for_config_entry(dr.async_get(hass), entry.entry_id)

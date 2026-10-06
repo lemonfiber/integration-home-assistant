@@ -13,16 +13,18 @@ import json
 import socket
 import ssl
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING, Final, Self
+from typing import TYPE_CHECKING, Any, Final, Self
 
 import trustme
 from aiohttp import web
 
 if TYPE_CHECKING:
-    from collections.abc import Mapping
+    from collections.abc import Callable, Mapping
     from types import TracebackType
 
 API_VERSION: Final = 1
+LET_GO: Final = "Error on transport creation for incoming connection"
+"""What the event loop says when a client lets a connection go while the stand-in is still accepting it."""
 LOOPBACK: Final = "127.0.0.1"
 HEARTBEAT: Final = b": heartbeat\n\n"
 
@@ -36,7 +38,14 @@ def problem(code: str, summary: str) -> dict[str, object]:
     """Return an `error` envelope carrying one problem."""
     return envelope(
         "error",
-        {"code": code, "severity": "error", "state": "open", "summary": summary, "meaning": "", "remedies": []},
+        {
+            "code": code,
+            "severity": "error",
+            "state": "open",
+            "summary": summary,
+            "meaning": "",
+            "remedies": [],
+        },
     )
 
 
@@ -58,7 +67,11 @@ class Reply:
         """Return the answer as aiohttp sends it."""
         if isinstance(self.body, str):
             return web.Response(status=self.status, text=self.body)
-        return web.Response(status=self.status, body=json.dumps(self.body).encode(), content_type="application/json")
+        return web.Response(
+            status=self.status,
+            body=json.dumps(self.body).encode(),
+            content_type="application/json",
+        )
 
 
 END: Final = b""
@@ -98,6 +111,7 @@ class Stack:
         self.pin = hashlib.sha256(der).hexdigest()
         self.port = 0
         self._runner: web.AppRunner | None = None
+        self._handler: Callable[[asyncio.AbstractEventLoop, dict[str, Any]], object] | None = None
 
     @property
     def url(self) -> str:
@@ -134,8 +148,28 @@ class Stack:
             await response.write(chunk)
         return response
 
+    def _accepting(self, loop: asyncio.AbstractEventLoop, context: dict[str, Any]) -> None:
+        """Pass on every failure the event loop reports but a client letting go of a connection being accepted.
+
+        A test that ends while a request is still connecting cancels it, and the
+        connection is cut on the stand-in's side mid-handshake: that is how the
+        integration lets go, not a failure of the test.
+        """
+        if str(context.get("message", "")).startswith(LET_GO) and isinstance(
+            context.get("exception"),
+            ConnectionError | ssl.SSLError,
+        ):
+            return
+        if self._handler is None:
+            loop.default_exception_handler(context)
+        else:
+            self._handler(loop, context)
+
     async def __aenter__(self) -> Self:
         """Start serving."""
+        loop = asyncio.get_running_loop()
+        self._handler = loop.get_exception_handler()
+        loop.set_exception_handler(self._accepting)
         application = web.Application()
         application.router.add_route("*", "/{tail:.*}", self._handle)
         self._runner = web.AppRunner(application, access_log=None, shutdown_timeout=0.1)
@@ -156,6 +190,7 @@ class Stack:
             feed.end()
         if self._runner is not None:
             await self._runner.cleanup()
+        asyncio.get_running_loop().set_exception_handler(self._handler)
 
 
 def unused_port() -> int:

@@ -123,14 +123,20 @@ def differences(expected: dict[str, bytes], found: dict[str, bytes]) -> list[str
     return [
         *(f"{path} is missing" for path in sorted(expected.keys() - found.keys())),
         *(f"{path} is not in sdk-python" for path in sorted(found.keys() - expected.keys())),
-        *(f"{path} differs" for path in sorted(expected.keys() & found.keys()) if expected[path] != found[path]),
+        *(
+            f"{path} differs"
+            for path in sorted(expected.keys() & found.keys())
+            if expected[path] != found[path]
+        ),
     ]
 
 
 def check(root: pathlib.Path, git: Git) -> list[str]:
     """Return every fault of the copy: unlike its commit's tree, or behind what `main` ships."""
     commit = recorded(root)
-    faults = [f"the copy is not sdk-python {commit}: {one}" for one in differences(tree(git, commit), held(root))]
+    faults = [
+        f"the copy is not sdk-python {commit}: {one}" for one in differences(tree(git, commit), held(root))
+    ]
     head = git("rev-parse", TRUNK).decode().strip()
     moved = git("diff", "--name-only", commit, head, "--", f"{PACKAGE}/").decode().split()
     if moved:

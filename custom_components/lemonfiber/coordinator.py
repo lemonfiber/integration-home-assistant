@@ -67,7 +67,13 @@ class DiagnosisCoordinator(DataUpdateCoordinator["DoctorReport | None"]):
 
     def __init__(self, hass: HomeAssistant, entry: LemonfiberConfigEntry, client: AsyncClient) -> None:
         """Read the findings through the entry's client."""
-        super().__init__(hass, LOGGER, config_entry=entry, name=f"{DOMAIN} diagnosis", update_interval=DIAGNOSIS_EVERY)
+        super().__init__(
+            hass,
+            LOGGER,
+            config_entry=entry,
+            name=f"{DOMAIN} diagnosis",
+            update_interval=DIAGNOSIS_EVERY,
+        )
         self._client = client
 
     @override
@@ -75,7 +81,10 @@ class DiagnosisCoordinator(DataUpdateCoordinator["DoctorReport | None"]):
         try:
             return expect(await self._client.read(Read.CHECKS), "doctor")["data"]
         except NotAdmittedError as error:
-            raise ConfigEntryAuthFailed(translation_domain=DOMAIN, translation_key=Reason.KEY_REFUSED) from error
+            raise ConfigEntryAuthFailed(
+                translation_domain=DOMAIN,
+                translation_key=Reason.KEY_REFUSED,
+            ) from error
         except LemonfiberError as error:
             refusal = refused(error)
             raise UpdateFailed(
@@ -139,12 +148,18 @@ class StreamCoordinator(DataUpdateCoordinator["Snapshot"]):
         self.async_set_updated_data(snapshot)
         if moved:
             self.config_entry.async_create_background_task(
-                self.hass, self.diagnosis.async_request_refresh(), f"{DOMAIN} diagnosis"
+                self.hass,
+                self.diagnosis.async_request_refresh(),
+                f"{DOMAIN} diagnosis",
             )
 
     def _lost(self, state: State) -> None:
         if self.state is State.CONNECTED:
-            LOGGER.info("The stream from %s is %s; its entities are unavailable", self.config_entry.title, state)
+            LOGGER.info(
+                "The stream from %s is %s; its entities are unavailable",
+                self.config_entry.title,
+                state,
+            )
         self.state = state
         self.last_update_success = False
         self.async_update_listeners()

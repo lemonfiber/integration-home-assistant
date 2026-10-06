@@ -10,7 +10,7 @@
 # and linted in its own repository; `scripts/vendor_sdk.py check` fails on any
 # change to it here.
 target-version = "py314"
-line-length = 120
+line-length = 110
 
 # A byte-identical copy of the spec's shared gate, linted where it is maintained,
 # and the vendored client.
@@ -26,18 +26,14 @@ ignore = [
     "RUF002",
     "RUF003",
     "E501",
-    # Home Assistant calls each platform's `async_setup_entry` and each
-    # coordinator's `_async_update_data` by name, with arguments it decides.
-    "ARG001",
-    # The formatter owns these, and ruff names them as conflicting with it.
-    "COM812",
 ]
 
 [lint.per-file-ignores]
 # `assert` is how pytest states what it checks, a test names the status or count
 # it expects as the number itself, a test's name is its description, and a test
-# takes every fixture and parameter it is given as an argument.
-"tests/**" = ["S101", "PLR2004", "D103", "PLR0913", "PLR0917"]
+# takes every fixture and parameter it is given as an argument, some of them for
+# what they set up rather than for a value.
+"tests/**" = ["S101", "PLR2004", "D103", "PLR0913", "PLR0917", "ARG001"]
 # The vendoring script, and the test that builds a repository for it to read,
 # run git, found on the PATH, with arguments they write themselves.
 "{scripts/vendor_sdk.py,tests/test_scripts.py}" = ["S603", "S607"]

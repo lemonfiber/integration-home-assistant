@@ -13,7 +13,10 @@ INTEGRATION: Final = ROOT / "custom_components" / "lemonfiber"
 VENDOR: Final = INTEGRATION / "_vendor"
 SHARED_GATE: Final = ROOT / "scripts" / "no_open_codeql_alert.py"
 
-SUPPRESSIONS: Final = re.compile(r"#\s*(type:\s*ignore|pyright:|noqa|pragma:\s*no\s*(cover|branch))", re.IGNORECASE)
+SUPPRESSIONS: Final = re.compile(
+    r"#\s*(type:\s*ignore|pyright:|noqa|pragma:\s*no\s*(cover|branch))",
+    re.IGNORECASE,
+)
 WIRE: Final = frozenset({"aiohttp", "urllib3", "requests", "httpx", "http", "socket", "ssl", "urllib"})
 """Every way to reach a stack that is not sdk-python."""
 
@@ -21,7 +24,10 @@ WIRE: Final = frozenset({"aiohttp", "urllib3", "requests", "httpx", "http", "soc
 def python_files(*roots: pathlib.Path) -> list[pathlib.Path]:
     """Return every Python file under these roots but the vendored client and the shared gate's copy."""
     return sorted(
-        path for root in roots for path in root.rglob("*.py") if path != SHARED_GATE and VENDOR not in path.parents
+        path
+        for root in roots
+        for path in root.rglob("*.py")
+        if path != SHARED_GATE and VENDOR not in path.parents
     )
 
 
