@@ -12,6 +12,7 @@ from custom_components.lemonfiber.binary_sensor import DASHBOARD_BINARY_SENSORS
 from custom_components.lemonfiber.connection import Reason
 from custom_components.lemonfiber.readings import SEVERITIES, STANDINGS
 from custom_components.lemonfiber.sensor import DASHBOARD_SENSORS, FINDINGS_SENSORS
+from custom_components.lemonfiber.update import SERVICE_UPDATE
 
 INTEGRATION: Final = pathlib.Path(__file__).resolve().parent.parent / "custom_components" / "lemonfiber"
 PLACEHOLDER: Final = re.compile(r"\{(\w+)\}")
@@ -69,3 +70,4 @@ def test_every_entity_has_its_name_and_icon() -> None:
         assert f"entity.sensor.{key}.default" in icons
     for one in DASHBOARD_BINARY_SENSORS:
         assert f"entity.binary_sensor.{one.translation_key}.name" in ENGLISH
+    assert f"entity.update.{SERVICE_UPDATE}.name" in ENGLISH

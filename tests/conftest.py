@@ -67,6 +67,18 @@ def transfer(speed: dict[str, object]) -> dict[str, object]:
     return {"name": "A film", "progress": 40, "protocol": "torrent", "speed": speed}
 
 
+def service(identifier: str, name: str) -> dict[str, object]:
+    """Return one running service as the dashboard names it."""
+    return {
+        "id": identifier,
+        "name": name,
+        "state": "running",
+        "criticality": "core",
+        "depends_on": [],
+        "forms": [],
+    }
+
+
 def dashboard(**panels: object) -> dict[str, object]:
     """Return a dashboard as the stack gathers one: healthy, two downloads, a disk and a VPN, with panels replaced."""
     snapshot: dict[str, object] = {
@@ -77,7 +89,9 @@ def dashboard(**panels: object) -> dict[str, object]:
         "queue": ready(
             [{"service": "sonarr", "depth": 3, "stuck": 0}, {"service": "radarr", "depth": 2, "stuck": 1}],
         ),
-        "services": ready([]),
+        "services": ready(
+            [service("sonarr", "Sonarr"), service("radarr", "Radarr"), service("jellyfin", "Jellyfin")],
+        ),
         "storage": ready({"free": reading(500_000_000_000), "hardlink": "linking"}),
         "stuck": [],
         "telemetry": "live",
@@ -114,11 +128,61 @@ DIAGNOSIS: Final = diagnosis(
 )
 
 
+PROVENANCE: Final = envelope(
+    "provenance",
+    {
+        "services": [
+            {
+                "id": "sonarr",
+                "name": "Sonarr",
+                "image": "x/sonarr",
+                "pinned": "4.0.15",
+                "license": "GPL-3.0",
+                "upstream": "u",
+            },
+            {
+                "id": "radarr",
+                "name": "Radarr",
+                "image": "x/radarr",
+                "pinned": "5.26.2",
+                "license": "GPL-3.0",
+                "upstream": "u",
+            },
+        ],
+    },
+)
+"""Where the services come from: two of the dashboard's three, each at the tag this build pins."""
+
+UPDATE: Final = envelope(
+    "update",
+    {
+        "applied": [],
+        "changes": [
+            {
+                "service": "sonarr",
+                "current": "4.0.14",
+                "target": "4.0.15",
+                "because": "",
+                "irreversible": False,
+            },
+        ],
+        "confirmed": False,
+        "in_flight": [],
+        "rehearsed": False,
+        "stack_edits": [],
+        "state": "updates-available",
+    },
+)
+"""What updating the stack would move: Sonarr, from the tag it stands on to its pin."""
+
+
 def serve(stack: Stack, scope: str = "read", *feeds: Feed) -> Feed:
     """Have the stand-in answer as a stack does for a key of a scope, its stream opening as each feed in turn."""
     stack.reply("/api/capabilities", Reply(body=capabilities(scope)))
     stack.reply("/api/version", Reply(body=envelope("version", {"binary": VERSION, "stack": "1"})))
     stack.reply("/api/checks", Reply(body=DIAGNOSIS))
+    stack.reply("/api/provenance", Reply(body=PROVENANCE))
+    stack.reply("/api/update", Reply(body=UPDATE))
     opened = feeds or (Feed(),)
     opened[0].say(event("dashboard", dashboard(), "1"))
     stack.stream(*opened)

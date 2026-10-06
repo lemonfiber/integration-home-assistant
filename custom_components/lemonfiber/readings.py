@@ -14,7 +14,7 @@ from typing import TYPE_CHECKING, Final
 from lemonfiber.contract import HealthStanding, ProblemSeverity
 
 if TYPE_CHECKING:
-    from lemonfiber.contract import DashboardReading, DoctorReport, Snapshot
+    from lemonfiber.contract import DashboardReading, DoctorReport, Service, Snapshot
 
 READY: Final = "ready"
 """A panel whose source answered."""
@@ -84,6 +84,12 @@ def disk_free(snapshot: Snapshot) -> int | None:
     if panel["panel"] != READY:
         return None
     return known(panel["data"]["free"])
+
+
+def services(snapshot: Snapshot) -> list[Service]:
+    """Return every service the stack runs, or none where the panel could not be filled."""
+    panel = snapshot["services"]
+    return panel["data"] if panel["panel"] == READY else []
 
 
 def has_vpn(snapshot: Snapshot) -> bool:

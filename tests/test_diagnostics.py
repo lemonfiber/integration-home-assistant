@@ -31,7 +31,13 @@ async def handed_over(hass: HomeAssistant, entry: MockConfigEntry) -> dict[str, 
     await hass.config_entries.async_setup(entry.entry_id)
     await hass.async_block_till_done()
     technical = entry.runtime_data.technical
-    await until(hass, lambda: technical is None or technical.diagnosis.data is not None)
+    await until(
+        hass,
+        lambda: (
+            technical is None
+            or (technical.diagnosis.data is not None and technical.versions.data is not None)
+        ),
+    )
     return cast("dict[str, Any]", await async_get_config_entry_diagnostics(hass, entry))
 
 
@@ -64,6 +70,7 @@ async def test_what_the_stack_said_is_handed_over_with_its_scope_and_state(
     assert dashboard["door"] == dashboard["household"] == REDACTED
     assert dashboard["health"]["standing"] == "healthy"
     assert len(said["diagnosis"]["findings"]) == 5
+    assert said["versions"].running == {"sonarr": "4.0.14"}
     assert said["entry"]["data"] == {"url": REDACTED, "api_key": REDACTED, "pin": REDACTED}
     assert said["entry"]["title"] == said["entry"]["unique_id"] == REDACTED
 
@@ -76,4 +83,4 @@ async def test_a_members_entry_hands_over_nothing_technical(
     serve(stack, "member")
     said = await handed_over(hass, entry)
     assert said["scope"] == "member"
-    assert {"state", "version", "dashboard", "diagnosis"}.isdisjoint(said)
+    assert {"state", "version", "dashboard", "diagnosis", "versions"}.isdisjoint(said)

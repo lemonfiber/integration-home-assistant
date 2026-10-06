@@ -18,7 +18,7 @@ from homeassistant.exceptions import ConfigEntryAuthFailed, ConfigEntryNotReady
 
 from .connection import NotConnectedError, Reason, connect
 from .const import CONF_PIN, DOMAIN
-from .coordinator import StreamCoordinator, first_snapshot
+from .coordinator import StreamCoordinator, VersionsCoordinator, first_snapshot
 from .runtime import LemonfiberConfigEntry, Runtime, Technical
 
 if TYPE_CHECKING:
@@ -26,7 +26,7 @@ if TYPE_CHECKING:
 
     from .connection import Connected
 
-PLATFORMS: Final = [Platform.BINARY_SENSOR, Platform.SENSOR]
+PLATFORMS: Final = [Platform.BINARY_SENSOR, Platform.SENSOR, Platform.UPDATE]
 
 
 def not_set_up(refusal: NotConnectedError) -> ConfigEntryAuthFailed | ConfigEntryNotReady:
@@ -50,6 +50,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: LemonfiberConfigEntry) -
     if technical is not None:
         entry.async_create_background_task(hass, technical.stream.follow(), f"{DOMAIN} stream")
         entry.async_create_background_task(hass, technical.diagnosis.async_refresh(), f"{DOMAIN} diagnosis")
+        entry.async_create_background_task(hass, technical.versions.async_refresh(), f"{DOMAIN} versions")
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
     return True
 
@@ -63,7 +64,8 @@ async def set_up_technical(
     version = await connected.version()
     stream = connected.client.events()
     stream_coordinator = StreamCoordinator(hass, entry, connected, stream, await first_snapshot(stream))
-    return Technical(version, stream_coordinator, stream_coordinator.diagnosis)
+    versions = VersionsCoordinator(hass, entry, connected.client)
+    return Technical(version, stream_coordinator, stream_coordinator.diagnosis, versions)
 
 
 async def async_unload_entry(hass: HomeAssistant, entry: LemonfiberConfigEntry) -> bool:

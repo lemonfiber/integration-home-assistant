@@ -1,7 +1,8 @@
 # Copyright (c) 2026 NightWorksIO
-"""The stack as Home Assistant follows it: the dashboard from the event stream, and the doctor's findings by read."""
+"""The stack as Home Assistant follows it: the dashboard from the event stream, the doctor's findings and the services' versions by read."""
 
 import asyncio
+from dataclasses import dataclass
 from enum import StrEnum
 from typing import TYPE_CHECKING, Final, override
 
@@ -10,9 +11,11 @@ from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, Upda
 from lemonfiber import Gap, LemonfiberError, Live, NotAdmittedError, Read, expect
 
 from .connection import NotConnectedError, Reason, refused, scope_of
-from .const import DIAGNOSIS_EVERY, DOMAIN, FIRST_SNAPSHOT_WITHIN, LOGGER
+from .const import DIAGNOSIS_EVERY, DOMAIN, FIRST_SNAPSHOT_WITHIN, LOGGER, VERSIONS_EVERY
 
 if TYPE_CHECKING:
+    from collections.abc import Mapping
+
     from homeassistant.core import HomeAssistant
     from lemonfiber import Arrival, AsyncClient, AsyncStream
     from lemonfiber.contract import DoctorReport, Snapshot
@@ -22,6 +25,9 @@ if TYPE_CHECKING:
 
 DASHBOARD: Final = "dashboard"
 """The kind the stream carries the dashboard in."""
+
+STACK: Final = {"what": "stack"}
+"""What the `update` read is asked about: the services the stack runs, rather than lemonfiber itself."""
 
 
 class State(StrEnum):
@@ -79,18 +85,63 @@ class DiagnosisCoordinator(DataUpdateCoordinator["DoctorReport | None"]):
     async def _async_update_data(self) -> DoctorReport:
         try:
             return expect(await self._client.read(Read.CHECKS), "doctor")["data"]
-        except NotAdmittedError as error:
-            raise ConfigEntryAuthFailed(
-                translation_domain=DOMAIN,
-                translation_key=Reason.KEY_REFUSED,
-            ) from error
         except LemonfiberError as error:
-            refusal = refused(error)
-            raise UpdateFailed(
-                translation_domain=DOMAIN,
-                translation_key=refusal.reason,
-                translation_placeholders=dict(refusal.placeholders),
-            ) from error
+            raise read_failed(error) from error
+
+
+def read_failed(error: LemonfiberError) -> ConfigEntryAuthFailed | UpdateFailed:
+    """Return what a coordinator raises when a read fails: a refused key, or a reading that did not arrive."""
+    if isinstance(error, NotAdmittedError):
+        return ConfigEntryAuthFailed(translation_domain=DOMAIN, translation_key=Reason.KEY_REFUSED)
+    refusal = refused(error)
+    return UpdateFailed(
+        translation_domain=DOMAIN,
+        translation_key=refusal.reason,
+        translation_placeholders=dict(refusal.placeholders),
+    )
+
+
+@dataclass(frozen=True, slots=True)
+class Versions:
+    """The version of each service the stack runs: the tag this build pins, and the one standing on it where they differ."""
+
+    pinned: Mapping[str, str]
+    """Each service's id, to the tag this build of lemonfiber pins it at."""
+    running: Mapping[str, str]
+    """Each service's id, to the tag it stands on, for every service that is not on its pin."""
+
+    def installed(self, service: str) -> str | None:
+        """Return the tag a service stands on, or None where the stack names no version for it."""
+        return self.running.get(service, self.pinned.get(service))
+
+
+class VersionsCoordinator(DataUpdateCoordinator["Versions | None"]):
+    """The version of every service, read hourly from where the services come from and what updating would move."""
+
+    config_entry: LemonfiberConfigEntry
+
+    def __init__(self, hass: HomeAssistant, entry: LemonfiberConfigEntry, client: AsyncClient) -> None:
+        """Read the versions through the entry's client."""
+        super().__init__(
+            hass,
+            LOGGER,
+            config_entry=entry,
+            name=f"{DOMAIN} versions",
+            update_interval=VERSIONS_EVERY,
+        )
+        self._client = client
+
+    @override
+    async def _async_update_data(self) -> Versions:
+        try:
+            provenance = expect(await self._client.read(Read.PROVENANCE), "provenance")["data"]
+            update = expect(await self._client.read(Read.UPDATE, STACK), "update")["data"]
+        except LemonfiberError as error:
+            raise read_failed(error) from error
+        return Versions(
+            pinned={service["id"]: service["pinned"] for service in provenance["services"]},
+            running={change["service"]: change["current"] for change in update["changes"]},
+        )
 
 
 class StreamCoordinator(DataUpdateCoordinator["Snapshot"]):
