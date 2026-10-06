@@ -8,7 +8,7 @@ What this repository is and what it must meet is specified in [`spec/30-repos/in
 
 The integration follows one lemonfiber stack per entry. It reaches the stack only through [sdk-python](https://github.com/lemonfiber/sdk-python), and only with an integration key the operator minted on the stack. It never asks for the operator password.
 
-Supported: any lemonfiber stack that serves its web API over https, reachable from the machine Home Assistant runs on.
+Supported: any lemonfiber stack that serves its web API over https, reachable from the machine Home Assistant runs on, in Home Assistant 2026.10 or newer.
 
 ## Installing it
 
