@@ -1,0 +1,35 @@
+{
+  "entity": {
+    "sensor": {
+      "health": {
+        "default": "mdi:heart-pulse"
+      },
+      "download_queue": {
+        "default": "mdi:tray-full"
+      },
+      "download_speed": {
+        "default": "mdi:download"
+      },
+      "disk_free_data": {
+        "default": "mdi:harddisk"
+      },
+      "findings_advisory": {
+        "default": "mdi:information-outline"
+      },
+      "findings_warning": {
+        "default": "mdi:alert-outline"
+      },
+      "findings_error": {
+        "default": "mdi:alert-circle-outline"
+      },
+      "findings_critical": {
+        "default": "mdi:alert-octagon-outline"
+      }
+    },
+    "binary_sensor": {
+      "vpn": {
+        "default": "mdi:vpn"
+      }
+    }
+  }
+}

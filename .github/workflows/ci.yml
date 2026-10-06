@@ -1,0 +1,208 @@
+name: ci
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+# The environment is installed once, from the lockfile and nothing else,
+# building no source distribution, and no `uv` a recipe runs syncs it again.
+# Two locked packages are published only as source and nothing the suite runs
+# imports them: `mock-open`, which the test harness declares, and `pyric`, which
+# Home Assistant's Bluetooth support declares. They are left out rather than
+# built.
+env:
+  UV_LOCKED: "1"
+  UV_NO_BUILD: "1"
+  UV_NO_SYNC: "1"
+
+permissions:
+  contents: read
+
+# A pull request pushed again cancels the run on its old head, which nobody
+# will read and which holds runners the org shares (Q-R75). Every other event
+# is grouped by its own run, so it is never cancelled and never cancels.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event_name == 'pull_request' && github.ref || github.run_id }}
+  cancel-in-progress: true
+
+jobs:
+  # Which of the following are worth running at all. A documentation change
+  # starts no Python toolchain, and asking costs one checkout.
+  scope:
+    name: what changed
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    outputs:
+      code: ${{ steps.diff.outputs.code }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - id: diff
+        env:
+          BASE: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.sha || '' }}
+        run: |
+          set -euo pipefail
+          # No base to compare against means every gate runs.
+          if [ -z "${BASE}" ] || ! git cat-file -e "${BASE}^{commit}" 2>/dev/null; then
+            echo "code=true" >> "$GITHUB_OUTPUT"
+            echo "No usable base commit, so every gate runs."
+            exit 0
+          fi
+          changed="$(git diff --name-only "${BASE}" HEAD)"
+          # Anything that is not documentation is code, so a new kind of file
+          # runs the gates. Under `.github/`, only this file runs them, and a
+          # change to it runs none where every changed line is a pin on a
+          # shared workflow from `lemonfiber/spec`: those jobs run no Python.
+          code=false
+          while IFS= read -r path; do
+            case "${path}" in
+            '' | docs/* | *.md | LICENSE) ;;
+            .github/workflows/ci.yml)
+              # Captured and tested for emptiness rather than piped to
+              # `grep -q`, which stops at the first line and lets `pipefail`
+              # read the writers' SIGPIPE as no such line.
+              moved="$(git diff -U0 "${BASE}" HEAD -- "${path}" \
+                | grep -E '^[-+]' | grep -vE '^(\+\+\+|---) ' \
+                | grep -vE '^[-+][[:space:]]*uses: lemonfiber/spec/\.github/workflows/[^@]+@[0-9a-f]{40}( # .*)?$' || true)"
+              if [ -n "${moved}" ]; then
+                code=true
+              fi
+              ;;
+            .github/*) ;;
+            *) code=true ;;
+            esac
+          done <<< "${changed}"
+          echo "code=${code}" >> "$GITHUB_OUTPUT"
+          if [ "${code}" = false ]; then
+            echo "Documentation, and workflows that run no Python gate; the Python gates are skipped."
+          fi
+
+  # The gates every repo in the org shares, defined once in the spec repo and
+  # pinned by commit. Those needing a pull request are guarded, because this
+  # workflow also runs on pushes to main.
+  dco:
+    uses: lemonfiber/spec/.github/workflows/dco.yml@999f97e9414290f029391d5d541087b8a6d23bdf # v1.0.29
+  attribution:
+    uses: lemonfiber/spec/.github/workflows/attribution.yml@999f97e9414290f029391d5d541087b8a6d23bdf # v1.0.29
+
+  # `pull-requests: write` is what lets the gate close a pull request whose
+  # citation is missing or names an identifier that does not exist. A job-level
+  # block replaces the workflow's default outright, so `contents: read` is
+  # restated here rather than inherited.
+  spec-check:
+    if: github.event_name == 'pull_request'
+    permissions:
+      contents: read
+      pull-requests: write
+    uses: lemonfiber/spec/.github/workflows/spec-check.yml@999f97e9414290f029391d5d541087b8a6d23bdf # v1.0.29
+
+  commitlint:
+    if: github.event_name == 'pull_request'
+    uses: lemonfiber/spec/.github/workflows/commitlint.yml@999f97e9414290f029391d5d541087b8a6d23bdf # v1.0.29
+
+  hygiene:
+    uses: lemonfiber/spec/.github/workflows/hygiene.yml@999f97e9414290f029391d5d541087b8a6d23bdf # v1.0.29
+
+  # Every pin this repository holds on a shared workflow, against what the spec's
+  # default branch holds now.
+  workflow-pins:
+    uses: lemonfiber/spec/.github/workflows/workflow-pins.yml@999f97e9414290f029391d5d541087b8a6d23bdf # v1.0.29
+
+  security:
+    uses: lemonfiber/spec/.github/workflows/security.yml@999f97e9414290f029391d5d541087b8a6d23bdf # v1.0.29
+
+  labeler:
+    if: github.event_name == 'pull_request'
+    permissions:
+      contents: read
+      pull-requests: write
+    uses: lemonfiber/spec/.github/workflows/labeler.yml@999f97e9414290f029391d5d541087b8a6d23bdf # v1.0.29
+
+  # OPS-R39, OPS-R40, OPS-R42: label a pull request that cites a goal the staged
+  # version locks, put it in that version's milestone, and say which goals it
+  # moves. `issues: write` is what the milestone half needs: a milestone is an
+  # issues-API object even when it sits on a pull request.
+  goals:
+    if: github.event_name == 'pull_request'
+    permissions:
+      contents: read
+      pull-requests: write
+      issues: write
+    uses: lemonfiber/spec/.github/workflows/goal-automations.yml@999f97e9414290f029391d5d541087b8a6d23bdf # v1.0.29
+
+  # Formatting, every lint rule and strict types. One checkout, one
+  # environment, cheapest first.
+  checks:
+    name: checks
+    needs: scope
+    # The result is asked as well as the output: a `scope` that failed leaves no
+    # output, and no output is not a "no". Skipping on it would merge a pull
+    # request with none of these run, or block it with nothing naming why.
+    if: ${{ !cancelled() && (needs.scope.result != 'success' || needs.scope.outputs.code == 'true') }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
+      - name: Install exactly what the lockfile says
+        run: uv sync --locked --no-build --no-install-package mock-open --no-install-package pyric
+      - name: Formatting and lint
+        run: uv run --locked --no-build --no-sync just lint
+      - name: Strict types
+        run: uv run --locked --no-build --no-sync just types
+
+  tests:
+    name: tests and coverage
+    needs: scope
+    if: ${{ !cancelled() && github.event_name == 'pull_request' && (needs.scope.result != 'success' || needs.scope.outputs.code == 'true') }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
+      - name: Install exactly what the lockfile says
+        run: uv sync --locked --no-build --no-install-package mock-open --no-install-package pyric
+      - name: The suite, with 100% line and branch coverage
+        run: uv run --locked --no-build --no-sync just coverage
+
+  # The most expensive gate, so the most guarded: only on a pull request, and
+  # only once the tests have passed. Mutating code whose tests already fail
+  # measures nothing.
+  mutation:
+    name: mutation testing
+    needs: [scope, tests]
+    if: ${{ !cancelled() && github.event_name == 'pull_request' && (needs.scope.result != 'success' || needs.scope.outputs.code == 'true') }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: The tests passed, so there is something to measure
+        env:
+          TESTS: ${{ needs.tests.result }}
+        run: |
+          if [ "${TESTS}" != success ]; then
+            echo "::error::Mutation did not run: the tests did not pass (${TESTS})."
+            exit 1
+          fi
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
+      - name: Install exactly what the lockfile says
+        run: uv sync --locked --no-build --no-install-package mock-open --no-install-package pyric
+      - name: Mutate, and hold the score to its minimum
+        run: uv run --locked --no-build --no-sync just mutation
+      - name: The mutants that survived, each as the change it made
+        if: ${{ !cancelled() }}
+        run: |
+          set -euo pipefail
+          survived="$(uv run --locked --no-build --no-sync mutmut results | awk -F: '/: survived$/ { gsub(/^[ \t]+/, "", $1); print $1 }')"
+          for mutant in ${survived}; do
+            uv run --locked --no-build --no-sync mutmut show "${mutant}"
+          done

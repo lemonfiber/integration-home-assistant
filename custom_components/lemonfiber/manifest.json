@@ -1,0 +1,12 @@
+{
+  "domain": "lemonfiber",
+  "name": "lemonfiber",
+  "codeowners": ["@lessevv"],
+  "config_flow": true,
+  "documentation": "https://github.com/lemonfiber/integration-home-assistant",
+  "integration_type": "service",
+  "iot_class": "local_push",
+  "issue_tracker": "https://github.com/lemonfiber/integration-home-assistant/issues",
+  "requirements": [],
+  "version": "0.0.0"
+}

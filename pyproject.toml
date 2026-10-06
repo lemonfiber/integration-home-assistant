@@ -1,0 +1,98 @@
+[project]
+name = "integration-home-assistant"
+version = "0.0.0"
+description = "lemonfiber in Home Assistant, through an integration key."
+readme = "README.md"
+license = "LicenseRef-Hippocratic-3.0"
+license-files = ["LICENSE"]
+authors = [{ name = "NightWorksIO", email = "info@nightworks.io" }]
+requires-python = ">=3.14.2"
+classifiers = [
+    "Private :: Do Not Upload",
+    "Programming Language :: Python :: 3.14",
+    "Typing :: Typed",
+]
+# Nothing at run time beyond what Home Assistant carries: the client is vendored
+# under `custom_components/lemonfiber/_vendor/`, and its two dependencies,
+# `aiohttp` and `urllib3`, are Home Assistant's own.
+dependencies = []
+
+[project.urls]
+Repository = "https://github.com/lemonfiber/integration-home-assistant"
+Specification = "https://github.com/lemonfiber/spec/blob/main/30-repos/integration-home-assistant.md"
+
+[dependency-groups]
+dev = [
+    "mutmut>=3.8",
+    "pyright[nodejs]>=1.1.414",
+    "pytest-cov>=7.1",
+    "pytest-homeassistant-custom-component==0.13.367",
+    "ruff>=0.16",
+    "rust-just>=1.58",
+    "trustme>=1.2",
+]
+
+[tool.uv]
+required-version = ">=0.11"
+package = false
+# Home Assistant pins these at releases with published vulnerabilities, and the
+# suite runs Home Assistant itself. The integration depends on neither.
+override-dependencies = ["cryptography>=50.0.0", "pyjwt>=2.15.0"]
+
+[tool.pyright]
+include = ["custom_components", "tests", "scripts"]
+# The vendored client is held to strict typing in its own repository, and is
+# found here through `extraPaths`, where its own absolute imports find it.
+exclude = ["custom_components/lemonfiber/_vendor", "scripts/no_open_codeql_alert.py", "**/__pycache__", ".venv"]
+extraPaths = ["custom_components/lemonfiber/_vendor"]
+pythonVersion = "3.14"
+typeCheckingMode = "strict"
+reportUnnecessaryTypeIgnoreComment = "error"
+enableTypeIgnoreComments = false
+reportImplicitOverride = "error"
+# Home Assistant declares an entity's properties as `cached_property` for mypy,
+# and its own `CoordinatorEntity` overrides `available` with a plain property, so
+# every coordinator entity inherits the two definitions this rule compares.
+reportIncompatibleVariableOverride = false
+reportPropertyTypeMismatch = "error"
+reportUninitializedInstanceVariable = "error"
+# The suite drives flows through Home Assistant's flow manager, whose
+# `async_configure` takes a bare `dict`; every other rule holds there too.
+executionEnvironments = [
+    { root = "tests", extraPaths = [".", "custom_components/lemonfiber/_vendor"], reportUnknownMemberType = false },
+    { root = "." },
+]
+
+[tool.pytest.ini_options]
+minversion = "9.0"
+testpaths = ["tests"]
+# The vendored client is found where the integration puts it on the path.
+pythonpath = [".", "custom_components/lemonfiber/_vendor"]
+addopts = ["--strict-markers", "-ra"]
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
+xfail_strict = true
+
+[tool.coverage.run]
+branch = true
+source = ["custom_components/lemonfiber", "scripts"]
+# The vendored client is measured in its own repository, and
+# `no_open_codeql_alert.py` is the spec's shared gate, measured where it is kept.
+omit = ["custom_components/lemonfiber/_vendor/*", "scripts/no_open_codeql_alert.py"]
+
+[tool.coverage.report]
+fail_under = 100
+show_missing = true
+skip_covered = true
+exclude_also = ['if __name__ == "__main__":']
+
+[tool.mutmut]
+source_paths = ["custom_components/"]
+do_not_mutate = ["custom_components/lemonfiber/_vendor/*"]
+also_copy = ["scripts/", "tests/"]
+pytest_add_cli_args_test_selection = ["tests/", "--ignore=tests/test_architecture.py"]
+do_not_mutate_patterns = ["\\bcast\\("]
+
+[tool.lemonfiber.mutation]
+# The share of mutants the suite must tell apart from the code, as a percentage.
+minimum-score = 90

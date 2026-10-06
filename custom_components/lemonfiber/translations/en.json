@@ -1,0 +1,174 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Connect to lemonfiber",
+        "description": "Paste what the stack showed when the integration key was minted: its address, the key and the certificate pin. The operator password is never asked for.",
+        "data": {
+          "url": "Address",
+          "api_key": "Key",
+          "pin": "Certificate pin"
+        },
+        "data_description": {
+          "url": "The https address the mint reply gave, with its port.",
+          "api_key": "The integration key, which starts with lfk_.",
+          "pin": "The 64 hexadecimal characters that identify the stack's certificate."
+        }
+      },
+      "reauth_confirm": {
+        "title": "Replace the key",
+        "description": "The stack no longer admits the key {name} holds. Mint a new key on the stack and paste it here.",
+        "data": {
+          "api_key": "Key"
+        },
+        "data_description": {
+          "api_key": "The new integration key, which starts with lfk_."
+        }
+      },
+      "reconfigure": {
+        "title": "Change the address and pin",
+        "description": "The key stays as it is. Give the address and certificate pin the stack is reached at now.",
+        "data": {
+          "url": "Address",
+          "pin": "Certificate pin"
+        },
+        "data_description": {
+          "url": "The https address the stack is served at now, with its port.",
+          "pin": "The 64 hexadecimal characters that identify the stack's certificate."
+        }
+      }
+    },
+    "error": {
+      "address_refused": "This is not an address lemonfiber is reached at. Give it as the mint reply wrote it: https, the machine's name or address, and the port.",
+      "address_not_https": "A stack is reached over https, where its pin can be checked. Use the https address from the mint reply.",
+      "pin_malformed": "A certificate pin is 64 hexadecimal characters. Copy it whole from the mint reply.",
+      "pin_mismatch": "The stack presented a certificate other than the one this pin names, so nothing was sent. Check the pin, or whether the address reaches the right machine.",
+      "unreachable": "Nothing answered at this address from here. If lemonfiber's web surface is bound to loopback only, a Home Assistant on another machine cannot reach it: bind it beyond loopback on the stack, then use the https address and pin it shows.",
+      "key_malformed": "A key is written in visible characters with no spaces. Copy it whole from the mint reply.",
+      "key_refused": "The stack does not admit this key. It may have been revoked; mint a new one.",
+      "key_in_the_clear": "The stack refuses a key that arrives from another machine without the encryption its pin verifies. Use the https address and the pin from the mint reply.",
+      "not_lemonfiber": "Something answered at this address, and it is not lemonfiber.",
+      "version_mismatch": "This integration speaks version {spoken} of lemonfiber's interface and the stack speaks version {served}. Update whichever of the two is older.",
+      "no_dashboard": "The stack answered but did not send its dashboard in time.",
+      "refused": "The stack refused: {sentence}"
+    },
+    "abort": {
+      "already_configured": "This stack is already added.",
+      "reauth_successful": "The new key is in use.",
+      "reconfigure_successful": "The new address and pin are in use."
+    }
+  },
+  "entity": {
+    "sensor": {
+      "health": {
+        "name": "Health",
+        "state": {
+          "healthy": "Healthy",
+          "stopped": "Stopped",
+          "unconfigured": "Not set up",
+          "advisory": "Advisory",
+          "degraded": "Degraded",
+          "broken": "Broken",
+          "critical": "Critical"
+        },
+        "state_attributes": {
+          "worst": {
+            "name": "Worst"
+          }
+        }
+      },
+      "download_queue": {
+        "name": "Download queue",
+        "unit_of_measurement": "items"
+      },
+      "download_speed": {
+        "name": "Download speed"
+      },
+      "disk_free_data": {
+        "name": "Data disk free"
+      },
+      "findings_advisory": {
+        "name": "Advisory findings",
+        "unit_of_measurement": "findings",
+        "state_attributes": {
+          "findings": {
+            "name": "Findings"
+          }
+        }
+      },
+      "findings_warning": {
+        "name": "Warning findings",
+        "unit_of_measurement": "findings",
+        "state_attributes": {
+          "findings": {
+            "name": "Findings"
+          }
+        }
+      },
+      "findings_error": {
+        "name": "Error findings",
+        "unit_of_measurement": "findings",
+        "state_attributes": {
+          "findings": {
+            "name": "Findings"
+          }
+        }
+      },
+      "findings_critical": {
+        "name": "Critical findings",
+        "unit_of_measurement": "findings",
+        "state_attributes": {
+          "findings": {
+            "name": "Findings"
+          }
+        }
+      }
+    },
+    "binary_sensor": {
+      "health_problem": {
+        "name": "Needs attention"
+      },
+      "vpn": {
+        "name": "VPN"
+      }
+    }
+  },
+  "exceptions": {
+    "address_refused": {
+      "message": "The stored address is not one lemonfiber is reached at. Change it in the integration's settings."
+    },
+    "address_not_https": {
+      "message": "The stored address is not https. Change it in the integration's settings."
+    },
+    "pin_malformed": {
+      "message": "The stored certificate pin is not 64 hexadecimal characters. Change it in the integration's settings."
+    },
+    "pin_mismatch": {
+      "message": "The stack presented a certificate other than the pinned one, so nothing was sent. If the stack's certificate changed, give the new pin in the integration's settings."
+    },
+    "unreachable": {
+      "message": "Nothing answered at the stack's address. Home Assistant tries again."
+    },
+    "key_malformed": {
+      "message": "The stored key is not one a request can carry. Replace it."
+    },
+    "key_refused": {
+      "message": "The stack does not admit the key. Replace it with a new one."
+    },
+    "key_in_the_clear": {
+      "message": "The stack refuses a key that arrives without the encryption its pin verifies. Use the https address and pin."
+    },
+    "not_lemonfiber": {
+      "message": "Something other than lemonfiber answered at the stack's address."
+    },
+    "version_mismatch": {
+      "message": "This integration speaks version {spoken} of lemonfiber's interface and the stack speaks version {served}. Update whichever of the two is older."
+    },
+    "no_dashboard": {
+      "message": "The stack answered but did not send its dashboard in time. Home Assistant tries again."
+    },
+    "refused": {
+      "message": "The stack refused: {sentence}"
+    }
+  }
+}
