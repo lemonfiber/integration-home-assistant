@@ -1,0 +1,174 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Verbinden met lemonfiber",
+        "description": "Plak wat de stack liet zien toen de integratiesleutel werd aangemaakt: het adres, de sleutel en de certificaatpin. Het beheerderswachtwoord wordt nooit gevraagd.",
+        "data": {
+          "url": "Adres",
+          "api_key": "Sleutel",
+          "pin": "Certificaatpin"
+        },
+        "data_description": {
+          "url": "Het https-adres uit het antwoord bij het aanmaken, met de poort.",
+          "api_key": "De integratiesleutel, die begint met lfk_.",
+          "pin": "De 64 hexadecimale tekens die het certificaat van de stack aanwijzen."
+        }
+      },
+      "reauth_confirm": {
+        "title": "Sleutel vervangen",
+        "description": "De stack laat de sleutel van {name} niet meer toe. Maak op de stack een nieuwe sleutel aan en plak die hier.",
+        "data": {
+          "api_key": "Sleutel"
+        },
+        "data_description": {
+          "api_key": "De nieuwe integratiesleutel, die begint met lfk_."
+        }
+      },
+      "reconfigure": {
+        "title": "Adres en pin wijzigen",
+        "description": "De sleutel blijft zoals hij is. Geef het adres en de certificaatpin waarop de stack nu bereikbaar is.",
+        "data": {
+          "url": "Adres",
+          "pin": "Certificaatpin"
+        },
+        "data_description": {
+          "url": "Het https-adres waarop de stack nu draait, met de poort.",
+          "pin": "De 64 hexadecimale tekens die het certificaat van de stack aanwijzen."
+        }
+      }
+    },
+    "error": {
+      "address_refused": "Op dit adres is lemonfiber niet te bereiken. Geef het zoals het antwoord bij het aanmaken het schreef: https, de naam of het adres van de machine, en de poort.",
+      "address_not_https": "Een stack wordt bereikt via https, waar de pin gecontroleerd kan worden. Gebruik het https-adres uit het antwoord bij het aanmaken.",
+      "pin_malformed": "Een certificaatpin bestaat uit 64 hexadecimale tekens. Kopieer hem in zijn geheel uit het antwoord bij het aanmaken.",
+      "pin_mismatch": "De stack liet een ander certificaat zien dan deze pin aanwijst, dus er is niets verstuurd. Controleer de pin, of dat het adres de juiste machine bereikt.",
+      "unreachable": "Op dit adres antwoordde vanaf hier niets. Als de webomgeving van lemonfiber alleen aan loopback gebonden is, kan een Home Assistant op een andere machine haar niet bereiken: bind haar op de stack ook buiten loopback en gebruik dan het https-adres en de pin die ze laat zien.",
+      "key_malformed": "Een sleutel bestaat uit zichtbare tekens zonder spaties. Kopieer hem in zijn geheel uit het antwoord bij het aanmaken.",
+      "key_refused": "De stack laat deze sleutel niet toe. Misschien is hij ingetrokken; maak een nieuwe aan.",
+      "key_in_the_clear": "De stack weigert een sleutel die van een andere machine komt zonder de versleuteling die de pin controleert. Gebruik het https-adres en de pin uit het antwoord bij het aanmaken.",
+      "not_lemonfiber": "Op dit adres antwoordde iets, maar het is niet lemonfiber.",
+      "version_mismatch": "Deze integratie spreekt versie {spoken} van de interface van lemonfiber en de stack spreekt versie {served}. Werk de oudste van de twee bij.",
+      "no_dashboard": "De stack antwoordde, maar stuurde zijn dashboard niet op tijd.",
+      "refused": "De stack weigerde: {sentence}"
+    },
+    "abort": {
+      "already_configured": "Deze stack is al toegevoegd.",
+      "reauth_successful": "De nieuwe sleutel is in gebruik.",
+      "reconfigure_successful": "Het nieuwe adres en de nieuwe pin zijn in gebruik."
+    }
+  },
+  "entity": {
+    "sensor": {
+      "health": {
+        "name": "Gezondheid",
+        "state": {
+          "healthy": "Gezond",
+          "stopped": "Gestopt",
+          "unconfigured": "Niet ingesteld",
+          "advisory": "Advies",
+          "degraded": "Verminderd",
+          "broken": "Kapot",
+          "critical": "Kritiek"
+        },
+        "state_attributes": {
+          "worst": {
+            "name": "Ergste"
+          }
+        }
+      },
+      "download_queue": {
+        "name": "Downloadwachtrij",
+        "unit_of_measurement": "items"
+      },
+      "download_speed": {
+        "name": "Downloadsnelheid"
+      },
+      "disk_free_data": {
+        "name": "Vrij op de dataschijf"
+      },
+      "findings_advisory": {
+        "name": "Adviesbevindingen",
+        "unit_of_measurement": "bevindingen",
+        "state_attributes": {
+          "findings": {
+            "name": "Bevindingen"
+          }
+        }
+      },
+      "findings_warning": {
+        "name": "Waarschuwingsbevindingen",
+        "unit_of_measurement": "bevindingen",
+        "state_attributes": {
+          "findings": {
+            "name": "Bevindingen"
+          }
+        }
+      },
+      "findings_error": {
+        "name": "Foutbevindingen",
+        "unit_of_measurement": "bevindingen",
+        "state_attributes": {
+          "findings": {
+            "name": "Bevindingen"
+          }
+        }
+      },
+      "findings_critical": {
+        "name": "Kritieke bevindingen",
+        "unit_of_measurement": "bevindingen",
+        "state_attributes": {
+          "findings": {
+            "name": "Bevindingen"
+          }
+        }
+      }
+    },
+    "binary_sensor": {
+      "health_problem": {
+        "name": "Vraagt aandacht"
+      },
+      "vpn": {
+        "name": "VPN"
+      }
+    }
+  },
+  "exceptions": {
+    "address_refused": {
+      "message": "Op het opgeslagen adres is lemonfiber niet te bereiken. Wijzig het in de instellingen van de integratie."
+    },
+    "address_not_https": {
+      "message": "Het opgeslagen adres is geen https-adres. Wijzig het in de instellingen van de integratie."
+    },
+    "pin_malformed": {
+      "message": "De opgeslagen certificaatpin bestaat niet uit 64 hexadecimale tekens. Wijzig hem in de instellingen van de integratie."
+    },
+    "pin_mismatch": {
+      "message": "De stack liet een ander certificaat zien dan het vastgepinde, dus er is niets verstuurd. Als het certificaat van de stack veranderd is, geef dan de nieuwe pin in de instellingen van de integratie."
+    },
+    "unreachable": {
+      "message": "Op het adres van de stack antwoordde niets. Home Assistant probeert het opnieuw."
+    },
+    "key_malformed": {
+      "message": "De opgeslagen sleutel kan niet in een verzoek mee. Vervang hem."
+    },
+    "key_refused": {
+      "message": "De stack laat de sleutel niet toe. Vervang hem door een nieuwe."
+    },
+    "key_in_the_clear": {
+      "message": "De stack weigert een sleutel die zonder de versleuteling komt die de pin controleert. Gebruik het https-adres en de pin."
+    },
+    "not_lemonfiber": {
+      "message": "Op het adres van de stack antwoordde iets anders dan lemonfiber."
+    },
+    "version_mismatch": {
+      "message": "Deze integratie spreekt versie {spoken} van de interface van lemonfiber en de stack spreekt versie {served}. Werk de oudste van de twee bij."
+    },
+    "no_dashboard": {
+      "message": "De stack antwoordde, maar stuurde zijn dashboard niet op tijd. Home Assistant probeert het opnieuw."
+    },
+    "refused": {
+      "message": "De stack weigerde: {sentence}"
+    }
+  }
+}

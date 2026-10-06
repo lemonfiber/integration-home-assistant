@@ -1,0 +1,5 @@
+* text=auto eol=lf
+
+# sdk-python, copied byte for byte by `scripts/vendor_sdk.py` and never edited here.
+custom_components/lemonfiber/_vendor/** linguist-vendored=true -text
+uv.lock linguist-generated=true

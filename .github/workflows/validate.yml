@@ -1,0 +1,49 @@
+# Home Assistant's and HACS's own checks of the integration (F12-R13).
+#
+# `hassfest` is Home Assistant's validation of an integration's manifest,
+# translations, config flow and icons, the one its own integrations meet. The
+# HACS action is what HACS checks before it installs a repository.
+name: validate
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  schedule:
+    # Weekly, because both checks move with Home Assistant and HACS rather than
+    # with this repository.
+    - cron: "10 6 * * 3"
+
+permissions:
+  contents: read
+
+# A pull request pushed again cancels the run on its old head, which nobody
+# will read and which holds runners the org shares (Q-R75). Every other event
+# is grouped by its own run, so it is never cancelled and never cancels.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event_name == 'pull_request' && github.ref || github.run_id }}
+  cancel-in-progress: true
+
+jobs:
+  hassfest:
+    name: hassfest
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: home-assistant/actions/hassfest@06749dd8c0b54f350bc69c8752456cee498808a3 # master
+
+  hacs:
+    name: hacs
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      # `brands` and `topics` are set where the repository is described rather
+      # than in this tree: the integration's icon in Home Assistant's brands
+      # repository, and the repository's topics on GitHub.
+      - uses: hacs/action@d556e736723344f83838d08488c983a15381059a # 22.5.0
+        with:
+          category: integration
+          ignore: brands topics
