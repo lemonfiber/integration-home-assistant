@@ -10,7 +10,7 @@ its kind (`lemonfiber.contract` holds each shape), and every failure is a
 """
 
 from lemonfiber._aio import AsyncClient, AsyncStream, admit_async
-from lemonfiber._generated.contract import (
+from lemonfiber._generated import (
     KEY_CALLABLE,
     KINDS,
     REFUSAL_CODES,

@@ -14,7 +14,7 @@ from collections.abc import Mapping, Sequence
 from dataclasses import dataclass, field
 from typing import Final, Literal, TypeIs, cast
 
-from lemonfiber._generated.contract import (
+from lemonfiber._generated import (
     REFUSAL_CODES,
     CapabilityState,
     Envelope,

@@ -13,7 +13,7 @@ carries when it was read (`ARCH-R78` to `ARCH-R82`).
 import typing
 from dataclasses import dataclass
 
-from lemonfiber._generated.contract import CapabilityState
+from lemonfiber._generated import CapabilityState
 from lemonfiber.reads import ACTIONS
 
 if typing.TYPE_CHECKING:

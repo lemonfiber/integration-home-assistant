@@ -1,0 +1,21 @@
+# Copyright (c) 2026 NightWorksIO
+"""The shapes `dashboard`, `doctor`, `error` and `plugins` all carry.
+
+Generated from `contract/web-api.contract.json`. Do not edit: `just generate` rewrites it,
+and CI fails on any difference.
+"""
+
+import typing
+
+
+type ProblemSeverity = typing.Literal["advisory", "warning", "error", "critical"]
+"""How much a problem matters.
+
+Four levels, deliberately. More would not be applied consistently, and
+inconsistent severity is worse than coarse severity.
+"""
+
+
+__all__ = [
+    "ProblemSeverity",
+]

@@ -12,7 +12,7 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from lemonfiber._generated.contract import Envelope, JobEnvelope
+    from lemonfiber._generated import Envelope, JobEnvelope
 
 
 @dataclass(frozen=True, slots=True)
