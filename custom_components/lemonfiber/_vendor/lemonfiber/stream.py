@@ -11,10 +11,11 @@ carries it again, whatever the resumption replays (`ARCH-R51`).
 import time
 from dataclasses import dataclass
 from enum import StrEnum
+from http import HTTPMethod, HTTPStatus
 from typing import TYPE_CHECKING, Final
 
+from lemonfiber._protocol.calls import Call
 from lemonfiber._sse import Parser
-from lemonfiber._wire import Call
 from lemonfiber.envelope import parse_envelope
 from lemonfiber.problems import StreamLostError, UnknownKindError
 from lemonfiber.reads import EVENTS
@@ -40,7 +41,7 @@ FIRST_WAIT: Final = 1.0
 LONGEST_WAIT: Final = 30.0
 """The most seconds an attempt to reopen waits."""
 
-OPENED: Final = 200
+OPENED: Final = HTTPStatus.OK
 """The status the stream opens with."""
 
 EVENT_STREAM: Final = "text/event-stream"
@@ -130,7 +131,7 @@ class Following:
         headers = {"Accept": EVENT_STREAM, **self._credential.header()}
         if self._last_id is not None:
             headers[RESUME_HEADER] = self._last_id
-        return Call("GET", EVENTS, headers)
+        return Call(HTTPMethod.GET, EVENTS, headers)
 
     def opened(self) -> None:
         """Begin reading a fresh opening."""
