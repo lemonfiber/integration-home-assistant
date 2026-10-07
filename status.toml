@@ -1,0 +1,23 @@
+# What this repository implements, one row per requirement (OPS-R74).
+#
+# `done` means the requirement is met in full by what is here, `partial` that this
+# repository holds its part and the rest lives elsewhere or is not built yet,
+# `open` that nothing here meets it yet. The release gate and the no-stubs gate
+# read this file; a pull request that changes whether a requirement is met changes
+# its row.
+
+requirement = [
+  { id = "F12-R1", state = "done", evidence = ["custom_components/lemonfiber/connection.py", "tests/test_architecture.py::test_the_stack_is_reached_through_sdk_python_alone", "tests/test_architecture.py::test_no_password_is_asked_for_or_exchanged"] },
+  { id = "F12-R2", state = "done", evidence = ["custom_components/lemonfiber/config_flow.py", "tests/test_config_flow.py::test_a_stack_is_added_once_the_address_key_and_pin_are_answered_for", "tests/test_config_flow.py::test_a_failure_names_the_field_to_change_and_the_form_can_be_answered_again"] },
+  { id = "F12-R3", state = "done", evidence = ["custom_components/lemonfiber/config_flow.py", "tests/test_config_flow.py::test_a_refused_key_is_replaced_by_asking_for_a_new_one_only", "tests/test_config_flow.py::test_the_address_and_pin_move_without_removing_the_entry"] },
+  { id = "F12-R4", state = "done", evidence = ["custom_components/lemonfiber/__init__.py", "tests/test_init.py::test_a_members_key_yields_no_technical_entity_and_opens_no_stream", "tests/test_controls.py::test_a_read_key_gets_no_control"] },
+  { id = "F12-R5", state = "partial", evidence = ["custom_components/lemonfiber/sensor.py", "custom_components/lemonfiber/binary_sensor.py", "custom_components/lemonfiber/update.py", "tests/test_entities.py::test_the_findings_are_counted_by_severity_and_say_what_happened"] },
+  { id = "F12-R6", state = "open" },
+  { id = "F12-R7", state = "done", evidence = ["custom_components/lemonfiber/coordinator.py", "tests/test_coordinator.py::test_a_gap_shows_every_stream_built_entity_unavailable_until_the_stream_says_it_again"] },
+  { id = "F12-R8", state = "partial", evidence = ["custom_components/lemonfiber/button.py", "custom_components/lemonfiber/switch.py", "custom_components/lemonfiber/jobs.py", "tests/test_controls.py::test_running_the_doctor_follows_its_job_and_reads_the_findings_again"] },
+  { id = "F12-R9", state = "open" },
+  { id = "F12-R10", state = "done", evidence = ["custom_components/lemonfiber/diagnostics.py", "tests/test_diagnostics.py::test_the_key_the_address_and_the_pin_appear_nowhere"] },
+  { id = "F12-R11", state = "done", evidence = ["custom_components/lemonfiber/translations/en.json", "custom_components/lemonfiber/translations/nl.json", "tests/test_translations.py::test_every_string_is_translated_with_the_same_placeholders"] },
+  { id = "F12-R12", state = "done", evidence = ["custom_components/lemonfiber/quality_scale.yaml", "tests/test_quality_scale.py::test_every_rule_is_met_or_exempt_for_a_reason"] },
+  { id = "F12-R13", state = "done", evidence = ["hacs.json", ".github/workflows/validate.yml"] },
+]
