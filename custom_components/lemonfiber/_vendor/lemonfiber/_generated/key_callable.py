@@ -21,15 +21,17 @@ class KeyCallable(typing.NamedTuple):
     """Whether calling it disturbs the running system."""
     rehearsal: bool
     """Whether it takes `dry_run`, so it can be rehearsed before the real call is offered."""
+    idempotent: bool
+    """Whether calling it again with the same arguments leaves the stack as calling it once did."""
 
 
 KEY_CALLABLE: typing.Final[typing.Mapping[KeyCallableAction, KeyCallable]] = types.MappingProxyType(
     {
-        "restart": KeyCallable(True, True),
-        "diagnose": KeyCallable(True, False),
-        "update": KeyCallable(True, True),
-        "downloads-pause": KeyCallable(False, True),
-        "downloads-resume": KeyCallable(False, True),
+        "restart": KeyCallable(True, True, False),
+        "diagnose": KeyCallable(True, False, False),
+        "update": KeyCallable(True, True, False),
+        "downloads-pause": KeyCallable(False, True, True),
+        "downloads-resume": KeyCallable(False, True, True),
     }
 )
 """What the contract says of each action a key may call, in the order it lists them."""

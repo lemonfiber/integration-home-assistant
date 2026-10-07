@@ -16,7 +16,10 @@ from typing import TYPE_CHECKING, Final, Self
 
 import aiohttp
 
-from lemonfiber import _wire
+from lemonfiber._protocol import operation
+from lemonfiber._protocol.calls import DEFAULT_TIMEOUT, Answer, Call, with_credential
+from lemonfiber._protocol.following import DEFAULT_EVERY, job_name, next_wait
+from lemonfiber._protocol.refusals import CERTIFICATE_REFUSED, NOT_ANSWERING, opening_refusal
 from lemonfiber.jobs import Ended, Finished, Running
 from lemonfiber.problems import (
     CertificateRefusedError,
@@ -31,6 +34,8 @@ if TYPE_CHECKING:
     from types import TracebackType
 
     from lemonfiber._generated import Envelope, JobEnvelope
+    from lemonfiber._protocol.answers import Admitted, Bundle
+    from lemonfiber._protocol.calls import Json, Query
     from lemonfiber.address import Address, Route
     from lemonfiber.capabilities import CapabilitySet
     from lemonfiber.credential import Credential
@@ -87,9 +92,9 @@ async def attempt(
     session: aiohttp.ClientSession,
     route: Route,
     tls: TlsSetting,
-    call: _wire.Call,
+    call: Call,
     limit: aiohttp.ClientTimeout,
-) -> _wire.Answer | None:
+) -> Answer | None:
     """Send one call over one route, or return nothing where no connection could be made there.
 
     A route that reaches a named stack by an address it resolved to names the
@@ -113,14 +118,14 @@ async def attempt(
         ) as response:
             body = await response.read()
     except aiohttp.ServerFingerprintMismatch, aiohttp.ClientSSLError:
-        failure: LemonfiberError = CertificateRefusedError(_wire.CERTIFICATE_REFUSED)
+        failure: LemonfiberError = CertificateRefusedError(CERTIFICATE_REFUSED)
     except aiohttp.ClientConnectorError:
         return None
     except aiohttp.ClientError, TimeoutError:
-        failure = UnreachableError(_wire.NOT_ANSWERING)
+        failure = UnreachableError(NOT_ANSWERING)
     else:
         headers = {name.lower(): value for name, value in response.headers.items()}
-        return _wire.Answer(response.status, headers, body)
+        return Answer(response.status, headers, body)
     raise failure
 
 
@@ -128,9 +133,9 @@ async def exchange(
     session: aiohttp.ClientSession,
     address: Address,
     tls: TlsSetting,
-    call: _wire.Call,
+    call: Call,
     limit: aiohttp.ClientTimeout,
-) -> _wire.Answer:
+) -> Answer:
     """Send one call over the first route a connection can be made on, following no redirect.
 
     A route is passed over only where no connection could be made, so nothing
@@ -140,7 +145,7 @@ async def exchange(
         answer = await attempt(session, route, tls, call, limit)
         if answer is not None:
             return answer
-    raise UnreachableError(_wire.NOT_ANSWERING)
+    raise UnreachableError(NOT_ANSWERING)
 
 
 class AsyncClient:
@@ -157,7 +162,7 @@ class AsyncClient:
         credential: Credential,
         *,
         session: aiohttp.ClientSession | None = None,
-        timeout: float = _wire.DEFAULT_TIMEOUT,
+        timeout: float = DEFAULT_TIMEOUT,
     ) -> None:
         """Hold an address, a credential and the session to send through; nothing is sent until a call is made."""
         self._address = address
@@ -179,55 +184,58 @@ class AsyncClient:
             self._owned = aiohttp.ClientSession()
         return self._owned
 
-    async def _answer(self, call: _wire.Call) -> _wire.Answer:
-        sent = _wire.with_credential(call, self._credential)
+    async def _answer(self, call: Call) -> Answer:
+        sent = with_credential(call, self._credential)
         return await exchange(self._session(), self._address, self._tls, sent, self._limit)
 
-    async def read(self, read: Read, query: _wire.Query | None = None) -> Envelope:
+    async def _run[T](self, asked: operation.Operation[T]) -> T:
+        return asked.read(await self._answer(asked.call))
+
+    async def read(self, read: Read, query: Query | None = None) -> Envelope:
         """Ask for what a command prints under `--json`."""
-        return _wire.envelope_of(await self._answer(_wire.read_call(read, query)))
+        return await self._run(operation.reading(read, query))
 
     async def capabilities(self) -> CapabilitySet:
         """Ask what the stack can do, for the credential this client holds, as it stands now."""
-        return _wire.capabilities_of(await self._answer(_wire.capabilities_call()))
+        return await self._run(operation.capabilities())
 
-    async def logs(self, query: _wire.Query | None = None) -> list[Envelope]:
+    async def logs(self, query: Query | None = None) -> list[Envelope]:
         """Ask for what the services have been saying, a `log` envelope a line."""
-        return _wire.envelopes_of(await self._answer(_wire.logs_call(query)))
+        return await self._run(operation.logs(query))
 
-    async def bundle(self, name: str) -> _wire.Bundle:
+    async def bundle(self, name: str) -> Bundle:
         """Fetch one support bundle this run wrote, by name, as the bytes it is."""
-        return _wire.bundle_of(name, await self._answer(_wire.bundle_call(name)))
+        return await self._run(operation.bundle(name))
 
-    async def act(self, action: str, arguments: Mapping[str, _wire.Json] | None = None) -> Envelope:
+    async def act(self, action: str, arguments: Mapping[str, Json] | None = None) -> Envelope:
         """Tell lemonfiber to do something the command line could also do. Sent once, never retried."""
-        return _wire.envelope_of(await self._answer(_wire.action_call(action, arguments)))
+        return await self._run(operation.action(action, arguments))
 
     async def job(self, job: str) -> JobStanding:
         """Ask where the work a name stands for got to."""
-        return _wire.standing_of(job, await self._answer(_wire.job_call(job, "GET")))
+        return await self._run(operation.job(job))
 
     async def release(self, job: str) -> JobStanding:
         """Let a name go, ending the work it stands for, and say where it now stands."""
-        return _wire.standing_of(job, await self._answer(_wire.job_call(job, "DELETE")))
+        return await self._run(operation.release(job))
 
     async def follow(
         self,
         job: str | JobEnvelope,
         *,
-        every: float = _wire.DEFAULT_EVERY,
+        every: float = DEFAULT_EVERY,
         within: float | None = None,
     ) -> Finished | Ended:
         """Ask where work stands every `every` seconds until it is no longer going.
 
         Raises `StillRunningError` once `within` seconds have passed with it still going.
         """
-        name = _wire.job_name(job)
+        name = job_name(job)
         loop = asyncio.get_running_loop()
         started = loop.time()
         standing = await self.job(name)
         while isinstance(standing, Running):
-            await asyncio.sleep(_wire.next_wait(name, started, loop.time(), every, within))
+            await asyncio.sleep(next_wait(name, started, loop.time(), every, within))
             standing = await self.job(name)
         return standing
 
@@ -326,7 +334,7 @@ class AsyncStream:
         for arrival in self._following.broke(why):
             yield arrival
 
-    async def _open(self, route: Route, call: _wire.Call) -> aiohttp.ClientResponse | None:
+    async def _open(self, route: Route, call: Call) -> aiohttp.ClientResponse | None:
         """Open the stream over one route: the response once it is open, or nothing where it did not open.
 
         A refusal the stack answered with, or a certificate it does not hold to,
@@ -347,13 +355,13 @@ class AsyncStream:
             if response.status == OPENED:
                 return response
             headers = {name.lower(): value for name, value in response.headers.items()}
-            answer = _wire.Answer(response.status, headers, await response.read())
+            answer = Answer(response.status, headers, await response.read())
         except aiohttp.ServerFingerprintMismatch, aiohttp.ClientSSLError:
-            failure = CertificateRefusedError(_wire.CERTIFICATE_REFUSED)
+            failure = CertificateRefusedError(CERTIFICATE_REFUSED)
         except aiohttp.ClientError, TimeoutError:
             return None
         else:
-            refusal = _wire.opening_refusal(answer)
+            refusal = opening_refusal(answer)
             if refusal is not None:
                 raise refusal
             return None
@@ -392,17 +400,17 @@ async def admit_async(
     *,
     name: str | None = None,
     session: aiohttp.ClientSession | None = None,
-) -> _wire.Admitted:
+) -> Admitted:
     """Offer a password, once, and come away with a session or with why there is none.
 
     A household member gives their `name`; the operator gives none. The session's
     credential is what an `AsyncClient` is then built with. The offer waits as
     long as a client's call does by default; `asyncio.timeout` around it waits less.
     """
-    call = _wire.session_call(password, name)
+    asked = operation.admission(password, name)
     tls = tls_for(address)
-    limit = aiohttp.ClientTimeout(total=_wire.DEFAULT_TIMEOUT)
+    limit = aiohttp.ClientTimeout(total=DEFAULT_TIMEOUT)
     if session is not None:
-        return _wire.admitted_of(await exchange(checked(session), address, tls, call, limit))
+        return asked.read(await exchange(checked(session), address, tls, asked.call, limit))
     async with aiohttp.ClientSession() as opened:
-        return _wire.admitted_of(await exchange(opened, address, tls, call, limit))
+        return asked.read(await exchange(opened, address, tls, asked.call, limit))

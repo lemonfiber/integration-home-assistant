@@ -23,8 +23,9 @@ from lemonfiber._generated import (
     is_key_callable,
     is_refusal_code,
 )
+from lemonfiber._protocol.answers import Admitted, Bundle
+from lemonfiber._protocol.calls import Json, Query
 from lemonfiber._sync import SyncClient, SyncStream, admit
-from lemonfiber._wire import Admitted, Bundle, Json, Query
 from lemonfiber.address import Address, CertificatePin, Route
 from lemonfiber.capabilities import CapabilitySet
 from lemonfiber.credential import CREDENTIAL_HEADER, Credential
