@@ -41,6 +41,8 @@ uv run just test      # the suite alone
 
 Mutation testing (`just mutation`), `hassfest`, HACS's validation and
 `sdk-drift` are merge gates that run in CI; do not run mutation locally.
+A change that touches only documentation runs none of them but HACS's, which
+reads `README.md`: `scripts/the_code_a_change_touches.py` decides which paths are code.
 
 ## Before you open a PR
 
