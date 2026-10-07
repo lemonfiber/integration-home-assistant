@@ -84,9 +84,9 @@ jobs:
   # pinned by commit. Those needing a pull request are guarded, because this
   # workflow also runs on pushes to main.
   dco:
-    uses: lemonfiber/spec/.github/workflows/dco.yml@92ec12769c3fdebc6063a839e9ea7c8bc23e6d3d # v1.0.31
+    uses: lemonfiber/spec/.github/workflows/dco.yml@d7f5d8d7e0c6fbbd8022f94ea48abcd59a518989 # v1.0.34
   attribution:
-    uses: lemonfiber/spec/.github/workflows/attribution.yml@92ec12769c3fdebc6063a839e9ea7c8bc23e6d3d # v1.0.31
+    uses: lemonfiber/spec/.github/workflows/attribution.yml@d7f5d8d7e0c6fbbd8022f94ea48abcd59a518989 # v1.0.34
 
   # `pull-requests: write` is what lets the gate close a pull request whose
   # citation is missing or names an identifier that does not exist. A job-level
@@ -97,29 +97,29 @@ jobs:
     permissions:
       contents: read
       pull-requests: write
-    uses: lemonfiber/spec/.github/workflows/spec-check.yml@92ec12769c3fdebc6063a839e9ea7c8bc23e6d3d # v1.0.31
+    uses: lemonfiber/spec/.github/workflows/spec-check.yml@d7f5d8d7e0c6fbbd8022f94ea48abcd59a518989 # v1.0.34
 
   commitlint:
     if: github.event_name == 'pull_request'
-    uses: lemonfiber/spec/.github/workflows/commitlint.yml@92ec12769c3fdebc6063a839e9ea7c8bc23e6d3d # v1.0.31
+    uses: lemonfiber/spec/.github/workflows/commitlint.yml@d7f5d8d7e0c6fbbd8022f94ea48abcd59a518989 # v1.0.34
 
   hygiene:
-    uses: lemonfiber/spec/.github/workflows/hygiene.yml@92ec12769c3fdebc6063a839e9ea7c8bc23e6d3d # v1.0.31
+    uses: lemonfiber/spec/.github/workflows/hygiene.yml@d7f5d8d7e0c6fbbd8022f94ea48abcd59a518989 # v1.0.34
 
   # Every pin this repository holds on a shared workflow, against what the spec's
   # default branch holds now.
   workflow-pins:
-    uses: lemonfiber/spec/.github/workflows/workflow-pins.yml@92ec12769c3fdebc6063a839e9ea7c8bc23e6d3d # v1.0.31
+    uses: lemonfiber/spec/.github/workflows/workflow-pins.yml@d7f5d8d7e0c6fbbd8022f94ea48abcd59a518989 # v1.0.34
 
   security:
-    uses: lemonfiber/spec/.github/workflows/security.yml@92ec12769c3fdebc6063a839e9ea7c8bc23e6d3d # v1.0.31
+    uses: lemonfiber/spec/.github/workflows/security.yml@d7f5d8d7e0c6fbbd8022f94ea48abcd59a518989 # v1.0.34
 
   labeler:
     if: github.event_name == 'pull_request'
     permissions:
       contents: read
       pull-requests: write
-    uses: lemonfiber/spec/.github/workflows/labeler.yml@92ec12769c3fdebc6063a839e9ea7c8bc23e6d3d # v1.0.31
+    uses: lemonfiber/spec/.github/workflows/labeler.yml@d7f5d8d7e0c6fbbd8022f94ea48abcd59a518989 # v1.0.34
 
   # OPS-R39, OPS-R40, OPS-R42: label a pull request that cites a goal the staged
   # version locks, put it in that version's milestone, and say which goals it
@@ -131,7 +131,7 @@ jobs:
       contents: read
       pull-requests: write
       issues: write
-    uses: lemonfiber/spec/.github/workflows/goal-automations.yml@92ec12769c3fdebc6063a839e9ea7c8bc23e6d3d # v1.0.31
+    uses: lemonfiber/spec/.github/workflows/goal-automations.yml@d7f5d8d7e0c6fbbd8022f94ea48abcd59a518989 # v1.0.34
 
   # Formatting, every lint rule and strict types. One checkout, one
   # environment, cheapest first.
