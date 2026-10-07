@@ -25,8 +25,37 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  # Whether this change reaches anything either check reads, asked of the script
+  # `ci.yml`'s `what changed` asks, so the two cannot disagree about a path.
+  # `hacs` reads the readme as well, so it has an answer of its own. Each check
+  # skips where its answer is no, and runs wherever this job did not succeed.
+  scope:
+    name: what changed
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    outputs:
+      code: ${{ steps.diff.outputs.code }}
+      hacs: ${{ steps.diff.outputs.hacs }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          # Every commit, so the base is here to compare against, and no file
+          # contents but the checkout's: the comparison reads trees, and the
+          # workflow lines it reads are fetched when it asks for them.
+          fetch-depth: 0
+          filter: blob:none
+      - id: diff
+        env:
+          # A pull request's base, or on a push the commit before it. A schedule
+          # has none, and the answer is then that both checks run.
+          BASE: ${{ github.event.pull_request.base.sha || github.event.merge_group.base_sha || github.event.before }}
+        run: python3 scripts/the_code_a_change_touches.py "${BASE}"
+
   hassfest:
     name: hassfest
+    needs: scope
+    if: ${{ !cancelled() && (needs.scope.result != 'success' || needs.scope.outputs.code == 'true') }}
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -37,6 +66,8 @@ jobs:
 
   hacs:
     name: hacs
+    needs: scope
+    if: ${{ !cancelled() && (needs.scope.result != 'success' || needs.scope.outputs.hacs == 'true') }}
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
