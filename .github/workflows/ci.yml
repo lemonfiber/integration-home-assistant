@@ -28,7 +28,11 @@ concurrency:
 
 jobs:
   # Which of the following are worth running at all. A documentation change
-  # starts no Python toolchain, and asking costs one checkout.
+  # starts no Python toolchain, and asking costs one checkout. Each gate below
+  # skips where the answer is no, and runs wherever this job did not succeed,
+  # so an answer that could not be reached runs everything. `sonar.yml`,
+  # `validate.yml` and `codeql.yml` ask the same script, so none of them can
+  # disagree about a path.
   scope:
     name: what changed
     runs-on: ubuntu-latest
@@ -38,47 +42,18 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          fetch-depth: 0
           persist-credentials: false
+          # Every commit, so the base is here to compare against, and no file
+          # contents but the checkout's: the comparison reads trees, and the
+          # workflow lines it reads are fetched when it asks for them.
+          fetch-depth: 0
+          filter: blob:none
       - id: diff
         env:
-          BASE: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.sha || '' }}
-        run: |
-          set -euo pipefail
-          # No base to compare against means every gate runs.
-          if [ -z "${BASE}" ] || ! git cat-file -e "${BASE}^{commit}" 2>/dev/null; then
-            echo "code=true" >> "$GITHUB_OUTPUT"
-            echo "No usable base commit, so every gate runs."
-            exit 0
-          fi
-          changed="$(git diff --name-only "${BASE}" HEAD)"
-          # Anything that is not documentation is code, so a new kind of file
-          # runs the gates. Under `.github/`, only this file runs them, and a
-          # change to it runs none where every changed line is a pin on a
-          # shared workflow from `lemonfiber/spec`: those jobs run no Python.
-          code=false
-          while IFS= read -r path; do
-            case "${path}" in
-            '' | docs/* | *.md | LICENSE) ;;
-            .github/workflows/ci.yml)
-              # Captured and tested for emptiness rather than piped to
-              # `grep -q`, which stops at the first line and lets `pipefail`
-              # read the writers' SIGPIPE as no such line.
-              moved="$(git diff -U0 "${BASE}" HEAD -- "${path}" \
-                | grep -E '^[-+]' | grep -vE '^(\+\+\+|---) ' \
-                | grep -vE '^[-+][[:space:]]*uses: lemonfiber/spec/\.github/workflows/[^@]+@[0-9a-f]{40}( # .*)?$' || true)"
-              if [ -n "${moved}" ]; then
-                code=true
-              fi
-              ;;
-            .github/*) ;;
-            *) code=true ;;
-            esac
-          done <<< "${changed}"
-          echo "code=${code}" >> "$GITHUB_OUTPUT"
-          if [ "${code}" = false ]; then
-            echo "Documentation, and workflows that run no Python gate; the Python gates are skipped."
-          fi
+          # A pull request's base, or on a push the commit before it. Any other
+          # event has none, and the answer is then that everything runs.
+          BASE: ${{ github.event.pull_request.base.sha || github.event.merge_group.base_sha || github.event.before }}
+        run: python3 scripts/the_code_a_change_touches.py "${BASE}"
 
   # The gates every repo in the org shares, defined once in the spec repo and
   # pinned by commit. Those needing a pull request are guarded, because this

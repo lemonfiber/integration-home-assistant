@@ -34,9 +34,10 @@ ignore = [
 # takes every fixture and parameter it is given as an argument, some of them for
 # what they set up rather than for a value.
 "tests/**" = ["S101", "PLR2004", "D103", "PLR0913", "PLR0917", "ARG001"]
-# The vendoring script, and the test that builds a repository for it to read,
-# run git, found on the PATH, with arguments they write themselves.
-"{scripts/vendor_sdk.py,tests/test_scripts.py}" = ["S603", "S607"]
+# The vendoring script, the script that tells what a change touches, and the
+# test that builds a repository for the first to read, run git, found on the
+# PATH, with arguments they write themselves.
+"{scripts/vendor_sdk.py,scripts/the_code_a_change_touches.py,tests/test_scripts.py}" = ["S603", "S607"]
 
 [lint.pydocstyle]
 convention = "pep257"

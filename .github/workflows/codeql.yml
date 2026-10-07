@@ -20,26 +20,69 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.event_name == 'pull_request' && github.ref || github.run_id }}
   cancel-in-progress: true
 jobs:
+  # Whether this change reaches anything an analysis reads, asked of the script
+  # `ci.yml`'s `what changed` asks, so the two cannot disagree about a path. For
+  # the analyses only documentation is not code: the Actions one reads every
+  # file under `.github/`.
+  scope:
+    name: what changed
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    outputs:
+      code: ${{ steps.diff.outputs.analyze }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          # Every commit, so the base is here to compare against, and no file
+          # contents but the checkout's: the comparison reads trees, and the
+          # workflow lines it reads are fetched when it asks for them.
+          fetch-depth: 0
+          filter: blob:none
+      - id: diff
+        env:
+          # A pull request's base, or on a push the commit before it. Any other
+          # event has none, and the answer is then that everything runs.
+          BASE: ${{ github.event.pull_request.base.sha || github.event.merge_group.base_sha || github.event.before }}
+        run: python3 scripts/the_code_a_change_touches.py "${BASE}"
+
   analyze:
+    needs: scope
+    # Runs whatever `what changed` said, because a matrix job skipped whole
+    # reports with its matrix unexpanded and the required `analyze (actions)`
+    # and `analyze (python)` would never appear. Where the change reaches
+    # nothing an analysis reads its steps skip instead, and each language
+    # reports success having analysed nothing.
+    if: ${{ !cancelled() }}
     runs-on: ubuntu-latest
     timeout-minutes: 30
     permissions:
       security-events: write
+    env:
+      CODE: ${{ needs.scope.result != 'success' || needs.scope.outputs.code == 'true' }}
     strategy:
       fail-fast: false
       matrix:
         language: [actions, python]
     steps:
+      - name: Only documentation changed, so nothing is analysed
+        if: env.CODE != 'true'
+        env:
+          LANGUAGE: ${{ matrix.language }}
+        run: echo "::notice::Every path this change touches is documentation, which no ${LANGUAGE} analysis reads, so none runs."
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        if: env.CODE == 'true'
         with:
           persist-credentials: false
       - uses: github/codeql-action/init@2892aa5e19bbd11bc0cff5427e3b750a04d9e3c2 # v3
+        if: env.CODE == 'true'
         with:
           languages: ${{ matrix.language }}
       # No build step: neither language is compiled. No `category:` either —
       # with a matrix, GitHub builds one that names its language, which is what
       # the gate below compares against.
       - uses: github/codeql-action/analyze@2892aa5e19bbd11bc0cff5427e3b750a04d9e3c2 # v3
+        if: env.CODE == 'true'
 
   # Whether an open alert stands against what this branch proposes. The check
   # GitHub raises beside the analysis is neutral on every pull request here and
@@ -50,7 +93,7 @@ jobs:
   # gate would be absent exactly when the analysis went wrong. It refuses a
   # commit it has no analysis of, by language, rather than passing an empty list.
   alerts:
-    needs: analyze
+    needs: [scope, analyze]
     if: ${{ !cancelled() }}
     permissions:
       contents: read
@@ -58,3 +101,7 @@ jobs:
     uses: lemonfiber/spec/.github/workflows/codeql-alerts.yml@999f97e9414290f029391d5d541087b8a6d23bdf # v1.0.29
     with:
       analysis: ${{ needs.analyze.result }}
+      # Whether the analyses above ran at all. Where only documentation changed
+      # they did not, and the gate says so rather than refusing a commit with no
+      # analysis; a skipped call would report as `alerts`, not `alerts / alerts`.
+      code: ${{ needs.scope.result != 'success' || needs.scope.outputs.code == 'true' }}
