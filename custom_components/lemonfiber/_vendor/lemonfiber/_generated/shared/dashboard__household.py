@@ -202,6 +202,10 @@ class MemberAsking(typing.TypedDict):
 class MemberRequest(typing.TypedDict):
     """One thing a household member asked for, and where it stands in their words."""
 
+    arrived: typing.NotRequired[str | None]
+    """When the title arrived on the media server, as the request service timestamps it.
+    Absent, not null, until it is there.
+    """
     estimate: typing.NotRequired[Estimate | None]
     """About how much room it will want, at the quality in force.
 
@@ -230,6 +234,11 @@ class MemberRequest(typing.TypedDict):
     `told`, which is why the two travel together: what an operator does next turns
     on it, and a reason read without it is a reason of unknown standing.
     """
+    shelf_id: typing.NotRequired[str | None]
+    """The identifier the media server holds the title under, which is the one the held
+    read names it by, so a request that has arrived can be found on the shelf. Absent,
+    not null, until it is there.
+    """
     state: typing.NotRequired[RequestState | None]
     """Where the request stands, or absent where the request service reports a status
     this build does not know rather than guessing it into the nearest word.
@@ -246,6 +255,11 @@ class MemberRequest(typing.TypedDict):
     Only on the ones nobody has ruled on. A request already answered has not been
     waiting since it was made, and a figure beside one would be counting the wrong
     thing.
+    """
+    year: typing.NotRequired[int | None]
+    """The year that title came out, where the service filing it knows one. Absent, not
+    null, until the request has been handed to that service, for the reason the title
+    is.
     """
 
 

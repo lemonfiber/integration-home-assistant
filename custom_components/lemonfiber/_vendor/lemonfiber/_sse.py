@@ -2,6 +2,7 @@
 """The `text/event-stream` wire format, read a chunk at a time."""
 
 import codecs
+import re
 from dataclasses import dataclass, field
 from typing import Final
 
@@ -10,11 +11,14 @@ from lemonfiber.problems import UnreadableResponseError
 LARGEST: Final = 16 * 1024 * 1024
 """The most characters one event's data, or one line of it, may hold."""
 
-NONE_LEFT: Final = -1
-"""What a search for a line ending finds where the text holds no more of them."""
+ENCODING: Final = "utf-8"
+"""What the stream is written in; a sequence it cannot decode is read as the replacement character."""
 
-NOT_LOOKED: Final = -2
-"""Where a line ending is before it has been looked for."""
+LINE_END: Final = re.compile(r"\r\n|\r|\n")
+"""What ends a line: a carriage return and a line feed, either alone, or the two together."""
+
+RETURN: Final = "\r"
+"""A carriage return, which ends a line alone unless a line feed follows it."""
 
 
 @dataclass(frozen=True, slots=True)
@@ -40,29 +44,31 @@ class Parser:
 
     A chunk may end inside a line and a line inside a UTF-8 sequence, so bytes
     are held until they decode, text until a line ends, and an event until a
-    blank line ends it. A comment line is the heartbeat and carries nothing.
-    An unfinished line is held as the pieces it arrived in and joined once it
-    ends, so a long line is not copied again with every chunk.
+    blank line ends it. A line opening with a colon names no field, which is
+    how the heartbeat is written, and carries nothing. An unfinished line is
+    held as the pieces it arrived in and joined once a line ends, so a long
+    line is not copied again with every chunk, and a carriage return at the end
+    of what arrived is held until what follows says whether a line feed is part
+    of the same ending.
 
     Nothing held grows past `largest` characters: a line that has not ended,
     or the data of an event that has not completed, beyond that is refused as
-    `UnreadableResponseError` rather than held, and each character is looked
-    at a bounded number of times, however the stream is cut into chunks.
+    `UnreadableResponseError` rather than held, and each character is joined
+    and split a bounded number of times, however the stream is cut into chunks.
     """
 
     def __init__(self, *, largest: int = LARGEST) -> None:
         """Start with nothing gathered, holding no line or event beyond `largest` characters."""
         self._largest = largest
-        self._decoder = codecs.getincrementaldecoder("utf-8")(errors="replace")
-        self._unfinished: list[str] = []
+        self._decoder = codecs.getincrementaldecoder(ENCODING)(errors="replace")
+        self._unfinished = [""]
         self._unfinished_size = 0
         self._pending = _Pending()
 
     def push(self, chunk: bytes) -> list[Event]:
         """Return the events this chunk completes, in order."""
         decoded = self._decoder.decode(chunk)
-        waiting = bool(self._unfinished) and self._unfinished[-1].endswith("\r")
-        if waiting or "\n" in decoded or "\r" in decoded:
+        if self._unfinished[-1].endswith(RETURN) or LINE_END.search(decoded):
             done = self._lines("".join([*self._unfinished, decoded]))
         else:
             self._unfinished.append(decoded)
@@ -75,24 +81,16 @@ class Parser:
 
     def _lines(self, text: str) -> list[Event]:
         """Read every line a text completes, keeping the line it has not finished."""
-        done: list[Event] = []
-        lines = Lines(text)
-        start = 0
-        while (end := lines.end_after(start)) is not None:
-            event = self._line(text[start : end[0]])
-            if event is not None:
-                done.append(event)
-            start = end[1]
-        rest = text[start:]
-        self._unfinished = [rest] if rest else []
-        self._unfinished_size = len(rest)
+        held = RETURN if text.endswith(RETURN) else ""
+        *complete, rest = LINE_END.split(text.removesuffix(held))
+        done = [event for line in complete if (event := self._line(line)) is not None]
+        self._unfinished = [rest + held]
+        self._unfinished_size = len(rest) + len(held)
         return done
 
     def _line(self, line: str) -> Event | None:
         if not line:
             return self._complete()
-        if line.startswith(":"):
-            return None
         name, _, value = line.partition(":")
         value = value.removeprefix(" ")
         if name == "id":
@@ -114,34 +112,3 @@ class Parser:
         if not pending.data:
             return None
         return Event(pending.id, pending.name, "\n".join(pending.data))
-
-
-class Lines:
-    """Finds where each line of a text ends, looking at each character once.
-
-    The next line feed and the next carriage return are each found once and
-    kept until the reading passes them, so a text of many lines is not searched
-    again from every line's start.
-    """
-
-    def __init__(self, text: str) -> None:
-        """Hold the text, with neither ending yet looked for."""
-        self._text = text
-        self._feed = NOT_LOOKED
-        self._return = NOT_LOOKED
-
-    def end_after(self, start: int) -> tuple[int, int] | None:
-        """Return where the first line at or after `start` ends and where the next begins, if it has ended."""
-        self._feed = feed = self._next(self._feed, "\n", start)
-        self._return = back = self._next(self._return, "\r", start)
-        if back == NONE_LEFT or NONE_LEFT < feed < back:
-            return None if feed == NONE_LEFT else (feed, feed + 1)
-        if back + 1 == len(self._text):
-            return None
-        return back, back + 2 if self._text[back + 1] == "\n" else back + 1
-
-    def _next(self, found: int, ending: str, start: int) -> int:
-        """Return the next `ending` at or after `start`, searching again only where the one found is behind it."""
-        if found == NOT_LOOKED or NONE_LEFT < found < start:
-            return self._text.find(ending, start)
-        return found

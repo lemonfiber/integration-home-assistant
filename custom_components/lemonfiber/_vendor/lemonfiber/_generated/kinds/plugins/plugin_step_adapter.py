@@ -428,6 +428,7 @@ class PluginsEnvelope(typing.TypedDict):
     api_version: int
     data: PluginInstalls
     host: typing.NotRequired[str | None]
+    job: typing.NotRequired[str | None]
     kind: typing.Literal["plugins"]
 
 

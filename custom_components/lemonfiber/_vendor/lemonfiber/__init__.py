@@ -23,13 +23,13 @@ from lemonfiber._generated import (
     is_key_callable,
     is_refusal_code,
 )
-from lemonfiber._protocol.answers import Admitted, Bundle
 from lemonfiber._protocol.calls import Json, Query
 from lemonfiber._sync import SyncClient, SyncStream, admit
 from lemonfiber.address import Address, CertificatePin, Route
 from lemonfiber.capabilities import CapabilitySet
-from lemonfiber.credential import CREDENTIAL_HEADER, Credential
+from lemonfiber.credential import CREDENTIAL_HEADER, Credential, Session
 from lemonfiber.envelope import SPOKEN_API_VERSION, expect, parse_envelope, read_envelope
+from lemonfiber.files import BundleFile
 from lemonfiber.jobs import Ended, Finished, JobStanding, Running
 from lemonfiber.problems import (
     AddressRefusedError,
@@ -68,13 +68,12 @@ __all__ = [
     "SPOKEN_API_VERSION",
     "Address",
     "AddressRefusedError",
-    "Admitted",
     "ApiVersionMismatchError",
     "Arrival",
     "AsyncClient",
     "AsyncStream",
     "Break",
-    "Bundle",
+    "BundleFile",
     "BusyError",
     "CapabilitySet",
     "CertificatePin",
@@ -107,6 +106,7 @@ __all__ = [
     "RefusedError",
     "Route",
     "Running",
+    "Session",
     "Stale",
     "StillRunningError",
     "StreamLostError",

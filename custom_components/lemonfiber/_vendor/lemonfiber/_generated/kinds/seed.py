@@ -22,6 +22,7 @@ class SeedEnvelope(typing.TypedDict):
     api_version: int
     data: SeedReport
     host: typing.NotRequired[str | None]
+    job: typing.NotRequired[str | None]
     kind: typing.Literal["seed"]
 
 

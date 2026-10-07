@@ -7,7 +7,8 @@ and CI fails on any difference.
 
 import typing
 
-from ...shared.dashboard__doctor__error__plugins import ProblemSeverity
+from ...shared.alert__dashboard import Alert
+from ...shared.alert__dashboard__doctor__error__plugins import ProblemSeverity
 from ...shared.dashboard__front_door import FrontDoorReport
 from ...shared.dashboard__household import HouseholdReport
 from ...shared.dashboard__lifecycle__status import Service
@@ -44,46 +45,6 @@ class Affected(typing.TypedDict):
     """How bad it is."""
     summary: str
     """What is wrong, in one line."""
-
-
-class Alert(typing.TypedDict):
-    """One interruption: what happened, which way, and how much it matters."""
-
-    affected: list[str]
-    """Every check this alert speaks for, the first being [`Self::check`]. More
-    than one where the same event was grouped across several services.
-    """
-    check: str
-    """The check this came from, so an alert and its condition cannot drift apart.
-    Where several were grouped, the first of them.
-    """
-    exit: typing.NotRequired[int | None]
-    """How the service it is about exited, where it has and the engine said;
-    where several were grouped, how the first of them did.
-
-    The technical half of what happened, kept out of the summary so the plain
-    words lead, and here for whoever wants the code.
-    """
-    kind: str
-    """What kind of event it is, shared by every instance of it."""
-    meaning: str
-    """What it costs the operator, which is the half between the event and the
-    fix. \"The tunnel dropped\" and \"restart the gateway\" leave whoever reads
-    them to work out for themselves whether anything leaked.
-    """
-    moment: Moment
-    """Which way it went."""
-    remedies: list[str]
-    """What to do about it, most likely first. An alert that says what happened
-    and not what to do is a notification, which is a different and worse thing.
-    """
-    severity: ProblemSeverity
-    """How much it matters. A resolution takes the severity of what resolved,
-    because \"the critical thing is over\" is itself worth the attention the
-    critical thing had.
-    """
-    summary: str
-    """What happened, in the words the condition was raised with."""
 
 
 type DashboardProtocol = typing.Literal["usenet", "torrent"]
@@ -163,15 +124,6 @@ class HealthSummary(typing.TypedDict):
     """The worst thing, named, so the line says something rather than only
     grading. Absent where nothing is wrong.
     """
-
-
-type Moment = typing.Literal["onset", "resolved"]
-"""Which way a condition went.
-
-Both directions are worth saying and neither is worth saying twice. An operator
-told a disk filled up and never told it was resolved goes on believing it — so
-resolution is an alert in its own right rather than the absence of one.
-"""
 
 
 type PanelArray_of_Queue = PanelArray_of_QueueReady | PanelArray_of_QueueUnavailable
@@ -388,6 +340,65 @@ class Queue(typing.TypedDict):
     """How many of them are stuck rather than progressing."""
 
 
+class Snapshot(typing.TypedDict):
+    """Everything the dashboard shows at one moment.
+
+    Each source's panel is filled or marked unavailable on its own, so one dead
+    source degrades one region rather than the screen. The surface builds this from
+    what it gathered; the standing is read from the same facts so it cannot
+    disagree with the panels.
+    """
+
+    alerts: list[Alert]
+    """What the operator has been told, newest first: what is owed them where a
+    channel is refusing, then what has already been said.
+    """
+    door: PanelFrontDoorReport
+    """The one address to hand somebody who lives here.
+
+    On the screen rather than only behind a question, because the operator who
+    needs it is not the one who thought to ask: they have just been asked \"what
+    do I open?\" by somebody in the next room. Built from the same reading as the
+    panels beside it, so the screen and `front-door` cannot name different doors.
+    """
+    health: HealthSummary
+    """The one-line health summary — the same computation every other surface
+    uses, so no two of them can grade the same stack differently.
+
+    Always present, unlike the panels: a stack that could not be reached has a
+    summary, and it says `unknown`. An absent summary would leave the operator
+    to infer health from a blank space, which is the one reading this must never
+    be open to.
+    """
+    household: PanelHouseholdReport
+    """What the household has asked for that is not moving.
+
+    On the screen rather than only behind a question, for the reason the door
+    beside it is: a request waiting on a decision or failed after one is waiting
+    on the operator, and an operator who has to think to ask is one who finds out
+    when somebody comes to complain.
+    """
+    queue: PanelArray_of_Queue
+    """The per-service queues."""
+    services: PanelArray_of_Service
+    """Every service and what it is doing."""
+    storage: PanelStorage
+    """The storage picture."""
+    stuck: list[Stuck]
+    """What in the pipeline has stopped, worst first — assessed across the
+    download clients and the \\*arrs together, because the failure that matters
+    most is invisible inside either.
+    """
+    telemetry: Telemetry
+    """Whether the screen itself can be trusted to be current."""
+    transfers: PanelArray_of_Transfer
+    """The active transfers."""
+    vpn: typing.NotRequired[PanelVpn | None]
+    """The VPN, or `None` where no VPN is configured and the panel is omitted
+    rather than shown permanently red.
+    """
+
+
 type Stall = typing.Literal[
     "redownload-loop",
     "repeated-import-failure",
@@ -490,7 +501,6 @@ class Vpn(typing.TypedDict):
 
 __all__ = [
     "Affected",
-    "Alert",
     "DashboardProtocol",
     "DashboardReading",
     "DashboardReadingKnown",
@@ -500,7 +510,6 @@ __all__ = [
     "Hardlink",
     "HealthStanding",
     "HealthSummary",
-    "Moment",
     "PanelArray_of_Queue",
     "PanelArray_of_QueueReady",
     "PanelArray_of_QueueUnavailable",
@@ -530,6 +539,7 @@ __all__ = [
     "PanelVpnUnavailable",
     "PanelVpnUnavailableData",
     "Queue",
+    "Snapshot",
     "Stall",
     "Storage",
     "Stuck",

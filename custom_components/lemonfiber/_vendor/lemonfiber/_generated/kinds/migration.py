@@ -40,6 +40,7 @@ class MigrationEnvelope(typing.TypedDict):
     api_version: int
     data: MigrationReport
     host: typing.NotRequired[str | None]
+    job: typing.NotRequired[str | None]
     kind: typing.Literal["migration"]
 
 

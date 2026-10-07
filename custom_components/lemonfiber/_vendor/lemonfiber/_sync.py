@@ -4,8 +4,8 @@
 A pinned address is reached through a connection pool holding the pin as
 `assert_fingerprint`: urllib3 compares the certificate's SHA-256 digest with it
 once the handshake completes and before a byte of the request is written, and
-refuses the connection where they differ (`ARCH-R99`). The pool is built here
-from the address alone, so no argument reaches the transport's options.
+refuses the connection where they differ. The pool is built here from the
+address alone, so no argument reaches the transport's options.
 """
 
 import time
@@ -15,9 +15,10 @@ import urllib3
 import urllib3.exceptions
 
 from lemonfiber._protocol import operation
-from lemonfiber._protocol.calls import DEFAULT_TIMEOUT, Answer, Call, with_credential
+from lemonfiber._protocol.calls import DEFAULT_TIMEOUT, Answer, Call, received, with_credential
 from lemonfiber._protocol.following import DEFAULT_EVERY, job_name, next_wait
 from lemonfiber._protocol.refusals import CERTIFICATE_REFUSED, NOT_ANSWERING, opening_refusal
+from lemonfiber._protocol.retry import Attempts
 from lemonfiber.jobs import Ended, Finished, Running
 from lemonfiber.problems import CertificateRefusedError, LemonfiberError, UnreachableError
 from lemonfiber.stream import FIRST_WAIT, OPENED, RECONNECTS_ALLOWED, SILENCE_ALLOWED, Break, Following
@@ -26,18 +27,18 @@ if TYPE_CHECKING:
     from collections.abc import Generator, Iterator, Mapping, Sequence
     from types import TracebackType
 
-    from lemonfiber._generated import Envelope, JobEnvelope
-    from lemonfiber._protocol.answers import Admitted, Bundle
+    from lemonfiber._generated import Envelope, JobEnvelope, LogEnvelope
     from lemonfiber._protocol.calls import Json, Query
     from lemonfiber.address import Address, Route
     from lemonfiber.capabilities import CapabilitySet
-    from lemonfiber.credential import Credential
+    from lemonfiber.credential import Credential, Session
+    from lemonfiber.files import BundleFile
     from lemonfiber.jobs import JobStanding
     from lemonfiber.reads import Read
     from lemonfiber.stream import Arrival, Live, Stale
 
 CHUNK: Final = 65536
-"""The most bytes one read of the stream asks for."""
+"""The most bytes one read of the stream asks for, so a chunk the server declares larger is not held whole."""
 
 
 VERIFYING: Final = "CERT_REQUIRED"
@@ -51,20 +52,19 @@ type Way = tuple[Route, urllib3.HTTPConnectionPool]
 """One route to a stack, and the pool its connections are kept in."""
 
 
-def pool_for(address: Address, route: Route, timeout: float) -> urllib3.HTTPConnectionPool:
+def pool_for(address: Address, route: Route) -> urllib3.HTTPConnectionPool:
     """Return the pool a route is reached through, holding the address's pin where it has one.
 
     A route that reaches a named stack by an address it resolved to checks the
-    certificate against that name, and names it in the TLS handshake.
+    certificate against that name, and names it in the TLS handshake. How long
+    a request waits is given with each request, so the pool holds no timeout.
     """
-    limit = urllib3.Timeout(total=timeout)
     if address.scheme == "http":
-        return urllib3.HTTPConnectionPool(route.host, address.port, timeout=limit)
+        return urllib3.HTTPConnectionPool(route.host, address.port)
     if address.pin is None:
         return urllib3.HTTPSConnectionPool(
             route.host,
             address.port,
-            timeout=limit,
             cert_reqs=VERIFYING,
             assert_hostname=route.named,
             server_hostname=route.named,
@@ -72,19 +72,18 @@ def pool_for(address: Address, route: Route, timeout: float) -> urllib3.HTTPConn
     return urllib3.HTTPSConnectionPool(
         route.host,
         address.port,
-        timeout=limit,
         cert_reqs=NOT_VERIFYING,
         assert_fingerprint=address.pin.hex,
     )
 
 
-def ways_to(address: Address, timeout: float) -> list[Way]:
+def ways_to(address: Address) -> list[Way]:
     """Return every route to a stack, each with its pool, in the order they are tried."""
-    return [(route, pool_for(address, route, timeout)) for route in address.routes]
+    return [(route, pool_for(address, route)) for route in address.routes]
 
 
-def attempt(way: Way, prefix: str, call: Call) -> Answer | None:
-    """Send one call over one route, or return nothing where no connection could be made there.
+def attempt(way: Way, prefix: str, call: Call, limit: float) -> Answer | None:
+    """Send one call over one route, waiting at most `limit` seconds, or return nothing where no connection could be made there.
 
     A failure is raised once urllib3's error is let go, so nothing of the
     request, its credential included, rides along as the failure's cause.
@@ -97,6 +96,7 @@ def attempt(way: Way, prefix: str, call: Call) -> Answer | None:
             body=call.body,
             headers={**call.headers, **route.headers()},
             retries=False,
+            timeout=urllib3.Timeout(total=limit),
         )
     except urllib3.exceptions.SSLError:
         failure: LemonfiberError = CertificateRefusedError(CERTIFICATE_REFUSED)
@@ -105,22 +105,42 @@ def attempt(way: Way, prefix: str, call: Call) -> Answer | None:
     except urllib3.exceptions.HTTPError:
         failure = UnreachableError(NOT_ANSWERING)
     else:
-        headers = {name.lower(): value for name, value in response.headers.items()}
-        return Answer(response.status, headers, response.data)
+        return received(response.status, response.headers, response.data)
     raise failure
 
 
-def exchange(ways: Sequence[Way], prefix: str, call: Call) -> Answer:
+def exchange(ways: Sequence[Way], prefix: str, call: Call, limit: float) -> Answer:
     """Send one call over the first route a connection can be made on, following no redirect.
 
     A route is passed over only where no connection could be made, so nothing
     was sent; once a connection is made, its outcome is the call's.
     """
     for way in ways:
-        answer = attempt(way, prefix, call)
+        answer = attempt(way, prefix, call, limit)
         if answer is not None:
             return answer
     raise UnreachableError(NOT_ANSWERING)
+
+
+def asked(ways: Sequence[Way], prefix: str, call: Call, attempts: Attempts) -> Answer:
+    """Send a call, and send a read again after a passing failure, as `attempts` allows.
+
+    The last attempt's outcome is the call's: its answer, or the failure that
+    nothing answered.
+    """
+    while True:
+        outcome: Answer | UnreachableError
+        try:
+            outcome = exchange(ways, prefix, call, attempts.left(time.monotonic()))
+        except UnreachableError as unanswered:
+            outcome = unanswered
+        pause = attempts.pause(outcome if isinstance(outcome, Answer) else None, time.monotonic())
+        if pause is None:
+            break
+        time.sleep(pause)
+    if isinstance(outcome, UnreachableError):
+        raise outcome
+    return outcome
 
 
 def close_all(ways: Sequence[Way]) -> None:
@@ -147,18 +167,18 @@ class SyncClient:
         """Hold an address and a credential; nothing is sent until a call is made."""
         self._address = address
         self._credential = credential
-        self._ways = ways_to(address, timeout)
+        self._timeout = timeout
+        self._ways = ways_to(address)
 
     @property
     def address(self) -> Address:
         """Return where this client sends, and the pin it holds that address to."""
         return self._address
 
-    def _answer(self, call: Call) -> Answer:
-        return exchange(self._ways, self._address.prefix, with_credential(call, self._credential))
-
-    def _run[T](self, asked: operation.Operation[T]) -> T:
-        return asked.read(self._answer(asked.call))
+    def _run[T](self, operated: operation.Operation[T]) -> T:
+        call = with_credential(operated.call, self._credential)
+        attempts = Attempts(operated.again, self._timeout, time.monotonic())
+        return operated.read(asked(self._ways, self._address.prefix, call, attempts))
 
     def read(self, read: Read, query: Query | None = None) -> Envelope:
         """Ask for what a command prints under `--json`."""
@@ -168,11 +188,22 @@ class SyncClient:
         """Ask what the stack can do, for the credential this client holds, as it stands now."""
         return self._run(operation.capabilities())
 
-    def logs(self, query: Query | None = None) -> list[Envelope]:
-        """Ask for what the services have been saying, a `log` envelope a line."""
-        return self._run(operation.logs(query))
+    def logs(
+        self,
+        *,
+        services: Sequence[str] = (),
+        forms: Sequence[str] = (),
+        tail: int | None = None,
+    ) -> list[LogEnvelope]:
+        """Ask for what the services have been saying, a `log` envelope a line.
 
-    def bundle(self, name: str) -> Bundle:
+        `services` and `forms` narrow to those named; `tail` is how many of the
+        latest lines to answer with. Each left out is left to lemonfiber, as the
+        command leaves a flag it was not given.
+        """
+        return self._run(operation.logs(services, forms, tail))
+
+    def bundle(self, name: str) -> BundleFile:
         """Fetch one support bundle this run wrote, by name, as the bytes it is."""
         return self._run(operation.bundle(name))
 
@@ -222,7 +253,7 @@ class SyncClient:
         `reconnects` attempts in a row have failed.
         """
         following = Following(self._credential, silence=silence, reconnects=reconnects, first_wait=first_wait)
-        return SyncStream(self._ways, self._address.prefix, following)
+        return SyncStream(self._ways, self._address.prefix, following, self._timeout)
 
     def close(self) -> None:
         """Close every connection this client holds."""
@@ -250,12 +281,13 @@ class SyncStream:
         ways: Sequence[Way],
         prefix: str,
         following: Following,
+        connect: float = DEFAULT_TIMEOUT,
     ) -> None:
         """Hold what opening and reading the stream needs; nothing is sent until it is iterated."""
         self._ways = ways
         self._prefix = prefix
         self._following = following
-        self._response: urllib3.BaseHTTPResponse | None = None
+        self._connect = connect
         self._arrivals = self._follow()
 
     def __iter__(self) -> Iterator[Arrival]:
@@ -274,12 +306,14 @@ class SyncStream:
         while True:
             response = self._open()
             if response is not None:
-                self._response = response
                 self._following.opened()
-                why = yield from self._read(response)
+                try:
+                    why = yield from self._read(response)
+                except BaseException:
+                    response.close()
+                    raise
                 response.drain_conn()
                 response.release_conn()
-                self._response = None
                 yield from self._following.broke(why)
             time.sleep(self._following.retry())
 
@@ -305,7 +339,7 @@ class SyncStream:
                 headers={**call.headers, **route.headers()},
                 retries=False,
                 preload_content=False,
-                timeout=urllib3.Timeout(connect=pool.timeout.connect_timeout, read=self._following.silence),
+                timeout=urllib3.Timeout(connect=self._connect, read=self._following.silence),
             )
         except urllib3.exceptions.SSLError:
             failure = CertificateRefusedError(CERTIFICATE_REFUSED)
@@ -320,8 +354,7 @@ class SyncStream:
         """Return a response that opened the stream, raising the refusal where the stack answered with one."""
         if response.status == OPENED:
             return response
-        headers = {name.lower(): value for name, value in response.headers.items()}
-        answer = Answer(response.status, headers, response.read())
+        answer = received(response.status, response.headers, response.read())
         response.release_conn()
         refusal = opening_refusal(answer)
         if refusal is not None:
@@ -343,9 +376,6 @@ class SyncStream:
     def close(self) -> None:
         """Stop following and let the connection go."""
         self._arrivals.close()
-        if self._response is not None:
-            self._response.close()
-            self._response = None
 
     def __enter__(self) -> Self:
         """Return the stream, to be closed when the block ends."""
@@ -367,15 +397,15 @@ def admit(
     *,
     name: str | None = None,
     timeout: float = DEFAULT_TIMEOUT,
-) -> Admitted:
+) -> Session:
     """Offer a password, once, and come away with a session or with why there is none.
 
     A household member gives their `name`; the operator gives none. The session's
     credential is what a `SyncClient` is then built with.
     """
-    asked = operation.admission(password, name)
-    ways = ways_to(address, timeout)
+    offered = operation.admission(password, name)
+    ways = ways_to(address)
     try:
-        return asked.read(exchange(ways, address.prefix, asked.call))
+        return offered.read(exchange(ways, address.prefix, offered.call, timeout))
     finally:
         close_all(ways)

@@ -61,6 +61,7 @@ class HostingEnvelope(typing.TypedDict):
     api_version: int
     data: HostingReport
     host: typing.NotRequired[str | None]
+    job: typing.NotRequired[str | None]
     kind: typing.Literal["hosting"]
 
 

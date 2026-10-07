@@ -17,6 +17,7 @@ class BesideEnvelope(typing.TypedDict):
     api_version: int
     data: BesideReport
     host: typing.NotRequired[str | None]
+    job: typing.NotRequired[str | None]
     kind: typing.Literal["beside"]
 
 

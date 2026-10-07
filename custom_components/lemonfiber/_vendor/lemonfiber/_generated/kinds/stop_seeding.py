@@ -50,6 +50,7 @@ class StopSeedingEnvelope(typing.TypedDict):
     api_version: int
     data: Letting
     host: typing.NotRequired[str | None]
+    job: typing.NotRequired[str | None]
     kind: typing.Literal["stop-seeding"]
 
 

@@ -7,7 +7,7 @@ and CI fails on any difference.
 
 import typing
 
-from .dashboard__doctor__error__plugins import ProblemSeverity
+from .alert__dashboard__doctor__error__plugins import ProblemSeverity
 from .doctor__error__plugins__repair import Remedy
 
 

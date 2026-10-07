@@ -4,10 +4,10 @@
 A pinned address is reached with an `aiohttp.Fingerprint` on every request:
 aiohttp compares the certificate's SHA-256 digest with it once the handshake
 completes and before a byte of the request is written, and refuses the
-connection where they differ (`ARCH-R99`). It is given per request rather than
-to a connector, so it holds on a session the caller supplied, whatever that
-session's connector was built with; an unpinned https address is given a
-verifying context per request for the same reason.
+connection where they differ. It is given per request rather than to a
+connector, so it holds on a session the caller supplied, whatever that session's
+connector was built with; an unpinned https address is given a verifying
+context per request for the same reason.
 """
 
 import asyncio
@@ -17,9 +17,10 @@ from typing import TYPE_CHECKING, Final, Self
 import aiohttp
 
 from lemonfiber._protocol import operation
-from lemonfiber._protocol.calls import DEFAULT_TIMEOUT, Answer, Call, with_credential
+from lemonfiber._protocol.calls import DEFAULT_TIMEOUT, Answer, Call, received, with_credential
 from lemonfiber._protocol.following import DEFAULT_EVERY, job_name, next_wait
 from lemonfiber._protocol.refusals import CERTIFICATE_REFUSED, NOT_ANSWERING, opening_refusal
+from lemonfiber._protocol.retry import Attempts
 from lemonfiber.jobs import Ended, Finished, Running
 from lemonfiber.problems import (
     CertificateRefusedError,
@@ -30,15 +31,15 @@ from lemonfiber.problems import (
 from lemonfiber.stream import FIRST_WAIT, OPENED, RECONNECTS_ALLOWED, SILENCE_ALLOWED, Break, Following
 
 if TYPE_CHECKING:
-    from collections.abc import AsyncGenerator, AsyncIterator, Callable, Mapping
+    from collections.abc import AsyncGenerator, AsyncIterator, Callable, Mapping, Sequence
     from types import TracebackType
 
-    from lemonfiber._generated import Envelope, JobEnvelope
-    from lemonfiber._protocol.answers import Admitted, Bundle
+    from lemonfiber._generated import Envelope, JobEnvelope, LogEnvelope
     from lemonfiber._protocol.calls import Json, Query
     from lemonfiber.address import Address, Route
     from lemonfiber.capabilities import CapabilitySet
-    from lemonfiber.credential import Credential
+    from lemonfiber.credential import Credential, Session
+    from lemonfiber.files import BundleFile
     from lemonfiber.jobs import JobStanding
     from lemonfiber.reads import Read
     from lemonfiber.stream import Arrival, Live, Stale
@@ -124,8 +125,7 @@ async def attempt(
     except aiohttp.ClientError, TimeoutError:
         failure = UnreachableError(NOT_ANSWERING)
     else:
-        headers = {name.lower(): value for name, value in response.headers.items()}
-        return Answer(response.status, headers, body)
+        return received(response.status, response.headers, body)
     raise failure
 
 
@@ -146,6 +146,35 @@ async def exchange(
         if answer is not None:
             return answer
     raise UnreachableError(NOT_ANSWERING)
+
+
+async def asked(
+    session: aiohttp.ClientSession,
+    address: Address,
+    tls: TlsSetting,
+    call: Call,
+    attempts: Attempts,
+) -> Answer:
+    """Send a call, and send a read again after a passing failure, as `attempts` allows.
+
+    The last attempt's outcome is the call's: its answer, or the failure that
+    nothing answered.
+    """
+    loop = asyncio.get_running_loop()
+    while True:
+        outcome: Answer | UnreachableError
+        limit = aiohttp.ClientTimeout(total=attempts.left(loop.time()))
+        try:
+            outcome = await exchange(session, address, tls, call, limit)
+        except UnreachableError as unanswered:
+            outcome = unanswered
+        pause = attempts.pause(outcome if isinstance(outcome, Answer) else None, loop.time())
+        if pause is None:
+            break
+        await asyncio.sleep(pause)
+    if isinstance(outcome, UnreachableError):
+        raise outcome
+    return outcome
 
 
 class AsyncClient:
@@ -170,7 +199,7 @@ class AsyncClient:
         self._given = None if session is None else checked(session)
         self._owned: aiohttp.ClientSession | None = None
         self._tls = tls_for(address)
-        self._limit = aiohttp.ClientTimeout(total=timeout)
+        self._timeout = timeout
 
     @property
     def address(self) -> Address:
@@ -184,12 +213,10 @@ class AsyncClient:
             self._owned = aiohttp.ClientSession()
         return self._owned
 
-    async def _answer(self, call: Call) -> Answer:
-        sent = with_credential(call, self._credential)
-        return await exchange(self._session(), self._address, self._tls, sent, self._limit)
-
-    async def _run[T](self, asked: operation.Operation[T]) -> T:
-        return asked.read(await self._answer(asked.call))
+    async def _run[T](self, operated: operation.Operation[T]) -> T:
+        call = with_credential(operated.call, self._credential)
+        attempts = Attempts(operated.again, self._timeout, asyncio.get_running_loop().time())
+        return operated.read(await asked(self._session(), self._address, self._tls, call, attempts))
 
     async def read(self, read: Read, query: Query | None = None) -> Envelope:
         """Ask for what a command prints under `--json`."""
@@ -199,11 +226,22 @@ class AsyncClient:
         """Ask what the stack can do, for the credential this client holds, as it stands now."""
         return await self._run(operation.capabilities())
 
-    async def logs(self, query: Query | None = None) -> list[Envelope]:
-        """Ask for what the services have been saying, a `log` envelope a line."""
-        return await self._run(operation.logs(query))
+    async def logs(
+        self,
+        *,
+        services: Sequence[str] = (),
+        forms: Sequence[str] = (),
+        tail: int | None = None,
+    ) -> list[LogEnvelope]:
+        """Ask for what the services have been saying, a `log` envelope a line.
 
-    async def bundle(self, name: str) -> Bundle:
+        `services` and `forms` narrow to those named; `tail` is how many of the
+        latest lines to answer with. Each left out is left to lemonfiber, as the
+        command leaves a flag it was not given.
+        """
+        return await self._run(operation.logs(services, forms, tail))
+
+    async def bundle(self, name: str) -> BundleFile:
         """Fetch one support bundle this run wrote, by name, as the bytes it is."""
         return await self._run(operation.bundle(name))
 
@@ -254,7 +292,7 @@ class AsyncClient:
         `reconnects` attempts in a row have failed.
         """
         following = Following(self._credential, silence=silence, reconnects=reconnects, first_wait=first_wait)
-        connect = aiohttp.ClientTimeout(total=None, sock_connect=self._limit.total)
+        connect = aiohttp.ClientTimeout(sock_connect=self._timeout)
         return AsyncStream(self._session, self._address, self._tls, following, connect)
 
     async def aclose(self) -> None:
@@ -354,8 +392,7 @@ class AsyncStream:
             )
             if response.status == OPENED:
                 return response
-            headers = {name.lower(): value for name, value in response.headers.items()}
-            answer = Answer(response.status, headers, await response.read())
+            answer = received(response.status, response.headers, await response.read())
         except aiohttp.ServerFingerprintMismatch, aiohttp.ClientSSLError:
             failure = CertificateRefusedError(CERTIFICATE_REFUSED)
         except aiohttp.ClientError, TimeoutError:
@@ -400,17 +437,17 @@ async def admit_async(
     *,
     name: str | None = None,
     session: aiohttp.ClientSession | None = None,
-) -> Admitted:
+) -> Session:
     """Offer a password, once, and come away with a session or with why there is none.
 
     A household member gives their `name`; the operator gives none. The session's
     credential is what an `AsyncClient` is then built with. The offer waits as
     long as a client's call does by default; `asyncio.timeout` around it waits less.
     """
-    asked = operation.admission(password, name)
+    offered = operation.admission(password, name)
     tls = tls_for(address)
     limit = aiohttp.ClientTimeout(total=DEFAULT_TIMEOUT)
     if session is not None:
-        return asked.read(await exchange(checked(session), address, tls, asked.call, limit))
+        return offered.read(await exchange(checked(session), address, tls, offered.call, limit))
     async with aiohttp.ClientSession() as opened:
-        return asked.read(await exchange(opened, address, tls, asked.call, limit))
+        return offered.read(await exchange(opened, address, tls, offered.call, limit))
