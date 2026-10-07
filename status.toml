@@ -1,0 +1,18 @@
+# What this repository has built against the specification, one row per
+# requirement (OPS-R74). Change a row in the pull request that changes whether
+# its requirement is met. The format and the checks are in the specification's
+# scripts/status_check.py; the release gate reads this file.
+
+requirement = [
+  { id = "F12-R1", state = "done", evidence = ["custom_components/lemonfiber/__init__.py", "custom_components/lemonfiber/connection.py", "custom_components/lemonfiber/config_flow.py", "tests/test_architecture.py"] },
+  { id = "F12-R2", state = "done", evidence = ["custom_components/lemonfiber/config_flow.py", "custom_components/lemonfiber/connection.py", "tests/test_config_flow.py"] },
+  { id = "F12-R3", state = "done", evidence = ["custom_components/lemonfiber/__init__.py", "custom_components/lemonfiber/coordinator.py", "custom_components/lemonfiber/config_flow.py", "tests/test_config_flow.py"] },
+  { id = "F12-R4", state = "done", evidence = ["custom_components/lemonfiber/connection.py", "custom_components/lemonfiber/entity.py", "custom_components/lemonfiber/button.py", "tests/test_init.py"] },
+  { id = "F12-R5", state = "partial", evidence = ["tests/test_entities.py", "custom_components/lemonfiber/sensor.py", "custom_components/lemonfiber/binary_sensor.py"] },
+  { id = "F12-R7", state = "partial", evidence = ["custom_components/lemonfiber/coordinator.py", "tests/test_coordinator.py"] },
+  { id = "F12-R8", state = "partial", evidence = ["tests/test_controls.py", "custom_components/lemonfiber/button.py", "custom_components/lemonfiber/switch.py"] },
+  { id = "F12-R10", state = "done", evidence = ["custom_components/lemonfiber/diagnostics.py", "tests/test_diagnostics.py"] },
+  { id = "F12-R11", state = "partial", evidence = ["custom_components/lemonfiber/translations/en.json", "custom_components/lemonfiber/translations/nl.json", "tests/test_translations.py"] },
+  { id = "F12-R12", state = "partial", evidence = ["custom_components/lemonfiber/quality_scale.yaml", "pyproject.toml", "tests/test_quality_scale.py"] },
+  { id = "F12-R13", state = "done", evidence = ["hacs.json", "custom_components/lemonfiber/manifest.json", ".github/workflows/validate.yml", "README.md"] },
+]
