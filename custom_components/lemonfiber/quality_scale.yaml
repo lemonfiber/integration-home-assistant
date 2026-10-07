@@ -7,7 +7,9 @@ rules:
   appropriate-polling:
     status: done
     comment: The dashboard arrives on the event stream; the doctor's findings are read hourly and when the stack's health moves.
-  brands: todo
+  brands:
+    status: done
+    comment: The icon and logo are in brand/, copied from the brand repository's exports of the marks.
   common-modules: done
   config-flow: done
   config-flow-test-coverage: done
@@ -65,12 +67,12 @@ rules:
     status: exempt
     comment: A stack is reached only with a key its operator mints and pastes, so there is nothing to discover it by.
   docs-data-update: done
-  docs-examples: todo
+  docs-examples: done
   docs-known-limitations: done
   docs-supported-devices: done
   docs-supported-functions: done
   docs-troubleshooting: done
-  docs-use-cases: todo
+  docs-use-cases: done
   dynamic-devices:
     status: exempt
     comment: An entry is one stack, and the stack is its one device.
@@ -78,12 +80,16 @@ rules:
     status: done
     comment: Every entity is a primary reading of the stack.
   entity-device-class: done
-  entity-disabled-by-default: todo
+  entity-disabled-by-default:
+    status: done
+    comment: Advisory findings, advice rather than anything wrong, are counted by an entity left off until enabled.
   entity-translations: done
   exception-translations: done
   icon-translations: done
   reconfiguration-flow: done
-  repair-issues: todo
+  repair-issues:
+    status: done
+    comment: A changed certificate, something other than lemonfiber at the address, and another interface version are raised as repairs until setup next reaches the stack.
   stale-devices:
     status: exempt
     comment: An entry is one stack, and the stack is its one device, removed with the entry.

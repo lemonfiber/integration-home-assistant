@@ -39,7 +39,7 @@ With a `read` or `act` key, one device for the stack, carrying:
 | Download speed | What every active download comes to |
 | Data disk free | The bytes free on the data volume |
 | VPN | Whether downloads leave through the tunnel; present only where the stack has a VPN |
-| Advisory, warning, error and critical findings | How many of the doctor's findings carry each severity, with what each says happened as an attribute |
+| Advisory, warning, error and critical findings | How many of the doctor's findings carry each severity, with what each says happened as an attribute. Advisory findings are advice rather than anything wrong, and their entity is off until enabled |
 | Update of each service | The version a service stands on and the version this build of lemonfiber pins it at, for every service the dashboard names |
 
 With an `act` key, where the stack says the key may call the action, also:
@@ -53,9 +53,75 @@ A control follows the job it started to its end. A failure is shown in the stack
 
 A member's key adds the entry and no entity.
 
+## What it is for
+
+- Seeing at a glance, beside the rest of the house, whether the stack is healthy and what is wrong when it is not.
+- Being told when the stack needs attention, the disk is filling or downloads stop leaving through the VPN, wherever Home Assistant already reaches you.
+- Keeping downloads off the line while the household streams, with an `act` key.
+- Knowing which services this build of lemonfiber would update.
+
+## Examples
+
+Each example names entities as an entry titled `nas.local` names them; use the ids your entry shows.
+
+Tell the operator when the stack needs attention, and what the worst of it is:
+
+```yaml
+automation:
+  - alias: "lemonfiber needs attention"
+    triggers:
+      - trigger: state
+        entity_id: binary_sensor.nas_local_needs_attention
+        to: "on"
+    actions:
+      - action: notify.notify
+        data:
+          message: "lemonfiber: {{ state_attr('sensor.nas_local_health', 'worst') }}"
+```
+
+Pause downloads for the evening and resume them at night, with an `act` key:
+
+```yaml
+automation:
+  - alias: "Downloads off the line in the evening"
+    triggers:
+      - trigger: time
+        at: "19:00:00"
+    actions:
+      - action: switch.turn_on
+        target:
+          entity_id: switch.nas_local_downloads_paused
+  - alias: "Downloads back at night"
+    triggers:
+      - trigger: time
+        at: "23:30:00"
+    actions:
+      - action: switch.turn_off
+        target:
+          entity_id: switch.nas_local_downloads_paused
+```
+
+Say when a control's action failed, in the stack's words:
+
+```yaml
+automation:
+  - alias: "A lemonfiber control failed"
+    triggers:
+      - trigger: event
+        event_type: lemonfiber_job
+        event_data:
+          outcome: failed
+    actions:
+      - action: notify.notify
+        data:
+          message: "{{ trigger.event.data.action }}: {{ trigger.event.data.sentence }}"
+```
+
 ## How it stays current
 
 The health, the downloads, the disk and the VPN come from the stack's event stream as the stack sends them. When the stream breaks, every one of them shows unavailable until the stream says what it is now; a value from before the break is never shown as current. A figure the stack itself cannot read at the moment shows unknown.
+
+Every entity shows unavailable while the stream has a gap, including the doctor's findings and the services' versions, which are read rather than streamed.
 
 The doctor's findings are read when the entry starts, every hour, and whenever the stream says the stack's health moved. The services' versions are read when the entry starts and every hour.
 
@@ -68,6 +134,8 @@ When the key is refused, Home Assistant asks for a new one; only the key is aske
 - There is no restart button and no alert events, an update entity shows an update without installing it, and there is no entity for active streams.
 
 ## Troubleshooting
+
+A changed certificate, something other than lemonfiber answering at the address, and a stack speaking another version of lemonfiber's interface are also raised under **Settings → Repairs** until the entry next reaches the stack.
 
 | Said | What to do |
 |---|---|

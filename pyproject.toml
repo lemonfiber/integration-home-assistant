@@ -75,7 +75,10 @@ xfail_strict = true
 
 [tool.coverage.run]
 branch = true
-source = ["custom_components/lemonfiber", "scripts"]
+# Measured from `custom_components` rather than the package, so the report names
+# the integration's files `lemonfiber/...` and none shares a name with one in
+# `scripts/`: two `__init__.py` under one name reach Sonar as one file.
+source = ["custom_components", "scripts"]
 # The vendored client is measured in its own repository, and
 # `no_open_codeql_alert.py` is the spec's shared gate, measured where it is kept.
 omit = ["custom_components/lemonfiber/_vendor/*", "scripts/no_open_codeql_alert.py"]

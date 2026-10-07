@@ -91,6 +91,7 @@ FINDINGS_SENSORS: Final = tuple(
         key=f"findings_{severity}",
         translation_key=f"findings_{severity}",
         state_class=SensorStateClass.MEASUREMENT,
+        entity_registry_enabled_default=severity != readings.LEAST_SEVERE,
         severity=severity,
     )
     for severity in readings.SEVERITIES
@@ -106,8 +107,8 @@ async def async_setup_entry(
     """Add the stack's figures."""
     async_add_entities(
         [
-            *(DashboardSensor(technical.stream, entry, technical.version, one) for one in DASHBOARD_SENSORS),
-            *(FindingsSensor(technical.diagnosis, entry, technical.version, one) for one in FINDINGS_SENSORS),
+            *(DashboardSensor(technical.stream, entry, technical, one) for one in DASHBOARD_SENSORS),
+            *(FindingsSensor(technical.diagnosis, entry, technical, one) for one in FINDINGS_SENSORS),
         ],
     )
 
@@ -119,11 +120,11 @@ class DashboardSensor(StackEntity[StreamCoordinator], SensorEntity):
         self,
         coordinator: StreamCoordinator,
         entry: LemonfiberConfigEntry,
-        version: str,
+        technical: Technical,
         description: DashboardSensorDescription,
     ) -> None:
         """Describe the figure and read it from the dashboard the stream last carried."""
-        super().__init__(coordinator, entry, version, description)
+        super().__init__(coordinator, entry, technical, description)
         self._reading = description
         self._read()
 
@@ -146,11 +147,11 @@ class FindingsSensor(StackEntity[DiagnosisCoordinator], SensorEntity):
         self,
         coordinator: DiagnosisCoordinator,
         entry: LemonfiberConfigEntry,
-        version: str,
+        technical: Technical,
         description: FindingsSensorDescription,
     ) -> None:
         """Describe the severity and count it in the findings last read."""
-        super().__init__(coordinator, entry, version, description)
+        super().__init__(coordinator, entry, technical, description)
         self._severity: ProblemSeverity = description.severity
         self._read()
 

@@ -31,7 +31,7 @@ async def async_setup_entry(
 ) -> None:
     """Add an update entity for every service the dashboard names."""
     async_add_entities(
-        ServiceUpdate(technical.versions, entry, technical.version, service)
+        ServiceUpdate(technical.versions, entry, technical, service)
         for service in readings.services(technical.stream.data)
     )
 
@@ -43,12 +43,12 @@ class ServiceUpdate(StackEntity[VersionsCoordinator], UpdateEntity):
         self,
         coordinator: VersionsCoordinator,
         entry: LemonfiberConfigEntry,
-        version: str,
+        technical: Technical,
         service: Service,
     ) -> None:
         """Name the entity for the service and read its versions."""
         description = UpdateEntityDescription(key=f"update_{service['id']}", translation_key=SERVICE_UPDATE)
-        super().__init__(coordinator, entry, version, description)
+        super().__init__(coordinator, entry, technical, description)
         self._service = service["id"]
         self._attr_title = service["name"]
         self._attr_translation_placeholders = {"service": service["name"]}

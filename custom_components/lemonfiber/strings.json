@@ -185,5 +185,19 @@
     "refused": {
       "message": "The stack refused: {sentence}"
     }
+  },
+  "issues": {
+    "pin_mismatch": {
+      "title": "The certificate of {title} has changed",
+      "description": "The stack at {title} presented a certificate other than the pinned one, so nothing is sent to it. If the stack's certificate changed, give its new pin through the integration's Reconfigure."
+    },
+    "not_lemonfiber": {
+      "title": "Something other than lemonfiber answers for {title}",
+      "description": "What answers at the address of {title} is not lemonfiber. Give the stack's address through the integration's Reconfigure."
+    },
+    "version_mismatch": {
+      "title": "{title} speaks another version of lemonfiber's interface",
+      "description": "This integration speaks version {spoken} of lemonfiber's interface and the stack at {title} speaks version {served}. Update whichever of the two is older."
+    }
   }
 }

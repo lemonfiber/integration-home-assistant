@@ -62,7 +62,7 @@ async def async_setup_entry(
 ) -> None:
     """Add the stack's yes-or-no answers that apply to it."""
     async_add_entities(
-        DashboardBinarySensor(technical.stream, entry, technical.version, one)
+        DashboardBinarySensor(technical.stream, entry, technical, one)
         for one in DASHBOARD_BINARY_SENSORS
         if one.exists(technical.stream.data)
     )
@@ -75,11 +75,11 @@ class DashboardBinarySensor(StackEntity[StreamCoordinator], BinarySensorEntity):
         self,
         coordinator: StreamCoordinator,
         entry: LemonfiberConfigEntry,
-        version: str,
+        technical: Technical,
         description: DashboardBinarySensorDescription,
     ) -> None:
         """Describe the answer and read it from the dashboard the stream last carried."""
-        super().__init__(coordinator, entry, version, description)
+        super().__init__(coordinator, entry, technical, description)
         self._reading = description
         self._attr_is_on = description.value(coordinator.data)
 

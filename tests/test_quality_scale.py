@@ -32,7 +32,8 @@ RULES: Final = frozenset(
         "async-dependency", "inject-websession", "strict-typing",
     },
 )  # fmt: skip
-STATUSES: Final = frozenset({"done", "exempt", "todo"})
+STATUSES: Final = frozenset({"done", "exempt"})
+"""What a rule can stand at: met, or not applying for a stated reason (F12-R12)."""
 
 
 def tracked() -> dict[str, object]:
@@ -45,7 +46,7 @@ def test_every_rule_through_platinum_is_tracked_and_nothing_else() -> None:
 
 
 @pytest.mark.parametrize("rule", sorted(RULES))
-def test_every_rule_has_a_status_and_every_exemption_a_reason(rule: str) -> None:
+def test_every_rule_is_met_or_exempt_for_a_reason(rule: str) -> None:
     held = tracked()[rule]
     if isinstance(held, str):
         assert held in STATUSES - {"exempt"}

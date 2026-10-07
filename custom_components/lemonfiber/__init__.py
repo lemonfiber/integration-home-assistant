@@ -15,6 +15,7 @@ from typing import TYPE_CHECKING, Final
 
 from homeassistant.const import CONF_API_KEY, CONF_URL, Platform
 from homeassistant.exceptions import ConfigEntryAuthFailed, ConfigEntryNotReady
+from homeassistant.helpers import issue_registry as ir
 
 from .connection import NotConnectedError, Reason, connect
 from .const import CONF_PIN, DOMAIN
@@ -25,6 +26,9 @@ if TYPE_CHECKING:
     from homeassistant.core import HomeAssistant
 
     from .connection import Connected
+
+REPAIRABLE: Final = frozenset({Reason.PIN_MISMATCH, Reason.NOT_LEMONFIBER, Reason.VERSION_MISMATCH})
+"""What only the person can put right, and so is raised as a repair until setup next reaches the stack."""
 
 PLATFORMS: Final = [
     Platform.BINARY_SENSOR,
@@ -45,13 +49,30 @@ def not_set_up(refusal: NotConnectedError) -> ConfigEntryAuthFailed | ConfigEntr
     )
 
 
+def issue_of(entry: LemonfiberConfigEntry, reason: Reason) -> str:
+    """Return the repair an entry raises for a reason, one per entry and reason."""
+    return f"{entry.entry_id}_{reason}"
+
+
 async def async_setup_entry(hass: HomeAssistant, entry: LemonfiberConfigEntry) -> bool:
     """Reach the stack, learn the key's scope, and follow the stream where the scope reaches it."""
     try:
         connected = await connect(hass, entry.data[CONF_URL], entry.data[CONF_API_KEY], entry.data[CONF_PIN])
         technical = await set_up_technical(hass, entry, connected) if connected.technical else None
     except NotConnectedError as refusal:
+        if refusal.reason in REPAIRABLE:
+            ir.async_create_issue(
+                hass,
+                DOMAIN,
+                issue_of(entry, refusal.reason),
+                is_fixable=False,
+                severity=ir.IssueSeverity.ERROR,
+                translation_key=refusal.reason,
+                translation_placeholders={"title": entry.title, **refusal.placeholders},
+            )
         raise not_set_up(refusal) from refusal
+    for reason in REPAIRABLE:
+        ir.async_delete_issue(hass, DOMAIN, issue_of(entry, reason))
     entry.runtime_data = Runtime(connected, technical)
     if technical is not None:
         entry.async_create_background_task(hass, technical.stream.follow(), f"{DOMAIN} stream")
