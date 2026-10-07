@@ -4,7 +4,7 @@
 Every exception this package raises is a `LemonfiberError`. Each subclass is one
 thing a caller can act on, and its message is a plain sentence for a person. A
 refusal is read from its code where the contract lists it, and from its status
-alone where it carries none (`ARCH-R138`).
+alone where it carries none.
 """
 
 from typing import TYPE_CHECKING

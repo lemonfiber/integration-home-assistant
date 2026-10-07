@@ -6,13 +6,11 @@ from http import HTTPMethod
 from typing import TYPE_CHECKING
 
 from lemonfiber._protocol.answers import (
-    Admitted,
-    Bundle,
-    admitted_of,
     bundle_of,
     capabilities_of,
     envelope_of,
-    envelopes_of,
+    log_lines_of,
+    session_of,
     standing_of,
 )
 from lemonfiber._protocol.calls import (
@@ -28,11 +26,13 @@ from lemonfiber._protocol.calls import (
 )
 
 if TYPE_CHECKING:
-    from collections.abc import Callable, Mapping
+    from collections.abc import Callable, Mapping, Sequence
 
-    from lemonfiber._generated import Envelope
+    from lemonfiber._generated import Envelope, LogEnvelope
     from lemonfiber._protocol.calls import Json, Query
     from lemonfiber.capabilities import CapabilitySet
+    from lemonfiber.credential import Session
+    from lemonfiber.files import BundleFile
     from lemonfiber.jobs import JobStanding
     from lemonfiber.reads import Read
 
@@ -43,26 +43,28 @@ class Operation[T]:
 
     call: Call
     read: Callable[[Answer], T]
+    again: bool = False
+    """Whether the request is a read, which may be asked again after a passing failure."""
 
 
 def reading(read: Read, query: Query | None) -> Operation[Envelope]:
     """Ask for what a command prints under `--json`."""
-    return Operation(read_call(read, query), envelope_of)
+    return Operation(read_call(read, query), envelope_of, again=True)
 
 
 def capabilities() -> Operation[CapabilitySet]:
     """Ask what the stack can do, for the credential the call carries."""
-    return Operation(capabilities_call(), capabilities_of)
+    return Operation(capabilities_call(), capabilities_of, again=True)
 
 
-def logs(query: Query | None) -> Operation[list[Envelope]]:
+def logs(services: Sequence[str], forms: Sequence[str], tail: int | None) -> Operation[list[LogEnvelope]]:
     """Ask for what the services have been saying, a `log` envelope a line."""
-    return Operation(logs_call(query), envelopes_of)
+    return Operation(logs_call(services, forms, tail), log_lines_of, again=True)
 
 
-def bundle(name: str) -> Operation[Bundle]:
+def bundle(name: str) -> Operation[BundleFile]:
     """Fetch one support bundle, by name, as the bytes it is."""
-    return Operation(bundle_call(name), lambda answer: bundle_of(name, answer))
+    return Operation(bundle_call(name), lambda answer: bundle_of(name, answer), again=True)
 
 
 def action(name: str, arguments: Mapping[str, Json] | None) -> Operation[Envelope]:
@@ -72,7 +74,7 @@ def action(name: str, arguments: Mapping[str, Json] | None) -> Operation[Envelop
 
 def job(name: str) -> Operation[JobStanding]:
     """Ask where the work a name stands for got to."""
-    return Operation(job_call(name, HTTPMethod.GET), lambda answer: standing_of(name, answer))
+    return Operation(job_call(name, HTTPMethod.GET), lambda answer: standing_of(name, answer), again=True)
 
 
 def release(name: str) -> Operation[JobStanding]:
@@ -80,6 +82,6 @@ def release(name: str) -> Operation[JobStanding]:
     return Operation(job_call(name, HTTPMethod.DELETE), lambda answer: standing_of(name, answer))
 
 
-def admission(password: str, name: str | None) -> Operation[Admitted]:
+def admission(password: str, name: str | None) -> Operation[Session]:
     """Offer a password, and a household member's name where it is one, for a session."""
-    return Operation(session_call(password, name), admitted_of)
+    return Operation(session_call(password, name), session_of)

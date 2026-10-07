@@ -49,6 +49,7 @@ class AdoptionEnvelope(typing.TypedDict):
     api_version: int
     data: AdoptReport
     host: typing.NotRequired[str | None]
+    job: typing.NotRequired[str | None]
     kind: typing.Literal["adoption"]
 
 

@@ -78,6 +78,7 @@ class OutboundEnvelope(typing.TypedDict):
     api_version: int
     data: Leaving
     host: typing.NotRequired[str | None]
+    job: typing.NotRequired[str | None]
     kind: typing.Literal["outbound"]
 
 

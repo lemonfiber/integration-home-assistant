@@ -16,6 +16,7 @@ class ErrorEnvelope(typing.TypedDict):
     api_version: int
     data: Problem
     host: typing.NotRequired[str | None]
+    job: typing.NotRequired[str | None]
     kind: typing.Literal["error"]
 
 

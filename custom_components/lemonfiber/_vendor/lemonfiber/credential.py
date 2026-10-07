@@ -1,13 +1,17 @@
 # Copyright (c) 2026 NightWorksIO
-"""What a client proves itself with: a per-run token, a session's secret or an integration key."""
+"""What a client proves itself with: a per-run token, a session's secret or an integration key, and a session itself."""
 
 import re
-from typing import Final, override
+from dataclasses import dataclass
+from typing import TYPE_CHECKING, Final, override
 
 from lemonfiber.problems import CredentialRefusedError
 
+if TYPE_CHECKING:
+    import datetime
+
 CREDENTIAL_HEADER: Final = "X-Lemonfiber-Token"
-"""The one header every credential travels in, and never a URL (`ARCH-R52`, `ARCH-R59`, `ARCH-R76`)."""
+"""The one header every credential travels in, and never a URL."""
 
 VISIBLE: Final = re.compile(r"^[\x21-\x7e]+$")
 """What a credential is written in: visible ASCII, nothing a header could be split on."""
@@ -37,3 +41,15 @@ class Credential:
     @override
     def __repr__(self) -> str:
         return "Credential(hidden)"
+
+
+@dataclass(frozen=True, slots=True)
+class Session:
+    """A session opened at the door: the credential it is carried by, when it stops being one, and whose it is.
+
+    `member` is the household member the session is for; absent is the operator.
+    """
+
+    credential: Credential
+    until: datetime.datetime
+    member: str | None

@@ -7,7 +7,7 @@ each with what it comes to for the credential that asked: `available`,
 `unconfigured` (a setting has to be turned on first) or `unpermitted` (this
 credential may not ask for it). A request the stack does not have is absent.
 It is a reading like any other: it can change while a client holds it, so it
-carries when it was read (`ARCH-R78` to `ARCH-R82`).
+carries when it was read.
 """
 
 import typing

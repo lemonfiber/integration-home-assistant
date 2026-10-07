@@ -1,5 +1,5 @@
 # Copyright (c) 2026 NightWorksIO
-"""The `pull` envelope, and the shapes only `pull` carries.
+"""The `alert` envelope, and the shapes only `alert` carries.
 
 Generated from `contract/web-api.contract.json`. Do not edit: `just generate` rewrites it,
 and CI fails on any difference.
@@ -7,17 +7,19 @@ and CI fails on any difference.
 
 import typing
 
+from ..shared.alert__dashboard import Alert
 
-class PullEnvelope(typing.TypedDict):
-    """The envelope carrying `pull`."""
+
+class AlertEnvelope(typing.TypedDict):
+    """The envelope carrying `alert`."""
 
     api_version: int
-    data: str
+    data: Alert
     host: typing.NotRequired[str | None]
     job: typing.NotRequired[str | None]
-    kind: typing.Literal["pull"]
+    kind: typing.Literal["alert"]
 
 
 __all__ = [
-    "PullEnvelope",
+    "AlertEnvelope",
 ]

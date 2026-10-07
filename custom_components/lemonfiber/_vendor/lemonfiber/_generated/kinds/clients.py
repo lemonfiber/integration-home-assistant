@@ -25,6 +25,7 @@ class ClientsEnvelope(typing.TypedDict):
     api_version: int
     data: Guidance
     host: typing.NotRequired[str | None]
+    job: typing.NotRequired[str | None]
     kind: typing.Literal["clients"]
 
 

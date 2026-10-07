@@ -2,10 +2,10 @@
 """The live stream, and the three things about it that are easy to get wrong.
 
 A silent stream and a dead one look alike, so the server speaks at least every
-`HEARTBEAT` seconds and twice that in silence is a broken stream (`ARCH-R50`,
-`ARCH-R61`). A broken stream is resumed from the last event id it carried
-(`ARCH-R62`). And every value held from before a gap is stale until the stream
-carries it again, whatever the resumption replays (`ARCH-R51`).
+`HEARTBEAT` seconds and twice that in silence is a broken stream. A broken
+stream is resumed from the last event id it carried. And every value held from
+before a gap is stale until the stream carries it again, whatever the
+resumption replays.
 """
 
 import time
@@ -95,11 +95,10 @@ type Arrival = Live | Stale | Gap | Unrecognised
 """What following the stream hands over, in the order it happened."""
 
 
-@dataclass(slots=True)
+@dataclass(frozen=True, slots=True)
 class _Held:
     envelope: Envelope
     at: float
-    live: bool
 
 
 class Following:
@@ -121,6 +120,7 @@ class Following:
         self._first_wait = first_wait
         self._clock = clock
         self._held: dict[str, _Held] = {}
+        self._live: set[str] = set()
         self._parser = Parser()
         self._last_id: str | None = None
         self._last_heard = clock()
@@ -152,15 +152,15 @@ class Following:
             except UnknownKindError as unknown:
                 arrivals.append(Unrecognised(unknown.kind))
                 continue
-            self._held[envelope["kind"]] = _Held(envelope, now, live=True)
+            self._held[envelope["kind"]] = _Held(envelope, now)
+            self._live.add(envelope["kind"])
             arrivals.append(Live(envelope))
         return arrivals
 
     def broke(self, why: Break) -> list[Arrival]:
         """Mark everything held as stale, and say so: the gap, then each value as it now stands."""
         now = self._clock()
-        for held in self._held.values():
-            held.live = False
+        self._live.clear()
         return [
             Gap(why, now - self._last_heard),
             *(Stale(h.envelope, now - h.at) for h in self._held.values()),
@@ -180,6 +180,6 @@ class Following:
         """Return the last value of each kind the stream carried, and whether it is still current."""
         now = self._clock()
         return {
-            kind: Live(held.envelope) if held.live else Stale(held.envelope, now - held.at)
+            kind: Live(held.envelope) if kind in self._live else Stale(held.envelope, now - held.at)
             for kind, held in self._held.items()
         }

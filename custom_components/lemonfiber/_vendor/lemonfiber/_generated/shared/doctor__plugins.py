@@ -7,8 +7,8 @@ and CI fails on any difference.
 
 import typing
 
+from .alert__dashboard__doctor__error__plugins import ProblemSeverity
 from .config__credentials__doctor__outbound__plugins__wiring__wizard import ValueOrigin
-from .dashboard__doctor__error__plugins import ProblemSeverity
 from .doctor__error__plugins import Code, Problem, ProblemState
 from .doctor__error__plugins__repair import Remedy
 

@@ -1,5 +1,5 @@
 # Copyright (c) 2026 NightWorksIO
-"""The shapes `dashboard`, `doctor`, `error` and `plugins` all carry.
+"""The shapes `alert`, `dashboard`, `doctor`, `error` and `plugins` all carry.
 
 Generated from `contract/web-api.contract.json`. Do not edit: `just generate` rewrites it,
 and CI fails on any difference.

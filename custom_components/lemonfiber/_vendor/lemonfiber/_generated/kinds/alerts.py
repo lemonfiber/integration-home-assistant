@@ -29,6 +29,7 @@ class AlertsEnvelope(typing.TypedDict):
     api_version: int
     data: AlertReport
     host: typing.NotRequired[str | None]
+    job: typing.NotRequired[str | None]
     kind: typing.Literal["alerts"]
 
 

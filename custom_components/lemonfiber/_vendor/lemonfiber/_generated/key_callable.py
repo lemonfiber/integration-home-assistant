@@ -27,7 +27,7 @@ class KeyCallable(typing.NamedTuple):
 
 KEY_CALLABLE: typing.Final[typing.Mapping[KeyCallableAction, KeyCallable]] = types.MappingProxyType(
     {
-        "restart": KeyCallable(True, True, False),
+        "restart": KeyCallable(True, True, True),
         "diagnose": KeyCallable(True, False, False),
         "update": KeyCallable(True, True, False),
         "downloads-pause": KeyCallable(False, True, True),

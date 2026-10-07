@@ -2,10 +2,10 @@
 """Where the work one name stands for got to.
 
 An action that reaches the services answers with a name rather than an
-outcome, and the name is redeemed afterwards (`ARCH-R70`, `ARCH-R71`). The
-standing is carried by the status and the kind together: `202` is work still
-going, `200` with the command's own kind is work that finished, and `200` with
-the `job` kind is work that ended before it finished (`ARCH-R132`).
+outcome, and the name is redeemed afterwards. The standing is carried by the
+status and the kind together: `202` is work still going, `200` with the
+command's own kind is work that finished, and `200` with the `job` kind is work
+that ended before it finished.
 """
 
 from dataclasses import dataclass

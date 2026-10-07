@@ -64,6 +64,7 @@ class WiringEnvelope(typing.TypedDict):
     api_version: int
     data: WiringReport
     host: typing.NotRequired[str | None]
+    job: typing.NotRequired[str | None]
     kind: typing.Literal["wiring"]
 
 

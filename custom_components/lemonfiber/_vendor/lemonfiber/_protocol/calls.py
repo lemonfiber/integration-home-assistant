@@ -59,6 +59,11 @@ class Answer:
     body: bytes
 
 
+def received(status: int, headers: Mapping[str, str], body: bytes) -> Answer:
+    """Return an answer as a transport received it, its header names lower-cased."""
+    return Answer(status, {name.lower(): value for name, value in headers.items()}, body)
+
+
 def segment(name: str) -> str:
     """Write a name as one path segment, so a separator in it reaches lemonfiber as written."""
     return urllib.parse.quote(name, safe=NOTHING_SAFE)
@@ -103,8 +108,13 @@ def capabilities_call() -> Call:
     return Call(HTTPMethod.GET, CAPABILITIES, {"Accept": JSON_TYPE})
 
 
-def logs_call(query: Query | None) -> Call:
-    """Ask for what the services have been saying."""
+def logs_call(services: Sequence[str], forms: Sequence[str], tail: int | None) -> Call:
+    """Ask for what the services have been saying: those named, of the forms named, the last `tail` lines.
+
+    Following the logs as they grow is not asked for here: lemonfiber answers it
+    with a job rather than with lines, and the lines arrive on the live stream.
+    """
+    query: Query = {"service": services, "form": forms, "tail": tail}
     return Call(HTTPMethod.GET, LOGS + search(query), {"Accept": JSON_TYPE})
 
 

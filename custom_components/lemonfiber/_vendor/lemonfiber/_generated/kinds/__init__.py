@@ -7,6 +7,7 @@ and CI fails on any difference.
 
 from . import admission as _admission
 from . import adoption as _adoption
+from . import alert as _alert
 from . import alerts as _alerts
 from . import archives as _archives
 from . import backup as _backup
@@ -44,6 +45,7 @@ from . import news_items as _news_items
 from . import outbound as _outbound
 from . import pairing as _pairing
 from . import pausing as _pausing
+from . import playing as _playing
 from . import plugins as _plugins
 from . import preview as _preview
 from . import provenance as _provenance
@@ -79,6 +81,7 @@ from . import word as _word
 
 from .admission import *
 from .adoption import *
+from .alert import *
 from .alerts import *
 from .archives import *
 from .backup import *
@@ -116,6 +119,7 @@ from .news_items import *
 from .outbound import *
 from .pairing import *
 from .pausing import *
+from .playing import *
 from .plugins import *
 from .preview import *
 from .provenance import *
@@ -152,6 +156,7 @@ from .word import *
 __all__: list[str] = []
 __all__ += _admission.__all__
 __all__ += _adoption.__all__
+__all__ += _alert.__all__
 __all__ += _alerts.__all__
 __all__ += _archives.__all__
 __all__ += _backup.__all__
@@ -189,6 +194,7 @@ __all__ += _news_items.__all__
 __all__ += _outbound.__all__
 __all__ += _pairing.__all__
 __all__ += _pausing.__all__
+__all__ += _playing.__all__
 __all__ += _plugins.__all__
 __all__ += _preview.__all__
 __all__ += _provenance.__all__

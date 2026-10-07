@@ -14,6 +14,7 @@ class RemovalEnvelope(typing.TypedDict):
     api_version: int
     data: HouseholdRemoval
     host: typing.NotRequired[str | None]
+    job: typing.NotRequired[str | None]
     kind: typing.Literal["removal"]
 
 
