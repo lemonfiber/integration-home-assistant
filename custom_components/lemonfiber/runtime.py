@@ -9,6 +9,7 @@ from homeassistant.config_entries import ConfigEntry
 if TYPE_CHECKING:
     from .connection import Connected
     from .coordinator import DiagnosisCoordinator, StreamCoordinator, VersionsCoordinator
+    from .member import MemberCoordinator
 
 
 @dataclass(frozen=True, slots=True)
@@ -23,11 +24,13 @@ class Technical:
 
 @dataclass(frozen=True, slots=True)
 class Runtime:
-    """The client that reached the stack, and the technical side where the key's scope reaches it."""
+    """The client that reached the stack, and the side of it the key's scope reaches: the technical one, or a member's own."""
 
     connected: Connected
     technical: Technical | None
     """Absent for a member's key, which yields no technical entity."""
+    theirs: MemberCoordinator | None = None
+    """A member's own stream, present for a member's key alone."""
 
 
 type LemonfiberConfigEntry = ConfigEntry[Runtime]

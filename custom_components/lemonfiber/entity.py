@@ -1,5 +1,5 @@
 # Copyright (c) 2026 NightWorksIO
-"""What every entity of a stack shares: its device, and how it is named and identified."""
+"""What every entity of a stack shares: its device, and how it is named and identified, on the technical side and on a member's own."""
 
 from typing import TYPE_CHECKING, Any, override
 
@@ -17,6 +17,7 @@ if TYPE_CHECKING:
     from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
 
     from .coordinator import StreamCoordinator
+    from .member import MemberCoordinator
     from .runtime import LemonfiberConfigEntry, Technical
 
 type PlatformSetup = Callable[
@@ -32,11 +33,18 @@ type TechnicalSetup = Callable[
 """What a platform adds of the stack's technical side."""
 
 
-def technical_side(adds: TechnicalSetup) -> PlatformSetup:
-    """Return a platform's setup that adds its entities only where the key reaches the stack's technical side.
+type MemberSetup = Callable[
+    [LemonfiberConfigEntry, MemberCoordinator, AddConfigEntryEntitiesCallback],
+    Coroutine[Any, Any, None],
+]
+"""What a platform adds of a member's own side."""
 
-    A member's key yields no technical entity, so a platform built this way adds
-    nothing for one.
+
+def sides(*, technical: TechnicalSetup | None = None, member: MemberSetup | None = None) -> PlatformSetup:
+    """Return a platform's setup adding what the key's scope reaches: its technical side, or a member's own.
+
+    A member's key yields no technical entity, and a `read` or `act` key no
+    member's entity, so a platform adds one side or neither.
     """
 
     async def async_setup_entry(
@@ -44,11 +52,28 @@ def technical_side(adds: TechnicalSetup) -> PlatformSetup:
         entry: LemonfiberConfigEntry,
         async_add_entities: AddConfigEntryEntitiesCallback,
     ) -> None:
-        technical = entry.runtime_data.technical
-        if technical is not None:
-            await adds(entry, technical, async_add_entities)
+        runtime = entry.runtime_data
+        if technical is not None and runtime.technical is not None:
+            await technical(entry, runtime.technical, async_add_entities)
+        if member is not None and runtime.theirs is not None:
+            await member(entry, runtime.theirs, async_add_entities)
 
     return async_setup_entry
+
+
+def technical_side(adds: TechnicalSetup) -> PlatformSetup:
+    """Return a platform's setup that adds its entities only where the key reaches the stack's technical side."""
+    return sides(technical=adds)
+
+
+def theirs_device(entry: LemonfiberConfigEntry) -> DeviceInfo:
+    """Return the one device a member's entry is, naming nothing technical: no version and no address."""
+    return DeviceInfo(
+        identifiers={(DOMAIN, entry.entry_id)},
+        name=entry.title,
+        manufacturer=MANUFACTURER,
+        model=MODEL,
+    )
 
 
 def device_of(entry: LemonfiberConfigEntry, version: str) -> DeviceInfo:
@@ -96,3 +121,21 @@ class StackEntity[CoordinatorT: DataUpdateCoordinator[Any]](CoordinatorEntity[Co
         await super().async_added_to_hass()
         if self.coordinator is not self._stream:
             self.async_on_remove(self._stream.async_add_listener(self.async_write_ha_state))
+
+
+class MemberEntity(CoordinatorEntity["MemberCoordinator"]):
+    """An entity of a member's own side, named by its translation and identified within its entry."""
+
+    _attr_has_entity_name = True
+
+    def __init__(
+        self,
+        coordinator: MemberCoordinator,
+        entry: LemonfiberConfigEntry,
+        description: EntityDescription,
+    ) -> None:
+        """Describe the entity and attach it to the entry's device."""
+        super().__init__(coordinator)
+        self.entity_description = description
+        self._attr_unique_id = f"{entry.entry_id}-{description.key}"
+        self._attr_device_info = theirs_device(entry)

@@ -50,6 +50,7 @@
       "not_lemonfiber": "Op dit adres antwoordde iets, maar het is niet lemonfiber.",
       "version_mismatch": "Deze integratie spreekt versie {spoken} van de interface van lemonfiber en de stack spreekt versie {served}. Werk de oudste van de twee bij.",
       "no_dashboard": "De stack antwoordde, maar stuurde zijn dashboard niet op tijd.",
+      "nothing_said": "De stack antwoordde, maar zei niet op tijd wat deze sleutel bereikt.",
       "refused": "De stack weigerde: {sentence}"
     },
     "abort": {
@@ -120,6 +121,69 @@
         "state_attributes": {
           "findings": {
             "name": "Bevindingen"
+          }
+        }
+      },
+      "requests_waiting_for_approval": {
+        "name": "Verzoeken die op goedkeuring wachten",
+        "unit_of_measurement": "verzoeken",
+        "state_attributes": {
+          "titles": {
+            "name": "Titels"
+          }
+        }
+      },
+      "requests_declined": {
+        "name": "Afgewezen verzoeken",
+        "unit_of_measurement": "verzoeken",
+        "state_attributes": {
+          "titles": {
+            "name": "Titels"
+          }
+        }
+      },
+      "requests_failed": {
+        "name": "Mislukte verzoeken",
+        "unit_of_measurement": "verzoeken",
+        "state_attributes": {
+          "titles": {
+            "name": "Titels"
+          }
+        }
+      },
+      "requests_getting": {
+        "name": "Verzoeken onderweg",
+        "unit_of_measurement": "verzoeken",
+        "state_attributes": {
+          "titles": {
+            "name": "Titels"
+          }
+        }
+      },
+      "requests_partly_here": {
+        "name": "Verzoeken deels binnen",
+        "unit_of_measurement": "verzoeken",
+        "state_attributes": {
+          "titles": {
+            "name": "Titels"
+          }
+        }
+      },
+      "requests_here": {
+        "name": "Verzoeken binnen",
+        "unit_of_measurement": "verzoeken",
+        "state_attributes": {
+          "titles": {
+            "name": "Titels"
+          }
+        }
+      },
+      "requests_gone": {
+        "name": "Verdwenen verzoeken",
+        "unit_of_measurement": "verzoeken",
+        "state_attributes": {
+          "titles": {
+            "name": "Titels"
           }
         }
       }
@@ -201,6 +265,16 @@
           }
         }
       }
+    },
+    "media_player": {
+      "playing": {
+        "name": "Speelt nu",
+        "state_attributes": {
+          "device": {
+            "name": "Apparaat"
+          }
+        }
+      }
     }
   },
   "exceptions": {
@@ -236,6 +310,9 @@
     },
     "no_dashboard": {
       "message": "De stack antwoordde, maar stuurde zijn dashboard niet op tijd. Home Assistant probeert het opnieuw."
+    },
+    "nothing_said": {
+      "message": "De stack antwoordde, maar zei niet op tijd wat deze sleutel bereikt. Home Assistant probeert het opnieuw."
     },
     "refused": {
       "message": "De stack weigerde: {sentence}"

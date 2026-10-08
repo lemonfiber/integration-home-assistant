@@ -7,10 +7,10 @@ from homeassistant.config_entries import ConfigEntryState
 from homeassistant.helpers import entity_registry as er
 from homeassistant.helpers import issue_registry as ir
 
-from custom_components.lemonfiber import coordinator
+from custom_components.lemonfiber import coordinator, member
 from custom_components.lemonfiber.connection import Reason, Scope
 from custom_components.lemonfiber.const import DOMAIN
-from tests.conftest import reauthenticating, serve
+from tests.conftest import HOUSEHOLD, reauthenticating, serve
 from tests.stack import Feed, Reply, event, problem
 
 if TYPE_CHECKING:
@@ -54,7 +54,7 @@ async def test_an_act_key_is_known_by_the_actions_it_may_call(
     assert entry.runtime_data.connected.scope is Scope.ACT
 
 
-async def test_a_members_key_yields_no_technical_entity_and_opens_no_stream(
+async def test_a_members_key_yields_no_technical_entity_and_follows_their_own_stream(
     hass: HomeAssistant,
     stack: Stack,
     entry: MockConfigEntry,
@@ -64,8 +64,40 @@ async def test_a_members_key_yields_no_technical_entity_and_opens_no_stream(
     assert entry.state is ConfigEntryState.LOADED
     assert entry.runtime_data.connected.scope is Scope.MEMBER
     assert entry.runtime_data.technical is None
-    assert er.async_entries_for_config_entry(er.async_get(hass), entry.entry_id) == []
-    assert stack.asked("/api/events") == stack.asked("/api/version") == 0
+    entities = er.async_entries_for_config_entry(er.async_get(hass), entry.entry_id)
+    assert {one.domain for one in entities} == {"sensor", "media_player"}
+    assert all("requests_" in one.unique_id or one.unique_id.endswith("-playing") for one in entities)
+    assert stack.asked("/api/events") == 1
+    assert stack.asked("/api/version") == stack.asked("/api/checks") == stack.asked("/api/provenance") == 0
+    assert await hass.config_entries.async_unload(entry.entry_id)
+
+
+async def test_a_members_stream_saying_nothing_of_theirs_in_time_is_let_go_and_tried_again(
+    hass: HomeAssistant,
+    stack: Stack,
+    entry: MockConfigEntry,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    serve(stack, "member")
+    quiet = Feed()
+    quiet.say(event("household", HOUSEHOLD), event("held", {"holdings": []}))
+    stack.stream(quiet)
+    monkeypatch.setattr(member, "FIRST_SNAPSHOT_WITHIN", 0.2)
+    await set_up(hass, entry)
+    assert entry.state is ConfigEntryState.SETUP_RETRY
+    assert entry.error_reason_translation_key == Reason.NOTHING_SAID
+
+
+async def test_a_members_stream_refusing_the_key_asks_for_a_new_one(
+    hass: HomeAssistant,
+    stack: Stack,
+    entry: MockConfigEntry,
+) -> None:
+    serve(stack, "member")
+    stack.reply("/api/events", Reply(403, problem("ADMIT-4", "Not admitted.")))
+    await set_up(hass, entry)
+    assert entry.state is ConfigEntryState.SETUP_ERROR
+    assert reauthenticating(hass)
 
 
 async def test_a_refused_key_asks_for_a_new_one(

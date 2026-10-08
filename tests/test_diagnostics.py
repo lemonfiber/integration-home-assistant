@@ -84,3 +84,5 @@ async def test_a_members_entry_hands_over_nothing_technical(
     said = await handed_over(hass, entry)
     assert said["scope"] == "member"
     assert {"state", "version", "dashboard", "diagnosis", "versions"}.isdisjoint(said)
+    assert said["stream"] == {"state": "connected", "their_row": True, "their_playing": True}
+    assert "Paddington in Peru" not in repr(said)

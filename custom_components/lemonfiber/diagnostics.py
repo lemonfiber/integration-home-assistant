@@ -62,7 +62,11 @@ async def async_get_config_entry_diagnostics(
     hass: HomeAssistant,
     entry: LemonfiberConfigEntry,
 ) -> dict[str, object]:
-    """Return the client, the entry, the key's scope and what the stack last said, with nothing that identifies or admits."""
+    """Return the client, the entry, the key's scope and what the stack last said, with nothing that identifies or admits.
+
+    Of a member's own stream, only whether it has said each thing is handed
+    over: what they asked for and what they watch are theirs.
+    """
     runtime = entry.runtime_data
     technical = runtime.technical
     said: dict[str, object] = {
@@ -78,5 +82,11 @@ async def async_get_config_entry_diagnostics(
             "dashboard": technical.stream.data,
             "diagnosis": technical.diagnosis.data,
             "versions": technical.versions.data,
+        }
+    if (theirs := runtime.theirs) is not None:
+        said["stream"] = {
+            "state": theirs.state,
+            "their_row": theirs.data.household is not None,
+            "their_playing": theirs.data.playing is not None,
         }
     return cast("dict[str, object]", withheld(said))

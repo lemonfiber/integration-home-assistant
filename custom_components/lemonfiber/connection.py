@@ -70,6 +70,7 @@ class Reason(StrEnum):
     NOT_LEMONFIBER = "not_lemonfiber"
     VERSION_MISMATCH = "version_mismatch"
     NO_DASHBOARD = "no_dashboard"
+    NOTHING_SAID = "nothing_said"
     REFUSED = "refused"
 
 
@@ -85,6 +86,7 @@ FIELD_OF: Final[Mapping[Reason, str]] = {
     Reason.NOT_LEMONFIBER: CONF_URL,
     Reason.VERSION_MISMATCH: BASE,
     Reason.NO_DASHBOARD: BASE,
+    Reason.NOTHING_SAID: BASE,
     Reason.REFUSED: BASE,
 }
 """The field each reason names: the one the person has to change."""

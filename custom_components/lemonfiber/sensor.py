@@ -1,5 +1,5 @@
 # Copyright (c) 2026 NightWorksIO
-"""The stack's figures: its health, its downloads, its disk, and the doctor's findings by severity."""
+"""The stack's figures: its health, its downloads, its disk, and the doctor's findings by severity; and a member's requests by state."""
 
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Final, override
@@ -15,14 +15,15 @@ from homeassistant.core import callback
 
 from . import readings
 from .coordinator import DiagnosisCoordinator, StreamCoordinator
-from .entity import StackEntity, technical_side
+from .entity import MemberEntity, StackEntity, sides
+from .member import GONE, REQUEST_STATES, MemberCoordinator
 
 if TYPE_CHECKING:
     from collections.abc import Callable, Mapping
 
     from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
     from homeassistant.helpers.typing import StateType
-    from lemonfiber.contract import ProblemSeverity, Snapshot
+    from lemonfiber.contract import ProblemSeverity, RequestState, Snapshot
 
     from .runtime import LemonfiberConfigEntry, Technical
 
@@ -98,8 +99,26 @@ FINDINGS_SENSORS: Final = tuple(
 )
 
 
-@technical_side
-async def async_setup_entry(
+@dataclass(frozen=True, kw_only=True)
+class RequestsSensorDescription(SensorEntityDescription):
+    """How many of a member's requests stand at one state."""
+
+    state: RequestState
+
+
+REQUESTS_SENSORS: Final = tuple(
+    RequestsSensorDescription(
+        key=f"requests_{state.replace('-', '_')}",
+        translation_key=f"requests_{state.replace('-', '_')}",
+        state_class=SensorStateClass.MEASUREMENT,
+        entity_registry_enabled_default=state != GONE,
+        state=state,
+    )
+    for state in REQUEST_STATES
+)
+
+
+async def add_technical(
     entry: LemonfiberConfigEntry,
     technical: Technical,
     async_add_entities: AddConfigEntryEntitiesCallback,
@@ -111,6 +130,18 @@ async def async_setup_entry(
             *(FindingsSensor(technical.diagnosis, entry, technical, one) for one in FINDINGS_SENSORS),
         ],
     )
+
+
+async def add_theirs(
+    entry: LemonfiberConfigEntry,
+    theirs: MemberCoordinator,
+    async_add_entities: AddConfigEntryEntitiesCallback,
+) -> None:
+    """Add a member's requests, by the state each stands at."""
+    async_add_entities(RequestsSensor(theirs, entry, one) for one in REQUESTS_SENSORS)
+
+
+async_setup_entry: Final = sides(technical=add_technical, member=add_theirs)
 
 
 class DashboardSensor(StackEntity[StreamCoordinator], SensorEntity):
@@ -160,6 +191,43 @@ class FindingsSensor(StackEntity[DiagnosisCoordinator], SensorEntity):
         said = None if report is None else readings.findings(report, self._severity)
         self._attr_native_value = None if said is None else len(said)
         self._attr_extra_state_attributes = {} if said is None else {"findings": said}
+
+    @callback
+    @override
+    def _handle_coordinator_update(self) -> None:
+        self._read()
+        super()._handle_coordinator_update()
+
+
+class RequestsSensor(MemberEntity, SensorEntity):
+    """How many of a member's requests stand at a state, and what each is called where it has a name yet.
+
+    Unavailable until their stream has said their household row, and wherever
+    the row could not be read.
+    """
+
+    def __init__(
+        self,
+        coordinator: MemberCoordinator,
+        entry: LemonfiberConfigEntry,
+        description: RequestsSensorDescription,
+    ) -> None:
+        """Describe the state and count their requests at it."""
+        super().__init__(coordinator, entry, description)
+        self._state: RequestState = description.state
+        self._read()
+
+    def _read(self) -> None:
+        requests = self.coordinator.data.requests(self._state)
+        self._readable = requests is not None
+        self._attr_native_value = None if requests is None else len(requests)
+        titles = [] if requests is None else [title for one in requests if (title := one.get("title"))]
+        self._attr_extra_state_attributes = {"titles": titles}
+
+    @property
+    @override
+    def available(self) -> bool:
+        return super().available and self._readable
 
     @callback
     @override

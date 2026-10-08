@@ -6,7 +6,7 @@ rules:
     comment: The integration registers no actions.
   appropriate-polling:
     status: done
-    comment: The dashboard arrives on the event stream; the doctor's findings are read hourly and when the stack's health moves.
+    comment: The dashboard, the alerts and a member's own side arrive on the event stream; the doctor's findings are read hourly and when the stack's health moves.
   brands:
     status: done
     comment: The icon and logo are in brand/, copied from the brand repository's exports of the marks.
@@ -84,8 +84,8 @@ rules:
     status: done
     comment: >-
       Advisory findings, advice rather than anything wrong, are counted by an entity left off
-      until enabled, and each service's restart button and update entity are left off beside the
-      stack's own.
+      until enabled; each service's restart button and update entity are left off beside the
+      stack's own; and a member's requests gone are counted by an entity left off beside the rest.
   entity-translations: done
   exception-translations: done
   icon-translations: done

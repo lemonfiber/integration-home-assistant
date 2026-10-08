@@ -2,6 +2,7 @@
 """The stack as Home Assistant follows it: the dashboard and the alerts from the event stream, the doctor's findings and the services' versions by read."""
 
 import asyncio
+from abc import abstractmethod
 from dataclasses import dataclass
 from enum import StrEnum
 from functools import partial
@@ -148,8 +149,13 @@ class VersionsCoordinator(DataUpdateCoordinator["Versions | None"]):
         )
 
 
-class StreamCoordinator(DataUpdateCoordinator["Snapshot"]):
-    """The dashboard as the event stream carries it, unavailable from a gap until the stream says it again, and each alert it carries fired."""
+class Following[T](DataUpdateCoordinator[T]):
+    """What the entry's event stream last said, unavailable from a gap until the stream says it again.
+
+    A stream ends one of two ways: a refused key asks for reauthentication, and
+    a lost stack reloads the entry, whose setup is retried with Home Assistant's
+    backoff and reads the key's scope again when it reaches the stack.
+    """
 
     config_entry: LemonfiberConfigEntry
 
@@ -159,33 +165,24 @@ class StreamCoordinator(DataUpdateCoordinator["Snapshot"]):
         entry: LemonfiberConfigEntry,
         connected: Connected,
         stream: AsyncStream,
-        first: Snapshot,
+        first: T,
     ) -> None:
-        """Hold the open stream and the first dashboard it carried, and the findings it asks to be read again."""
+        """Hold the open stream and what it said first."""
         super().__init__(hass, LOGGER, config_entry=entry, name=f"{DOMAIN} stream")
         self.data = first
         self.state = State.CONNECTED
-        self.diagnosis = DiagnosisCoordinator(hass, entry, connected.client)
         self._connected = connected
         self._stream = stream
-        self._alert_listeners: list[Callable[[Alert], None]] = []
 
     async def follow(self) -> None:
-        """Follow the stream until the key is refused or the stack is lost, then hand the entry back to Home Assistant.
-
-        A refused key asks for reauthentication. A lost stack reloads the entry,
-        whose setup is retried with Home Assistant's backoff and reads the key's
-        scope again when it reaches the stack.
-        """
+        """Follow the stream until the key is refused or the stack is lost, then hand the entry back to Home Assistant."""
         try:
             while True:
                 arrival = await anext(self._stream)
                 if isinstance(arrival, Gap):
                     self._lost(State.STALE)
-                elif (snapshot := dashboard_in(arrival)) is not None:
-                    self._carried(snapshot)
-                elif (alert := alert_in(arrival)) is not None:
-                    self._alerted(alert)
+                else:
+                    self._heard(arrival)
         except NotAdmittedError:
             self._lost(State.REFUSED)
             self.config_entry.async_start_reauth(self.hass)
@@ -193,31 +190,16 @@ class StreamCoordinator(DataUpdateCoordinator["Snapshot"]):
             self._lost(State.UNREACHABLE)
             self.hass.config_entries.async_schedule_reload(self.config_entry.entry_id)
 
-    @callback
-    def async_add_alert_listener(self, listener: Callable[[Alert], None]) -> CALLBACK_TYPE:
-        """Call a listener with every alert the stream carries from now on, until the returned callback is called."""
-        self._alert_listeners.append(listener)
-        return partial(self._alert_listeners.remove, listener)
+    @abstractmethod
+    def _heard(self, arrival: Arrival) -> None:
+        """Take in one arrival that is not a gap."""
 
-    def _alerted(self, alert: Alert) -> None:
-        fire(self.hass, self.config_entry, alert)
-        for listener in tuple(self._alert_listeners):
-            listener(alert)
-
-    def _carried(self, snapshot: Snapshot) -> None:
-        resumed = self.state is State.STALE
-        moved = snapshot["health"] != self.data["health"]
-        if resumed:
+    def _carried(self, data: T) -> None:
+        if self.state is State.STALE:
             LOGGER.info("The stream from %s resumed", self.config_entry.title)
             self.config_entry.async_create_background_task(self.hass, self._rescope(), f"{DOMAIN} scope")
         self.state = State.CONNECTED
-        self.async_set_updated_data(snapshot)
-        if moved:
-            self.config_entry.async_create_background_task(
-                self.hass,
-                self.diagnosis.async_request_refresh(),
-                f"{DOMAIN} diagnosis",
-            )
+        self.async_set_updated_data(data)
 
     def _lost(self, state: State) -> None:
         if self.state is State.CONNECTED:
@@ -238,3 +220,42 @@ class StreamCoordinator(DataUpdateCoordinator["Snapshot"]):
             return
         if scope_of(capabilities) is not self._connected.scope:
             self.hass.config_entries.async_schedule_reload(self.config_entry.entry_id)
+
+
+class StreamCoordinator(Following["Snapshot"]):
+    """The dashboard as the event stream carries it, and each alert it carries fired."""
+
+    def __init__(
+        self,
+        hass: HomeAssistant,
+        entry: LemonfiberConfigEntry,
+        connected: Connected,
+        stream: AsyncStream,
+        first: Snapshot,
+    ) -> None:
+        """Hold the open stream and the first dashboard it carried, and the findings it asks to be read again."""
+        super().__init__(hass, entry, connected, stream, first)
+        self.diagnosis = DiagnosisCoordinator(hass, entry, connected.client)
+        self._alert_listeners: list[Callable[[Alert], None]] = []
+
+    @callback
+    def async_add_alert_listener(self, listener: Callable[[Alert], None]) -> CALLBACK_TYPE:
+        """Call a listener with every alert the stream carries from now on, until the returned callback is called."""
+        self._alert_listeners.append(listener)
+        return partial(self._alert_listeners.remove, listener)
+
+    @override
+    def _heard(self, arrival: Arrival) -> None:
+        if (snapshot := dashboard_in(arrival)) is not None:
+            moved = snapshot["health"] != self.data["health"]
+            self._carried(snapshot)
+            if moved:
+                self.config_entry.async_create_background_task(
+                    self.hass,
+                    self.diagnosis.async_request_refresh(),
+                    f"{DOMAIN} diagnosis",
+                )
+        elif (alert := alert_in(arrival)) is not None:
+            fire(self.hass, self.config_entry, alert)
+            for listener in tuple(self._alert_listeners):
+                listener(alert)
