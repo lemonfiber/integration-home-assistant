@@ -9,7 +9,7 @@ import typing
 
 from .alert__dashboard__doctor__error__plugins import ProblemSeverity
 from .config__credentials__doctor__outbound__plugins__wiring__wizard import ValueOrigin
-from .doctor__error__plugins import Code, Problem, ProblemState
+from .doctor__error__plugins import Code, Problem, ProblemState, ProblemStep
 from .doctor__error__plugins__repair import Remedy
 
 
@@ -53,6 +53,13 @@ class DoctorVerdictFail(typing.TypedDict):
     """How much it matters."""
     state: ProblemState
     """Where it stands with respect to being fixed."""
+    steps: typing.NotRequired[list[ProblemStep]]
+    """Every step a run declares, with what each came to, where the problem ended a run
+    of steps part-way; absent from every other problem.
+
+    Data beside the detail rather than in it, so a client reads what changed
+    somewhere going back cannot reach without parsing a sentence written for a person.
+    """
     summary: str
     """What happened, in one plain sentence."""
 
@@ -101,6 +108,13 @@ class DoctorVerdictWarn(typing.TypedDict):
     """How much it matters."""
     state: ProblemState
     """Where it stands with respect to being fixed."""
+    steps: typing.NotRequired[list[ProblemStep]]
+    """Every step a run declares, with what each came to, where the problem ended a run
+    of steps part-way; absent from every other problem.
+
+    Data beside the detail rather than in it, so a client reads what changed
+    somewhere going back cannot reach without parsing a sentence written for a person.
+    """
     summary: str
     """What happened, in one plain sentence."""
 

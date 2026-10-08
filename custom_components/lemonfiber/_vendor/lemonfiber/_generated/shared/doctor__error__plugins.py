@@ -37,6 +37,13 @@ class Problem(typing.TypedDict):
     """How much it matters."""
     state: ProblemState
     """Where it stands with respect to being fixed."""
+    steps: typing.NotRequired[list[ProblemStep]]
+    """Every step a run declares, with what each came to, where the problem ended a run
+    of steps part-way; absent from every other problem.
+
+    Data beside the detail rather than in it, so a client reads what changed
+    somewhere going back cannot reach without parsing a sentence written for a person.
+    """
     summary: str
     """What happened, in one plain sentence."""
 
@@ -45,8 +52,39 @@ type ProblemState = typing.Literal["actionable", "guided", "remediable", "unknow
 """Where a problem stands with respect to being fixed."""
 
 
+class ProblemStep(typing.TypedDict):
+    """What one step of a run that stopped part-way came to."""
+
+    came: StepCame
+    """What it came to."""
+    landed: bool
+    """Whether it reached somewhere other than the plugin's own services, which going
+    back cannot undo.
+    """
+    recipe: str
+    """The recipe the step belongs to."""
+    step: str
+    """The step's id within it."""
+
+
+type StepCame = typing.Literal[
+    "answered",
+    "skipped",
+    "not-reached",
+    "unreachable",
+    "refused",
+    "withheld",
+    "unexpected",
+    "uncaptured",
+    "oversized",
+]
+"""What one step of a recipe came to."""
+
+
 __all__ = [
     "Code",
     "Problem",
     "ProblemState",
+    "ProblemStep",
+    "StepCame",
 ]
