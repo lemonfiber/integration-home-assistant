@@ -104,7 +104,7 @@ jobs:
     uses: lemonfiber/spec/.github/workflows/commitlint.yml@9ea0d953458bb79b9afd8b412d7e99c9435cff34 # v1.0.46
 
   hygiene:
-    uses: lemonfiber/spec/.github/workflows/hygiene.yml@f1f7ba7d5cdb455ecb6e2a232763b460487a4bd5 # v1.0.58
+    uses: lemonfiber/spec/.github/workflows/hygiene.yml@9e4af595a441995073b44629dcac592813f646bf # v1.0.60
 
   # Every pin this repository holds on a shared workflow, against what the spec's
   # default branch holds now.
@@ -112,7 +112,7 @@ jobs:
     uses: lemonfiber/spec/.github/workflows/workflow-pins.yml@9ea0d953458bb79b9afd8b412d7e99c9435cff34 # v1.0.46
 
   security:
-    uses: lemonfiber/spec/.github/workflows/security.yml@f1f7ba7d5cdb455ecb6e2a232763b460487a4bd5 # v1.0.58
+    uses: lemonfiber/spec/.github/workflows/security.yml@9e4af595a441995073b44629dcac592813f646bf # v1.0.60
 
   labeler:
     if: github.event_name == 'pull_request'
