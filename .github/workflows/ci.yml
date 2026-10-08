@@ -104,7 +104,7 @@ jobs:
     uses: lemonfiber/spec/.github/workflows/commitlint.yml@9ea0d953458bb79b9afd8b412d7e99c9435cff34 # v1.0.46
 
   hygiene:
-    uses: lemonfiber/spec/.github/workflows/hygiene.yml@9ea0d953458bb79b9afd8b412d7e99c9435cff34 # v1.0.46
+    uses: lemonfiber/spec/.github/workflows/hygiene.yml@67242eb72bafaa25b3bb735ff3f5c3a50e0006d6 # v1.0.52
 
   # Every pin this repository holds on a shared workflow, against what the spec's
   # default branch holds now.
