@@ -1,5 +1,5 @@
 # Copyright (c) 2026 NightWorksIO
-"""The lemonfiber contract's shapes, generated from the artefact at 34570aa127f59a0c54d79ab5bf1c3022e39f89a9.
+"""The lemonfiber contract's shapes, generated from the artefact at 65103564328269478a863ae41bbf527f6f6c5f1e.
 
 Generated from the contract vendored in `contract/`. Do not edit: `just generate` rewrites it,
 and CI fails on any difference.
