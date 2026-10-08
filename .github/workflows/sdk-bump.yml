@@ -227,24 +227,25 @@ jobs:
             verdict="**Lint, strict types or the suite did not pass.** The client changed something the integration uses, so taking it is a change here rather than a bump. Read the failing run before merging."
           fi
 
-          # The title names a revision and a later run takes another, so it is
-          # rewritten where a pull request is already open.
+          body="$(printf '%s\n' \
+            "\`sdk-drift\` compares the vendored client with sdk-python's main, and the copy was behind. This takes the client so that the next author to open a pull request is not handed a vendor bump they did not come for." \
+            "" \
+            "- was: \`${PIN}\`" \
+            "- now: \`${HEAD_SHA}\`" \
+            "" \
+            "${verdict}" \
+            "" \
+            "Opened by \`sdk-bump\`, which sdk-python's \`sdk-moved\` dispatches on every push to its main." \
+            "" \
+            "Spec: Q-R68")"
+
+          # The title, the revision and the verdict belong to the latest run, so
+          # an open pull request has all three rewritten.
           existing="$(gh api "repos/${REPO}/pulls?head=${GITHUB_REPOSITORY_OWNER}:${BRANCH}&state=open" --jq '.[0].number // ""')"
           if [ -n "$existing" ]; then
-            gh api --method PATCH "repos/${REPO}/pulls/${existing}" -f title="${title}" >/dev/null
+            gh api --method PATCH "repos/${REPO}/pulls/${existing}" -f title="${title}" -f body="${body}" >/dev/null
             echo "::notice::#${existing} updated to ${HEAD_SHA}"
           else
-            body="$(printf '%s\n' \
-              "\`sdk-drift\` compares the vendored client with sdk-python's main, and the copy was behind. This takes the client so that the next author to open a pull request is not handed a vendor bump they did not come for." \
-              "" \
-              "- was: \`${PIN}\`" \
-              "- now: \`${HEAD_SHA}\`" \
-              "" \
-              "${verdict}" \
-              "" \
-              "Opened by \`sdk-bump\`, which sdk-python's \`sdk-moved\` dispatches on every push to its main." \
-              "" \
-              "Spec: Q-R68")"
             existing="$(gh api --method POST "repos/${REPO}/pulls" -f title="${title}" -f head="${BRANCH}" \
               -f base=main -f body="${body}" --jq .number)"
             echo "::notice::opened #${existing}"
@@ -255,5 +256,8 @@ jobs:
               && echo "auto-merge armed on #${existing}." \
               || echo "::warning::could not arm auto-merge on #${existing}; merge it by hand."
           else
+            # An earlier clean run may have armed it; a take that is not clean
+            # waits for a person.
+            gh pr merge "${existing}" --repo "${REPO}" --disable-auto >/dev/null 2>&1 || true
             echo "::warning::#${existing} needs reading: the client did not come out clean."
           fi
