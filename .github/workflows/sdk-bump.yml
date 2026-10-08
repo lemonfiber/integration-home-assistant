@@ -32,10 +32,13 @@ env:
   BRANCH: chore/the-integration-takes-the-client
   SDK: lemonfiber/sdk-python
   VENDOR: custom_components/lemonfiber/_vendor
-  # Every `uv` these steps run syncs from the lockfile and nothing else,
-  # building no source distribution.
+  # Every `uv` these steps run reads the lockfile and nothing else, builds no
+  # source distribution, and syncs only where a step says so: the recipes run
+  # `uv run` themselves, and a sync there would try to install the two packages
+  # the explicit sync leaves out, which have no wheel.
   UV_LOCKED: "1"
   UV_NO_BUILD: "1"
+  UV_NO_SYNC: "1"
 
 jobs:
   bump:
