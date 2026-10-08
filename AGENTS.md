@@ -1,10 +1,11 @@
 # AGENTS.md — integration-home-assistant
 
-Guidance for any AI agent working in this repo.
-
-> **Common rules for every lemonfiber repo are canonical in the spec:**
-> [50-governance/ai-contributors.md](https://github.com/lemonfiber/spec/blob/main/50-governance/ai-contributors.md).
-> Read them. This file is the `integration-home-assistant`-specific header only.
+> **Start at the roadmap and board on [lemonfiber.app](https://lemonfiber.app),
+> rendered from the report of where every unreleased version stands. Then the
+> rules** every repository shares:
+> [working in the repositories](https://github.com/lemonfiber/spec/blob/main/50-governance/working-in-the-repositories.md)
+> and [the rules for agents](https://github.com/lemonfiber/spec/blob/main/50-governance/ai-contributors.md).
+> This file holds only what is true of this repository.
 
 ## What this repo is
 
@@ -30,8 +31,6 @@ and [F12](https://github.com/lemonfiber/spec/blob/main/10-functional/features/f-
   `# pragma: no cover`; the architecture tests refuse each of them.
 - **Every string shown is translated**, in `strings.json`, `translations/en.json`
   (identical to it) and `translations/nl.json` (`F12-R11`).
-- **Comments and docstrings state what a thing is or does.** Reasoning and
-  history belong in the spec.
 
 ## Checks
 
@@ -42,12 +41,9 @@ uv run just test      # the suite alone
 ```
 
 Mutation testing (`just mutation`), `hassfest`, HACS's validation and
-`sdk-drift` are merge gates that run in CI; do not run mutation locally.
+`sdk-drift` are merge gates that run in CI.
 
 ## Before you open a PR
 
 - `uv run just ci` is clean.
 - `custom_components/lemonfiber/quality_scale.yaml` says where each rule stands.
-- Cite a spec identifier in a commit `Spec:` trailer and the PR body.
-- Sign off every commit (`git commit -s`); the DCO gate fails without it.
-- No AI attribution in commits, PR bodies, or comments.
