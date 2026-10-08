@@ -13,12 +13,12 @@ staged=$(git diff --cached --name-only --diff-filter=ACM -- '*.py')
 [ -x .venv/bin/ruff ] || exit 0
 
 # shellcheck disable=SC2086
-.venv/bin/ruff format --check $staged || {
+.venv/bin/ruff format --check --force-exclude $staged || {
 	echo "pre-commit: ruff would reformat a staged file. Run \`uv run just fix\`." >&2
 	exit 1
 }
 # shellcheck disable=SC2086
-.venv/bin/ruff check $staged || {
+.venv/bin/ruff check --force-exclude $staged || {
 	echo "pre-commit: ruff found something in a staged file. Run \`uv run just fix\`, then fix what remains." >&2
 	exit 1
 }

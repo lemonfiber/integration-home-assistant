@@ -93,6 +93,7 @@ type RefusalCode = typing.Literal[
     "SERVE-8",
     "SPACE-6",
     "STACK-1",
+    "STACK-10",
     "STACK-2",
     "STACK-3",
     "STACK-4",
@@ -439,6 +440,9 @@ REFUSAL_CODES: typing.Final[typing.Mapping[RefusalCode, ListedRefusal]] = types.
         ),
         "STACK-1": ListedRefusal(
             "STACK_UNREADABLE", 500, "Raised when a stack directory holds no readable manifest."
+        ),
+        "STACK-10": ListedRefusal(
+            "STACK_UNASSEMBLED", 500, "Raised when a manifest's files are not laid out as the contract says."
         ),
         "STACK-2": ListedRefusal(
             "STACK_UNUSABLE", 500, "Raised when a manifest is readable and this build cannot use it."
