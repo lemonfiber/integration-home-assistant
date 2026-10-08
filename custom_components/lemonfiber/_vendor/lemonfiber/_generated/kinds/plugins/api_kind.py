@@ -313,25 +313,6 @@ class PluginOverriding(typing.TypedDict):
     """What changing it is for."""
 
 
-class PluginPair(typing.TypedDict):
-    """One value a recipe could carry to one destination, as the operator agrees to it."""
-
-    approval: typing.NotRequired[str]
-    """What approving this pair is written as, on the command line and over the web,
-    where it carries the value to a host outside the stack. Absent where it reaches
-    a service in this stack, which takes nothing off the machine and asks for no
-    approval.
-    """
-    origin: str
-    """Whose value it is, as its input or the step that captures it says; empty where
-    neither does.
-    """
-    to: str
-    """Where it may be carried, by the name the manifest gives it."""
-    value: str
-    """What the value is called within the recipe."""
-
-
 class PluginPlaced(typing.TypedDict):
     """One service of an installed plugin, as it was placed."""
 
@@ -515,6 +496,20 @@ are read from `extension-points.json` rather than restated here. What this type
 fixes is that a contribution is declared in this block and nowhere else, and that
 it carries nothing outside the union of the rows the published points take.
 """
+
+
+PluginPair = typing.TypedDict(
+    "PluginPair",
+    {
+        "approval": typing.NotRequired[str],
+        "from": typing.NotRequired[str],
+        "origin": str,
+        "release": typing.NotRequired[str],
+        "to": str,
+        "value": str,
+    },
+)
+"""One value a recipe could carry to one destination, as the operator agrees to it."""
 
 
 __all__ = [
