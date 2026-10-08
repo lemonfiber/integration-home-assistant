@@ -21,6 +21,8 @@ type RefusalCode = typing.Literal[
     "ASK-1",
     "ASK-10",
     "ASK-11",
+    "ASK-12",
+    "ASK-13",
     "ASK-2",
     "ASK-3",
     "ASK-4",
@@ -83,6 +85,7 @@ type RefusalCode = typing.Literal[
     "RESTORE-11",
     "SERVE-6",
     "SERVE-7",
+    "SERVE-8",
     "SPACE-6",
     "STACK-1",
     "STACK-2",
@@ -155,6 +158,16 @@ REFUSAL_CODES: typing.Final[typing.Mapping[RefusalCode, ListedRefusal]] = types.
             "NOT_A_KEY_REQUEST",
             400,
             "Raised where the body of a mint is not a key's name, scope, purpose and the password.",
+        ),
+        "ASK-12": ListedRefusal(
+            "NOT_AN_IDEMPOTENCY_KEY",
+            400,
+            "Raised where an action's `Idempotency-Key` is not one to 255 visible characters, or is given more than once.",
+        ),
+        "ASK-13": ListedRefusal(
+            "IDEMPOTENCY_KEY_REUSED",
+            400,
+            "Raised where an `Idempotency-Key` already sent with one action and its arguments is sent with another.",
         ),
         "ASK-2": ListedRefusal(
             "MISSING_ARGUMENT", 400, "Raised where an action was not given an argument it needs."
@@ -387,6 +400,9 @@ REFUSAL_CODES: typing.Final[typing.Mapping[RefusalCode, ListedRefusal]] = types.
         "SERVE-6": ListedRefusal("UNRENDERABLE", 500, "Raised when an answer could not be rendered."),
         "SERVE-7": ListedRefusal(
             "NO_JOB_NAME", 500, "Raised when this machine will not supply the randomness a job is named with."
+        ),
+        "SERVE-8": ListedRefusal(
+            "UNANSWERED", 500, "Raised when an action's work ended before it had an answer to give."
         ),
         "SPACE-6": ListedRefusal(
             "ANOTHER_OFFER", 400, "Raised when an agreement names an offer that is not the one standing now."
