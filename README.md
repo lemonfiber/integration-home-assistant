@@ -9,14 +9,14 @@ It reaches the stack only through [sdk-python](https://github.com/lemonfiber/sdk
 an integration key the operator mints on the stack. It never asks for the operator password.
 
 **Status:** installed from this repository as a HACS custom repository; it is not in HACS's
-default list. It needs `lemonfiber key`, which no lemonfiber release has yet: build lemonfiber
-from its `main` branch.
+default list.
 
 ## Requirements
 
 - Home Assistant 2026.10 or newer, with [HACS](https://hacs.xyz).
-- A lemonfiber stack whose web API is served over https on your network, on a fixed port,
-  reachable from the machine Home Assistant runs on.
+- A lemonfiber stack on [v0.17.0](https://github.com/lemonfiber/lemonfiber/releases/tag/v0.17.0)
+  or newer, the first release with `lemonfiber key`, whose web API is served over https on
+  your network, on a fixed port, reachable from the machine Home Assistant runs on.
 
 ## Installing it
 
