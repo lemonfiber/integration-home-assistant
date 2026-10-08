@@ -2,8 +2,8 @@
 
 A Home Assistant integration for [lemonfiber](https://github.com/lemonfiber/lemonfiber), the
 tool that sets up and runs a self-hosted media stack. It shows the stack's health, downloads,
-disk space and doctor findings in Home Assistant, and gives you a few controls such as pausing
-downloads.
+disk space, doctor findings and alerts in Home Assistant, and gives you a few controls: running
+the doctor, restarting services, updating them, and pausing downloads.
 
 It reaches the stack only through [sdk-python](https://github.com/lemonfiber/sdk-python), with
 an integration key the operator mints on the stack. It never asks for the operator password.
@@ -70,25 +70,33 @@ With a `read` or `act` key, one device for the stack, carrying:
 | Data disk free | The bytes free on the data volume |
 | VPN | Whether downloads leave through the tunnel; present only where the stack has a VPN |
 | Advisory, warning, error and critical findings | How many of the doctor's findings carry each severity, with what each says happened as an attribute. Advisory findings are advice rather than anything wrong, and their entity is off until enabled |
-| Update of each service | The version a service stands on and the version this build of lemonfiber pins it at, for every service the dashboard names |
+| Stack update | Every service that is off its pin, by its id, at the version it stands on and the version it would move to, with what each step means as the release notes. Where nothing would move, both versions are the version of lemonfiber the stack runs |
+| Update of each service | The version a service stands on and the version this build of lemonfiber pins it at, for every service the dashboard names, with what the step means as the release summary. Off until enabled; the stack update covers them all |
+| Alerts | The last alert the stack raised or resolved: the event type is `onset` or `resolved`, and the attributes say what happened, what it means, what to do, its severity, its kind, the checks it speaks for and the alert's identity |
 
 With an `act` key, where the stack says the key may call the action, also:
 
 | Entity | What it does |
 |---|---|
 | Run the doctor | Runs every check, follows the run to its end, and reads the findings again |
+| Restart the stack | Restarts every service the stack runs. Shown under the device's configuration |
+| Restart each service | Restarts the one service, leaving the rest of the stack alone, for every service the dashboard names. Shown under the device's configuration, and off until enabled |
+| Install, on the stack update and on each service's update | Updates the stack, or the one service, to the versions this build of lemonfiber pins. Pressing install agrees to what the step costs. A step the stack refuses to take offers no install |
 | Downloads paused | Pauses every download client when turned on, and resumes them when turned off. The stack does not report whether they are paused, so the switch shows what it last asked for |
 
 A control follows the job it started to its end. A failure is shown in the stack's own words, and every outcome is fired as a `lemonfiber_job` event carrying the entry, the action, the job's name where it started one, the outcome (`finished`, `ended` or `failed`) and, for a failure, the stack's sentence.
 
 A member's key adds the entry and no entity.
 
+Every alert is also fired as a `lemonfiber_alert` event, at its onset and at its resolution, carrying the entry, the alert's identity (the same on an onset and on the resolution that ends it), `moment` (`onset` or `resolved`), `severity`, `kind`, `check`, `affected`, `summary` (what happened), `meaning` (what it means), `remedies` (what to do) and, where the stack gave one, `exit`. Neither the event nor the entity carries the key, the address or the pin.
+
 ## What it is for
 
 - Seeing at a glance, beside the rest of the house, whether the stack is healthy and what is wrong when it is not.
 - Being told when the stack needs attention, the disk is filling or downloads stop leaving through the VPN, wherever Home Assistant already reaches you.
 - Keeping downloads off the line while the household streams, with an `act` key.
-- Knowing which services this build of lemonfiber would update.
+- Knowing which services this build of lemonfiber would update, and updating them, with an `act` key.
+- Hearing about an alert, and its resolution, with what to do about it.
 
 ## Examples
 
@@ -131,6 +139,22 @@ automation:
           entity_id: switch.nas_local_downloads_paused
 ```
 
+Pass each alert on with what to do about it, and say when it is over:
+
+```yaml
+automation:
+  - alias: "lemonfiber alert"
+    triggers:
+      - trigger: event
+        event_type: lemonfiber_alert
+    actions:
+      - action: notify.notify
+        data:
+          message: >-
+            {% if trigger.event.data.moment == 'onset' %}{{ trigger.event.data.summary }}
+            {{ trigger.event.data.meaning }} {{ trigger.event.data.remedies | first }}{% else %}Resolved: {{ trigger.event.data.summary }}{% endif %}
+```
+
 Say when a control's action failed, in the stack's words:
 
 ```yaml
@@ -149,7 +173,7 @@ automation:
 
 ## How it stays current
 
-The health, the downloads, the disk and the VPN come from the stack's event stream as the stack sends them. When the stream breaks, every one of them shows unavailable until the stream says what it is now; a value from before the break is never shown as current. A figure the stack itself cannot read at the moment shows unknown.
+The health, the downloads, the disk, the VPN and the alerts come from the stack's event stream as the stack sends them. When the stream breaks, every one of them shows unavailable until the stream says what it is now; a value from before the break is never shown as current. A figure the stack itself cannot read at the moment shows unknown.
 
 Every entity shows unavailable while the stream has a gap, including the doctor's findings and the services' versions, which are read rather than streamed.
 
@@ -160,7 +184,8 @@ When the key is refused, Home Assistant asks for a new one; only the key is aske
 ## Known limitations
 
 - Disk free is shown for the data volume, the one the event stream carries.
-- There is no restart button and no alert events, an update entity shows an update without installing it, and there is no entity for active streams.
+- There is no entity for active streams.
+- The stack does not report whether the download clients are paused, so the downloads switch shows what it last asked for.
 
 ## Troubleshooting
 

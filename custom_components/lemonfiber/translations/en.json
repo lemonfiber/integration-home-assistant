@@ -135,16 +135,71 @@
     "update": {
       "service_update": {
         "name": "Update of {service}"
+      },
+      "stack_update": {
+        "name": "Stack update"
       }
     },
     "button": {
       "run_the_doctor": {
         "name": "Run the doctor"
+      },
+      "restart_service": {
+        "name": "Restart {service}"
+      },
+      "restart_stack": {
+        "name": "Restart the stack"
       }
     },
     "switch": {
       "downloads_paused": {
         "name": "Downloads paused"
+      }
+    },
+    "event": {
+      "alerts": {
+        "name": "Alerts",
+        "state_attributes": {
+          "event_type": {
+            "state": {
+              "onset": "Started",
+              "resolved": "Resolved"
+            }
+          },
+          "severity": {
+            "name": "Severity",
+            "state": {
+              "advisory": "Advisory",
+              "warning": "Warning",
+              "error": "Error",
+              "critical": "Critical"
+            }
+          },
+          "kind": {
+            "name": "Kind"
+          },
+          "check": {
+            "name": "Check"
+          },
+          "affected": {
+            "name": "Affected checks"
+          },
+          "summary": {
+            "name": "What happened"
+          },
+          "meaning": {
+            "name": "What it means"
+          },
+          "remedies": {
+            "name": "What to do"
+          },
+          "id": {
+            "name": "Alert"
+          },
+          "exit": {
+            "name": "Exit code"
+          }
+        }
       }
     }
   },

@@ -37,7 +37,7 @@ async def test_a_read_key_follows_the_stream_and_builds_the_entities(
     assert entry.state is ConfigEntryState.LOADED
     assert entry.runtime_data.connected.scope is Scope.READ
     entities = er.async_entries_for_config_entry(er.async_get(hass), entry.entry_id)
-    assert len(entities) == 13
+    assert len(entities) == 15
     assert all(one.unique_id.startswith(f"{entry.entry_id}-") for one in entities)
     assert stack.asked("/api/events") == 1
     assert await hass.config_entries.async_unload(entry.entry_id)

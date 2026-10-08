@@ -101,6 +101,7 @@ class Stack:
         """Make a certificate of the stand-in's own, and the pin that names it."""
         self.arrived: list[tuple[str, str, Mapping[str, str]]] = []
         self.queries: list[tuple[str, Mapping[str, str]]] = []
+        self.bodies: list[tuple[str, object]] = []
         self.feeds: list[Feed] = []
         self._replies: dict[str, list[Reply | Feed]] = {}
         authority = trustme.CA()
@@ -134,6 +135,8 @@ class Stack:
     async def _handle(self, request: web.Request) -> web.StreamResponse:
         self.arrived.append((request.method, request.path, dict(request.headers)))
         self.queries.append((request.path, dict(request.query)))
+        if request.can_read_body:
+            self.bodies.append((request.path, await request.json()))
         queued = self._replies.get(request.path)
         if not queued:
             return web.Response(status=599, text="the stand-in was not told how to answer this")

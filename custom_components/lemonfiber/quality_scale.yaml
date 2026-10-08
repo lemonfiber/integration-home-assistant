@@ -33,7 +33,7 @@ rules:
     comment: The integration provides no triggers.
   entity-event-setup:
     status: done
-    comment: Every entity is a coordinator entity; the coordinators hold the subscriptions.
+    comment: Every entity is a coordinator entity; the coordinators hold the subscriptions, and the alerts entity subscribes to the stream's alerts when added and lets go when removed.
   entity-unique-id: done
   has-entity-name: done
   runtime-data: done
@@ -78,11 +78,14 @@ rules:
     comment: An entry is one stack, and the stack is its one device.
   entity-category:
     status: done
-    comment: Every entity is a primary reading of the stack.
+    comment: The restart buttons are configuration; every other entity is a primary reading or control of the stack.
   entity-device-class: done
   entity-disabled-by-default:
     status: done
-    comment: Advisory findings, advice rather than anything wrong, are counted by an entity left off until enabled.
+    comment: >-
+      Advisory findings, advice rather than anything wrong, are counted by an entity left off
+      until enabled, and each service's restart button and update entity are left off beside the
+      stack's own.
   entity-translations: done
   exception-translations: done
   icon-translations: done

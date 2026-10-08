@@ -7,6 +7,7 @@ from typing import TYPE_CHECKING, Any, Final, cast
 import pytest
 from homeassistant.config_entries import SOURCE_REAUTH
 from homeassistant.const import CONF_API_KEY, CONF_URL
+from homeassistant.helpers import entity_registry as er
 from lemonfiber import KEY_CALLABLE, Read
 from lemonfiber.reads import ACTIONS
 from pytest_homeassistant_custom_component.common import MockConfigEntry
@@ -153,26 +154,35 @@ PROVENANCE: Final = envelope(
 )
 """Where the services come from: two of the dashboard's three, each at the tag this build pins."""
 
-UPDATE: Final = envelope(
-    "update",
-    {
-        "applied": [],
-        "changes": [
-            {
-                "service": "sonarr",
-                "current": "4.0.14",
-                "target": "4.0.15",
-                "because": "",
-                "irreversible": False,
-            },
-        ],
-        "confirmed": False,
-        "in_flight": [],
-        "rehearsed": False,
-        "stack_edits": [],
-        "state": "updates-available",
-    },
-)
+SONARR_STEP: Final[dict[str, object]] = {
+    "service": "sonarr",
+    "current": "4.0.14",
+    "target": "4.0.15",
+    "because": "A patch release: fixes, nothing that changes how it is set up.",
+    "irreversible": False,
+    "jump": "patch",
+    "refused": False,
+}
+"""Sonarr's step, from the tag it stands on to its pin."""
+
+
+def update(*changes: dict[str, object]) -> dict[str, object]:
+    """Return what updating the stack would move: these steps."""
+    return envelope(
+        "update",
+        {
+            "applied": [],
+            "changes": list(changes),
+            "confirmed": False,
+            "in_flight": [],
+            "rehearsed": False,
+            "stack_edits": [],
+            "state": "updates-available" if changes else "current",
+        },
+    )
+
+
+UPDATE: Final = update(SONARR_STEP)
 """What updating the stack would move: Sonarr, from the tag it stands on to its pin."""
 
 
@@ -217,6 +227,18 @@ def entry(hass: HomeAssistant, stack: Stack) -> MockConfigEntry:
     added = entry_for(stack)
     added.add_to_hass(hass)
     return added
+
+
+def enabled(hass: HomeAssistant, entry: MockConfigEntry, entity_id: str, key: str) -> None:
+    """Register an entity left off by default as enabled, before the entry is set up, under the id it would get."""
+    domain, object_id = entity_id.split(".")
+    er.async_get(hass).async_get_or_create(
+        domain,
+        DOMAIN,
+        f"{entry.entry_id}-{key}",
+        config_entry=entry,
+        suggested_object_id=object_id,
+    )
 
 
 async def until(hass: HomeAssistant, done: Callable[[], bool]) -> None:

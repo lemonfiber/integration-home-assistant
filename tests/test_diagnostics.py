@@ -70,7 +70,7 @@ async def test_what_the_stack_said_is_handed_over_with_its_scope_and_state(
     assert dashboard["door"] == dashboard["household"] == REDACTED
     assert dashboard["health"]["standing"] == "healthy"
     assert len(said["diagnosis"]["findings"]) == 5
-    assert said["versions"].running == {"sonarr": "4.0.14"}
+    assert said["versions"].changes["sonarr"]["current"] == "4.0.14"
     assert said["entry"]["data"] == {"url": REDACTED, "api_key": REDACTED, "pin": REDACTED}
     assert said["entry"]["title"] == said["entry"]["unique_id"] == REDACTED
 

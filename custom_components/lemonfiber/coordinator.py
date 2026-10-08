@@ -1,24 +1,27 @@
 # Copyright (c) 2026 NightWorksIO
-"""The stack as Home Assistant follows it: the dashboard from the event stream, the doctor's findings and the services' versions by read."""
+"""The stack as Home Assistant follows it: the dashboard and the alerts from the event stream, the doctor's findings and the services' versions by read."""
 
 import asyncio
 from dataclasses import dataclass
 from enum import StrEnum
+from functools import partial
 from typing import TYPE_CHECKING, Final, override
 
+from homeassistant.core import CALLBACK_TYPE, callback
 from homeassistant.exceptions import ConfigEntryAuthFailed
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 from lemonfiber import Gap, LemonfiberError, Live, NotAdmittedError, Read, expect
 
+from .alerts import alert_in, fire
 from .connection import NotConnectedError, Reason, refused, scope_of
 from .const import DIAGNOSIS_EVERY, DOMAIN, FIRST_SNAPSHOT_WITHIN, LOGGER, VERSIONS_EVERY
 
 if TYPE_CHECKING:
-    from collections.abc import Mapping
+    from collections.abc import Callable, Mapping
 
     from homeassistant.core import HomeAssistant
     from lemonfiber import Arrival, AsyncClient, AsyncStream
-    from lemonfiber.contract import DoctorReport, Snapshot
+    from lemonfiber.contract import Alert, DoctorReport, Snapshot, UpdateChange
 
     from .connection import Connected
     from .runtime import LemonfiberConfigEntry
@@ -103,16 +106,17 @@ def read_failed(error: LemonfiberError) -> ConfigEntryAuthFailed | UpdateFailed:
 
 @dataclass(frozen=True, slots=True)
 class Versions:
-    """The version of each service the stack runs: the tag this build pins, and the one standing on it where they differ."""
+    """The version of each service the stack runs: the tag this build pins, and the step to it where one is owed."""
 
     pinned: Mapping[str, str]
     """Each service's id, to the tag this build of lemonfiber pins it at."""
-    running: Mapping[str, str]
-    """Each service's id, to the tag it stands on, for every service that is not on its pin."""
+    changes: Mapping[str, UpdateChange]
+    """Each service's id, to what updating it would change, for every service that is not on its pin."""
 
     def installed(self, service: str) -> str | None:
         """Return the tag a service stands on, or None where the stack names no version for it."""
-        return self.running.get(service, self.pinned.get(service))
+        change = self.changes.get(service)
+        return self.pinned.get(service) if change is None else change["current"]
 
 
 class VersionsCoordinator(DataUpdateCoordinator["Versions | None"]):
@@ -140,12 +144,12 @@ class VersionsCoordinator(DataUpdateCoordinator["Versions | None"]):
             raise read_failed(error) from error
         return Versions(
             pinned={service["id"]: service["pinned"] for service in provenance["services"]},
-            running={change["service"]: change["current"] for change in update["changes"]},
+            changes={change["service"]: change for change in update["changes"]},
         )
 
 
 class StreamCoordinator(DataUpdateCoordinator["Snapshot"]):
-    """The dashboard as the event stream carries it, unavailable from a gap until the stream says it again."""
+    """The dashboard as the event stream carries it, unavailable from a gap until the stream says it again, and each alert it carries fired."""
 
     config_entry: LemonfiberConfigEntry
 
@@ -164,6 +168,7 @@ class StreamCoordinator(DataUpdateCoordinator["Snapshot"]):
         self.diagnosis = DiagnosisCoordinator(hass, entry, connected.client)
         self._connected = connected
         self._stream = stream
+        self._alert_listeners: list[Callable[[Alert], None]] = []
 
     async def follow(self) -> None:
         """Follow the stream until the key is refused or the stack is lost, then hand the entry back to Home Assistant.
@@ -179,12 +184,25 @@ class StreamCoordinator(DataUpdateCoordinator["Snapshot"]):
                     self._lost(State.STALE)
                 elif (snapshot := dashboard_in(arrival)) is not None:
                     self._carried(snapshot)
+                elif (alert := alert_in(arrival)) is not None:
+                    self._alerted(alert)
         except NotAdmittedError:
             self._lost(State.REFUSED)
             self.config_entry.async_start_reauth(self.hass)
         except LemonfiberError:
             self._lost(State.UNREACHABLE)
             self.hass.config_entries.async_schedule_reload(self.config_entry.entry_id)
+
+    @callback
+    def async_add_alert_listener(self, listener: Callable[[Alert], None]) -> CALLBACK_TYPE:
+        """Call a listener with every alert the stream carries from now on, until the returned callback is called."""
+        self._alert_listeners.append(listener)
+        return partial(self._alert_listeners.remove, listener)
+
+    def _alerted(self, alert: Alert) -> None:
+        fire(self.hass, self.config_entry, alert)
+        for listener in tuple(self._alert_listeners):
+            listener(alert)
 
     def _carried(self, snapshot: Snapshot) -> None:
         resumed = self.state is State.STALE
