@@ -135,16 +135,71 @@
     "update": {
       "service_update": {
         "name": "Update van {service}"
+      },
+      "stack_update": {
+        "name": "Stack-update"
       }
     },
     "button": {
       "run_the_doctor": {
         "name": "Dokter laten kijken"
+      },
+      "restart_service": {
+        "name": "{service} herstarten"
+      },
+      "restart_stack": {
+        "name": "De stack herstarten"
       }
     },
     "switch": {
       "downloads_paused": {
         "name": "Downloads gepauzeerd"
+      }
+    },
+    "event": {
+      "alerts": {
+        "name": "Meldingen",
+        "state_attributes": {
+          "event_type": {
+            "state": {
+              "onset": "Begonnen",
+              "resolved": "Opgelost"
+            }
+          },
+          "severity": {
+            "name": "Ernst",
+            "state": {
+              "advisory": "Advies",
+              "warning": "Waarschuwing",
+              "error": "Fout",
+              "critical": "Kritiek"
+            }
+          },
+          "kind": {
+            "name": "Soort"
+          },
+          "check": {
+            "name": "Controle"
+          },
+          "affected": {
+            "name": "Betrokken controles"
+          },
+          "summary": {
+            "name": "Wat er gebeurde"
+          },
+          "meaning": {
+            "name": "Wat het betekent"
+          },
+          "remedies": {
+            "name": "Wat te doen"
+          },
+          "id": {
+            "name": "Melding"
+          },
+          "exit": {
+            "name": "Afsluitcode"
+          }
+        }
       }
     }
   },

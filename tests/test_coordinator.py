@@ -23,7 +23,7 @@ if TYPE_CHECKING:
 HEALTH: Final = "sensor.127_0_0_1_health"
 QUEUE: Final = "sensor.127_0_0_1_download_queue"
 CRITICAL: Final = "sensor.127_0_0_1_critical_findings"
-SONARR: Final = "update.127_0_0_1_update_of_sonarr"
+STACK_UPDATE: Final = "update.127_0_0_1_stack_update"
 
 
 def state(hass: HomeAssistant, entity_id: str) -> str:
@@ -82,19 +82,19 @@ async def test_a_gap_shows_every_stream_built_entity_unavailable_until_the_strea
     serve(stack, "read", first, second)
     await set_up(hass, entry)
     stream = entry.runtime_data.technical.stream
-    await until(hass, lambda: state(hass, CRITICAL) == "2" and state(hass, SONARR) == STATE_ON)
+    await until(hass, lambda: state(hass, CRITICAL) == "2" and state(hass, STACK_UPDATE) == STATE_ON)
     first.end()
     await until(hass, lambda: state(hass, HEALTH) == STATE_UNAVAILABLE)
     assert stream.state is State.STALE
     assert state(hass, QUEUE) == STATE_UNAVAILABLE
     assert state(hass, CRITICAL) == STATE_UNAVAILABLE
-    assert state(hass, SONARR) == STATE_UNAVAILABLE
+    assert state(hass, STACK_UPDATE) == STATE_UNAVAILABLE
     await until(hass, lambda: stack.asked("/api/events") == 2)
     second.say(event("dashboard", dashboard()))
     await until(hass, lambda: state(hass, HEALTH) == "healthy")
     assert stream.state is State.CONNECTED
     assert state(hass, CRITICAL) == "2"
-    assert state(hass, SONARR) == STATE_ON
+    assert state(hass, STACK_UPDATE) == STATE_ON
     await until(hass, lambda: stack.asked("/api/capabilities") == 2)
     assert entry.state is ConfigEntryState.LOADED
     assert stack.asked("/api/version") == 1

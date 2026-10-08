@@ -10,12 +10,13 @@ import pytest
 
 from custom_components.lemonfiber import REPAIRABLE
 from custom_components.lemonfiber.binary_sensor import DASHBOARD_BINARY_SENSORS
-from custom_components.lemonfiber.button import RUN_THE_DOCTOR
+from custom_components.lemonfiber.button import RESTART_SERVICE, RESTART_STACK, RUN_THE_DOCTOR
 from custom_components.lemonfiber.connection import Reason
+from custom_components.lemonfiber.event import ALERTS, MOMENTS
 from custom_components.lemonfiber.readings import SEVERITIES, STANDINGS
 from custom_components.lemonfiber.sensor import DASHBOARD_SENSORS, FINDINGS_SENSORS
 from custom_components.lemonfiber.switch import DOWNLOADS_PAUSED
-from custom_components.lemonfiber.update import SERVICE_UPDATE
+from custom_components.lemonfiber.update import SERVICE_UPDATE, STACK_UPDATE
 
 INTEGRATION: Final = pathlib.Path(__file__).resolve().parent.parent / "custom_components" / "lemonfiber"
 PLACEHOLDER: Final = re.compile(r"\{(\w+)\}")
@@ -80,6 +81,21 @@ def test_every_entity_has_its_name_and_icon() -> None:
     for one in DASHBOARD_BINARY_SENSORS:
         assert f"entity.binary_sensor.{one.translation_key}.name" in ENGLISH
     assert f"entity.update.{SERVICE_UPDATE}.name" in ENGLISH
+    assert f"entity.update.{STACK_UPDATE.translation_key}.name" in ENGLISH
+    assert f"entity.button.{RESTART_STACK.translation_key}.name" in ENGLISH
+    assert f"entity.button.{RESTART_SERVICE}.name" in ENGLISH
+    assert f"entity.event.{ALERTS.translation_key}.name" in ENGLISH
+    assert f"entity.event.{ALERTS.translation_key}.default" in icons
     for platform, one in (("button", RUN_THE_DOCTOR), ("switch", DOWNLOADS_PAUSED)):
         assert f"entity.{platform}.{one.translation_key}.name" in ENGLISH
         assert f"entity.{platform}.{one.translation_key}.default" in icons
+
+
+@pytest.mark.parametrize("moment", MOMENTS)
+def test_every_way_an_alert_goes_has_its_words(moment: str) -> None:
+    assert f"entity.event.{ALERTS.translation_key}.state_attributes.event_type.state.{moment}" in ENGLISH
+
+
+@pytest.mark.parametrize("severity", SEVERITIES)
+def test_every_severity_an_alert_carries_has_its_words(severity: str) -> None:
+    assert f"entity.event.{ALERTS.translation_key}.state_attributes.severity.state.{severity}" in ENGLISH

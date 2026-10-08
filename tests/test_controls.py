@@ -1,16 +1,24 @@
 # Copyright (c) 2026 NightWorksIO
-"""The controls an `act` key gets without a rehearsal: running the doctor, and pausing or resuming downloads."""
+"""The controls an `act` key gets without a rehearsal: running the doctor, restarting, and pausing or resuming downloads."""
 
 from typing import TYPE_CHECKING, Final, cast
 
 import pytest
-from homeassistant.const import ATTR_ASSUMED_STATE, ATTR_ENTITY_ID, STATE_OFF, STATE_ON, STATE_UNKNOWN
+from homeassistant.const import (
+    ATTR_ASSUMED_STATE,
+    ATTR_ENTITY_ID,
+    STATE_OFF,
+    STATE_ON,
+    STATE_UNKNOWN,
+    EntityCategory,
+)
 from homeassistant.exceptions import HomeAssistantError
+from homeassistant.helpers import entity_registry as er
 from pytest_homeassistant_custom_component.common import async_capture_events
 
 from custom_components.lemonfiber.connection import Reason
 from custom_components.lemonfiber.jobs import JOB_EVENT
-from tests.conftest import DIAGNOSIS, capabilities, reauthenticating, serve, until
+from tests.conftest import DIAGNOSIS, capabilities, enabled, reauthenticating, serve, until
 from tests.stack import Reply, envelope, problem
 
 if TYPE_CHECKING:
@@ -21,6 +29,9 @@ if TYPE_CHECKING:
 
 DOCTOR: Final = "button.127_0_0_1_run_the_doctor"
 PAUSED: Final = "switch.127_0_0_1_downloads_paused"
+RESTART_STACK: Final = "button.127_0_0_1_restart_the_stack"
+RESTART_SONARR: Final = "button.127_0_0_1_restart_sonarr"
+RESTARTED: Final = Reply(202, envelope("job", {"action": "restart", "job": "j-2"}))
 STARTED: Final = Reply(202, envelope("job", {"action": "diagnose", "job": "j-1"}))
 PAUSING: Final = Reply(body=envelope("pausing", {"asked": "pause", "clients": [], "rehearsed": False}))
 
@@ -48,6 +59,7 @@ async def test_a_read_key_gets_no_control(hass: HomeAssistant, stack: Stack, ent
     serve(stack)
     await set_up(hass, entry)
     assert hass.states.get(DOCTOR) is hass.states.get(PAUSED) is None
+    assert hass.states.async_entity_ids("button") == []
 
 
 async def test_a_control_whose_action_is_switched_off_is_not_created(
@@ -60,9 +72,11 @@ async def test_a_control_whose_action_is_switched_off_is_not_created(
     states = cast("dict[str, dict[str, str]]", switched_off["data"])["capabilities"]
     states["/api/actions/diagnose"] = "unconfigured"
     states["/api/actions/downloads-resume"] = "unpermitted"
+    states["/api/actions/restart"] = "unconfigured"
     stack.reply("/api/capabilities", Reply(body=switched_off))
     await set_up(hass, entry)
     assert hass.states.get(DOCTOR) is hass.states.get(PAUSED) is None
+    assert hass.states.async_entity_ids("button") == []
 
 
 async def test_running_the_doctor_follows_its_job_and_reads_the_findings_again(
@@ -178,3 +192,64 @@ async def test_a_refused_toggle_leaves_the_switch_as_it_was(
     with pytest.raises(HomeAssistantError):
         await hass.services.async_call("switch", "turn_on", {ATTR_ENTITY_ID: PAUSED}, blocking=True)
     assert state(hass, PAUSED) == STATE_UNKNOWN
+
+
+async def test_a_service_is_restarted_alone_and_the_restart_followed(
+    hass: HomeAssistant,
+    stack: Stack,
+    entry: MockConfigEntry,
+) -> None:
+    serve(stack, "act")
+    stack.reply("/api/actions/restart", RESTARTED)
+    stack.reply("/api/jobs/j-2", Reply(body=envelope("lifecycle", {"rehearsed": False})))
+    enabled(hass, entry, RESTART_SONARR, "restart_sonarr")
+    await set_up(hass, entry)
+    fired = async_capture_events(hass, JOB_EVENT)
+    await hass.services.async_call("button", "press", {ATTR_ENTITY_ID: RESTART_SONARR}, blocking=True)
+    assert stack.bodies == [("/api/actions/restart", {"services": ["sonarr"]})]
+    assert [event.data for event in fired] == [
+        {"entry_id": entry.entry_id, "action": "restart", "job": "j-2", "outcome": "finished"},
+    ]
+
+
+async def test_the_whole_stack_is_restarted_by_naming_no_service(
+    hass: HomeAssistant,
+    stack: Stack,
+    entry: MockConfigEntry,
+) -> None:
+    serve(stack, "act")
+    stack.reply("/api/actions/restart", RESTARTED)
+    stack.reply("/api/jobs/j-2", Reply(body=envelope("lifecycle", {"rehearsed": False})))
+    await set_up(hass, entry)
+    await hass.services.async_call("button", "press", {ATTR_ENTITY_ID: RESTART_STACK}, blocking=True)
+    assert stack.bodies == [("/api/actions/restart", {})]
+
+
+async def test_a_refused_restart_is_said_in_the_stacks_words(
+    hass: HomeAssistant,
+    stack: Stack,
+    entry: MockConfigEntry,
+) -> None:
+    serve(stack, "act")
+    stack.reply("/api/actions/restart", Reply(409, problem("BUSY-1", "An update is running.")))
+    enabled(hass, entry, RESTART_SONARR, "restart_sonarr")
+    await set_up(hass, entry)
+    with pytest.raises(HomeAssistantError) as raised:
+        await hass.services.async_call("button", "press", {ATTR_ENTITY_ID: RESTART_SONARR}, blocking=True)
+    assert raised.value.translation_placeholders == {"sentence": "An update is running."}
+
+
+async def test_the_stack_restart_is_on_and_each_services_left_off_until_enabled(
+    hass: HomeAssistant,
+    stack: Stack,
+    entry: MockConfigEntry,
+) -> None:
+    serve(stack, "act")
+    await set_up(hass, entry)
+    assert hass.states.get(RESTART_STACK) is not None
+    assert hass.states.get(RESTART_SONARR) is None
+    registry = er.async_get(hass)
+    for entity_id in (RESTART_STACK, RESTART_SONARR):
+        held = registry.async_get(entity_id)
+        assert held is not None
+        assert held.entity_category is EntityCategory.CONFIG

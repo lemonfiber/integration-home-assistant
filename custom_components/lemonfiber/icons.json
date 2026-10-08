@@ -43,6 +43,11 @@
           "off": "mdi:play-circle-outline"
         }
       }
+    },
+    "event": {
+      "alerts": {
+        "default": "mdi:bell-alert-outline"
+      }
     }
   }
 }

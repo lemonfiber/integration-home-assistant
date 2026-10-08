@@ -33,6 +33,7 @@ REPAIRABLE: Final = frozenset({Reason.PIN_MISMATCH, Reason.NOT_LEMONFIBER, Reaso
 PLATFORMS: Final = [
     Platform.BINARY_SENSOR,
     Platform.BUTTON,
+    Platform.EVENT,
     Platform.SENSOR,
     Platform.SWITCH,
     Platform.UPDATE,
