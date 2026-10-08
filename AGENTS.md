@@ -22,6 +22,8 @@ and [F12](https://github.com/lemonfiber/spec/blob/main/10-functional/features/f-
   sdk-python at the commit its `REVISION` names, written by
   `uv run just vendor <commit>`. `sdk-drift` fails on any difference from that
   commit, and when sdk-python's `main` has changed what the copy holds.
+  `sdk-bump` takes that `main` on its own pull request whenever sdk-python's
+  `main` moves, and merges it when lint, types and the suite still pass.
 - **What appears is what the key's scope reaches**, read from the stack's
   capabilities on every connection, never inferred or asked of the person.
 - **No suppressions.** No `# type: ignore`, `# pyright:`, `# noqa` or
