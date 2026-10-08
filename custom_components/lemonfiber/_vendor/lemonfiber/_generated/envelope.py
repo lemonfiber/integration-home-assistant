@@ -1,7 +1,7 @@
 # Copyright (c) 2026 NightWorksIO
 """Every kind the server may send, and the envelope of any of them.
 
-Generated from `contract/web-api.contract.json`. Do not edit: `just generate` rewrites it,
+Generated from the contract vendored in `contract/`. Do not edit: `just generate` rewrites it,
 and CI fails on any difference.
 """
 

@@ -1,7 +1,7 @@
 # Copyright (c) 2026 NightWorksIO
 """Every code the contract lists a refusal as carrying, and what it says of each.
 
-Generated from `contract/web-api.contract.json`. Do not edit: `just generate` rewrites it,
+Generated from the contract vendored in `contract/`. Do not edit: `just generate` rewrites it,
 and CI fails on any difference.
 """
 

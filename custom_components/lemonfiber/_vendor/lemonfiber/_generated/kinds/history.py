@@ -1,7 +1,7 @@
 # Copyright (c) 2026 NightWorksIO
 """The `history` envelope, and the shapes only `history` carries.
 
-Generated from `contract/web-api.contract.json`. Do not edit: `just generate` rewrites it,
+Generated from the contract vendored in `contract/`. Do not edit: `just generate` rewrites it,
 and CI fails on any difference.
 """
 
