@@ -97,14 +97,14 @@ jobs:
     permissions:
       contents: read
       pull-requests: write
-    uses: lemonfiber/spec/.github/workflows/spec-check.yml@9ea0d953458bb79b9afd8b412d7e99c9435cff34 # v1.0.46
+    uses: lemonfiber/spec/.github/workflows/spec-check.yml@d39729a2ee2b66266e3819465392abcd684f2feb # v1.0.53
 
   commitlint:
     if: github.event_name == 'pull_request'
     uses: lemonfiber/spec/.github/workflows/commitlint.yml@9ea0d953458bb79b9afd8b412d7e99c9435cff34 # v1.0.46
 
   hygiene:
-    uses: lemonfiber/spec/.github/workflows/hygiene.yml@9ea0d953458bb79b9afd8b412d7e99c9435cff34 # v1.0.46
+    uses: lemonfiber/spec/.github/workflows/hygiene.yml@d39729a2ee2b66266e3819465392abcd684f2feb # v1.0.53
 
   # Every pin this repository holds on a shared workflow, against what the spec's
   # default branch holds now.
