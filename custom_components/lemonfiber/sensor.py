@@ -15,7 +15,7 @@ from homeassistant.core import callback
 
 from . import readings
 from .coordinator import DiagnosisCoordinator, StreamCoordinator
-from .entity import MemberEntity, StackEntity, sides
+from .entity import MemberEntity, StackEntity, both, member_side, technical_side
 from .member import GONE, REQUEST_STATES, MemberCoordinator
 
 if TYPE_CHECKING:
@@ -118,6 +118,7 @@ REQUESTS_SENSORS: Final = tuple(
 )
 
 
+@technical_side
 async def add_technical(
     entry: LemonfiberConfigEntry,
     technical: Technical,
@@ -132,6 +133,7 @@ async def add_technical(
     )
 
 
+@member_side
 async def add_theirs(
     entry: LemonfiberConfigEntry,
     theirs: MemberCoordinator,
@@ -141,7 +143,7 @@ async def add_theirs(
     async_add_entities(RequestsSensor(theirs, entry, one) for one in REQUESTS_SENSORS)
 
 
-async_setup_entry: Final = sides(technical=add_technical, member=add_theirs)
+async_setup_entry: Final = both(add_technical, add_theirs)
 
 
 class DashboardSensor(StackEntity[StreamCoordinator], SensorEntity):

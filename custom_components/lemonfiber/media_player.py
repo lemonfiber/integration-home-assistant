@@ -7,7 +7,7 @@ from homeassistant.components.media_player import MediaPlayerEntity, MediaPlayer
 from homeassistant.components.media_player.const import MediaPlayerEntityFeature, MediaPlayerState, MediaType
 from homeassistant.core import callback
 
-from .entity import MemberEntity, sides
+from .entity import MemberEntity, member_side
 
 if TYPE_CHECKING:
     from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
@@ -25,16 +25,14 @@ CONTENT_TYPES: Final[dict[Medium, MediaType]] = {"film": MediaType.MOVIE, "serie
 """What Home Assistant calls each kind of thing a member can be playing. Anything else is named nothing."""
 
 
-async def add_theirs(
+@member_side
+async def async_setup_entry(
     entry: LemonfiberConfigEntry,
     theirs: MemberCoordinator,
     async_add_entities: AddConfigEntryEntitiesCallback,
 ) -> None:
     """Add what the member is playing."""
     async_add_entities([TheirPlaying(theirs, entry, PLAYING)])
-
-
-async_setup_entry: Final = sides(member=add_theirs)
 
 
 class TheirPlaying(MemberEntity, MediaPlayerEntity):
@@ -60,13 +58,7 @@ class TheirPlaying(MemberEntity, MediaPlayerEntity):
         sessions = self.coordinator.data.sessions()
         self._readable = sessions is not None
         first: Playback | None = sessions[0] if sessions else None
-        self._attr_state = (
-            MediaPlayerState.IDLE
-            if first is None
-            else MediaPlayerState.PAUSED
-            if first["paused"]
-            else MediaPlayerState.PLAYING
-        )
+        self._attr_state = MediaPlayerState.IDLE if first is None else _standing(first)
         self._attr_media_title = None if first is None else first["title"]
         self._attr_media_series_title = None if first is None else first.get("series")
         self._attr_media_season = None if first is None else _numbered(first.get("season"))
@@ -84,6 +76,11 @@ class TheirPlaying(MemberEntity, MediaPlayerEntity):
     def _handle_coordinator_update(self) -> None:
         self._read()
         super()._handle_coordinator_update()
+
+
+def _standing(session: Playback) -> MediaPlayerState:
+    """Return whether a session is playing or paused."""
+    return MediaPlayerState.PAUSED if session["paused"] else MediaPlayerState.PLAYING
 
 
 def _numbered(number: int | None) -> str | None:

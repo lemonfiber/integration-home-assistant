@@ -9,7 +9,7 @@ until the stream says it again.
 
 import asyncio
 import typing
-from dataclasses import dataclass, replace
+from dataclasses import dataclass
 from typing import TYPE_CHECKING, Final, override
 
 from lemonfiber import LemonfiberError, Live, expect
@@ -71,9 +71,9 @@ def heard(theirs: Theirs, arrival: Arrival) -> Theirs | None:
     if not isinstance(arrival, Live):
         return None
     if arrival.envelope["kind"] == HOUSEHOLD:
-        return replace(theirs, household=expect(arrival.envelope, HOUSEHOLD)["data"])
+        return Theirs(household=expect(arrival.envelope, HOUSEHOLD)["data"], playing=theirs.playing)
     if arrival.envelope["kind"] == PLAYING:
-        return replace(theirs, playing=expect(arrival.envelope, PLAYING)["data"])
+        return Theirs(household=theirs.household, playing=expect(arrival.envelope, PLAYING)["data"])
     return None
 
 

@@ -40,11 +40,11 @@ type MemberSetup = Callable[
 """What a platform adds of a member's own side."""
 
 
-def sides(*, technical: TechnicalSetup | None = None, member: MemberSetup | None = None) -> PlatformSetup:
-    """Return a platform's setup adding what the key's scope reaches: its technical side, or a member's own.
+def technical_side(adds: TechnicalSetup) -> PlatformSetup:
+    """Return a platform's setup that adds its entities only where the key reaches the stack's technical side.
 
-    A member's key yields no technical entity, and a `read` or `act` key no
-    member's entity, so a platform adds one side or neither.
+    A member's key yields no technical entity, so a platform built this way adds
+    nothing for one.
     """
 
     async def async_setup_entry(
@@ -52,18 +52,44 @@ def sides(*, technical: TechnicalSetup | None = None, member: MemberSetup | None
         entry: LemonfiberConfigEntry,
         async_add_entities: AddConfigEntryEntitiesCallback,
     ) -> None:
-        runtime = entry.runtime_data
-        if technical is not None and runtime.technical is not None:
-            await technical(entry, runtime.technical, async_add_entities)
-        if member is not None and runtime.theirs is not None:
-            await member(entry, runtime.theirs, async_add_entities)
+        technical = entry.runtime_data.technical
+        if technical is not None:
+            await adds(entry, technical, async_add_entities)
 
     return async_setup_entry
 
 
-def technical_side(adds: TechnicalSetup) -> PlatformSetup:
-    """Return a platform's setup that adds its entities only where the key reaches the stack's technical side."""
-    return sides(technical=adds)
+def member_side(adds: MemberSetup) -> PlatformSetup:
+    """Return a platform's setup that adds its entities only for a member's key, from that member's own stream.
+
+    A `read` or `act` key yields no member's entity, so a platform built this
+    way adds nothing for one.
+    """
+
+    async def async_setup_entry(
+        _hass: HomeAssistant,
+        entry: LemonfiberConfigEntry,
+        async_add_entities: AddConfigEntryEntitiesCallback,
+    ) -> None:
+        theirs = entry.runtime_data.theirs
+        if theirs is not None:
+            await adds(entry, theirs, async_add_entities)
+
+    return async_setup_entry
+
+
+def both(*setups: PlatformSetup) -> PlatformSetup:
+    """Return a platform's setup that runs each of these in turn, for a platform with entities on both sides."""
+
+    async def async_setup_entry(
+        hass: HomeAssistant,
+        entry: LemonfiberConfigEntry,
+        async_add_entities: AddConfigEntryEntitiesCallback,
+    ) -> None:
+        for setup in setups:
+            await setup(hass, entry, async_add_entities)
+
+    return async_setup_entry
 
 
 def theirs_device(entry: LemonfiberConfigEntry) -> DeviceInfo:
