@@ -6,10 +6,9 @@
 # this file to know what it must see finish first. The required contexts and
 # where they come from:
 #
-#   ci               spec-check / spec-check, dco / dco, commitlint / commitlint,
-#                    hygiene / {actionlint, invite, links, markdown, pins,
-#                    shared-files, typos}, security / {gitleaks, osv-scanner},
-#                    checks, tests and coverage, mutation testing
+#   gates   gates / gates
+#   pin-only pin-only / pin-only
+#   ci               checks, tests and coverage, mutation testing
 #   sonar            gate / gate
 #   sdk-drift        sdk-drift
 #   validate         hassfest, hacs
@@ -26,7 +25,7 @@
 name: awaiting-maintainer
 on:
   workflow_run:
-    workflows: [ci, sonar, sdk-drift, validate, codeql]
+    workflows: [gates, pin-only, ci, sonar, sdk-drift, validate, codeql]
     types: [completed]
   pull_request_review:
     types: [submitted]
