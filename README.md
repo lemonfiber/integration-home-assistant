@@ -187,10 +187,10 @@ uv run just ci      # lint, strict types, the suite at 100% line and branch cove
 ```
 
 The client sits under `custom_components/lemonfiber/_vendor/` at the sdk-python commit its
-`REVISION` names, written by `uv run just vendor <commit>` and never by hand. Mutation testing,
-`hassfest`, HACS's validation and the client's drift check run in CI. Every change cites a
-requirement in the [specification](https://github.com/lemonfiber/spec), which describes this
-integration as feature
+`REVISION` names, written by `uv run just vendor <commit>` or by the `sdk-bump` workflow, never
+by hand. Mutation testing, `hassfest`, HACS's validation and the client's drift check run in CI.
+Every change cites a requirement in the [specification](https://github.com/lemonfiber/spec),
+which describes this integration as feature
 [F12](https://github.com/lemonfiber/spec/blob/main/10-functional/features/f-extensibility/f12-home-assistant.md);
 start with the
 [contributing guide](https://github.com/lemonfiber/spec/blob/main/50-governance/contributing.md).
