@@ -88,6 +88,15 @@
       "disk_free_data": {
         "name": "Data disk free"
       },
+      "active_streams": {
+        "name": "Active streams",
+        "unit_of_measurement": "streams",
+        "state_attributes": {
+          "sessions": {
+            "name": "Sessions"
+          }
+        }
+      },
       "findings_advisory": {
         "name": "Advisory findings",
         "unit_of_measurement": "findings",

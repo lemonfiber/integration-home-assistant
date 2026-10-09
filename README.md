@@ -68,6 +68,7 @@ With a `read` or `act` key, one device for the stack, carrying:
 | Download queue | How many items wait in every queue together |
 | Download speed | What every active download comes to |
 | Data disk free | The bytes free on the data volume |
+| Active streams | How many sessions the media server is playing, with who is watching what, on which device, and whether it is paused, as an attribute |
 | VPN | Whether downloads leave through the tunnel; present only where the stack has a VPN |
 | Advisory, warning, error and critical findings | How many of the doctor's findings carry each severity, with what each says happened as an attribute. Advisory findings are advice rather than anything wrong, and their entity is off until enabled |
 | Stack update | Every service that is off its pin, by its id, at the version it stands on and the version it would move to, with what each step means as the release notes. Where nothing would move, both versions are the version of lemonfiber the stack runs |
@@ -178,7 +179,7 @@ automation:
 
 ## How it stays current
 
-The health, the downloads, the disk, the VPN and the alerts come from the stack's event stream as the stack sends them. When the stream breaks, every one of them shows unavailable until the stream says what it is now; a value from before the break is never shown as current. A figure the stack itself cannot read at the moment shows unknown.
+The health, the downloads, the disk, the VPN, what is playing and the alerts come from the stack's event stream as the stack sends them. When the stream breaks, every one of them shows unavailable until the stream says what it is now; a value from before the break is never shown as current. A figure the stack itself cannot read at the moment shows unknown.
 
 Every entity shows unavailable while the stream has a gap, including the doctor's findings and the services' versions, which are read rather than streamed.
 
@@ -189,7 +190,6 @@ When the key is refused, Home Assistant asks for a new one; only the key is aske
 ## Known limitations
 
 - Disk free is shown for the data volume, the one the event stream carries.
-- There is no entity for active streams.
 - An entry is identified by the stack's address, so a second key for the same stack, a member's among them, cannot be added beside the first.
 - The stack does not report whether the download clients are paused, so the downloads switch shows what it last asked for.
 

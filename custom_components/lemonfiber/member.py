@@ -17,7 +17,7 @@ from lemonfiber.contract import RequestState
 
 from .connection import NotConnectedError, Reason, refused
 from .const import FIRST_SNAPSHOT_WITHIN
-from .coordinator import Following, State
+from .coordinator import Following, State, playing_in
 
 if TYPE_CHECKING:
     from lemonfiber import Arrival, AsyncStream
@@ -25,9 +25,6 @@ if TYPE_CHECKING:
 
 HOUSEHOLD: Final = "household"
 """The kind a member's stream carries their row of the household in."""
-
-PLAYING: Final = "playing"
-"""The kind a member's stream carries what they are playing in."""
 
 REQUEST_STATES: Final[tuple[RequestState, ...]] = typing.get_args(RequestState.__value__)
 """Every state a request can stand at, in the order a request moves through them."""
@@ -72,8 +69,8 @@ def heard(theirs: Theirs, arrival: Arrival) -> Theirs | None:
         return None
     if arrival.envelope["kind"] == HOUSEHOLD:
         return Theirs(household=expect(arrival.envelope, HOUSEHOLD)["data"], playing=theirs.playing)
-    if arrival.envelope["kind"] == PLAYING:
-        return Theirs(household=theirs.household, playing=expect(arrival.envelope, PLAYING)["data"])
+    if (playing := playing_in(arrival)) is not None:
+        return Theirs(household=theirs.household, playing=playing)
     return None
 
 

@@ -14,7 +14,7 @@ from typing import TYPE_CHECKING, Final
 from lemonfiber.contract import HealthStanding, ProblemSeverity
 
 if TYPE_CHECKING:
-    from lemonfiber.contract import DashboardReading, DoctorReport, Service, Snapshot
+    from lemonfiber.contract import DashboardReading, DoctorReport, Playback, Service, Snapshot
 
 READY: Final = "ready"
 """A panel whose source answered."""
@@ -115,4 +115,18 @@ def findings(report: DoctorReport, severity: ProblemSeverity) -> list[str]:
         verdict = finding["verdict"]
         if (verdict["outcome"] == "fail" or verdict["outcome"] == "warn") and verdict["severity"] == severity:
             said.append(verdict["summary"])
+    return said
+
+
+def watching(session: Playback) -> dict[str, object]:
+    """Return who is watching what, on which device and whether it is paused, with the series an episode is of."""
+    said: dict[str, object] = {
+        "member": session["member"],
+        "title": session["title"],
+        "device": session["device"],
+        "paused": session["paused"],
+    }
+    for numbered in ("series", "season", "episode"):
+        if (value := session.get(numbered)) is not None:
+            said[numbered] = value
     return said

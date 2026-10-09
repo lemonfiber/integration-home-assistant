@@ -45,6 +45,9 @@
       },
       "requests_gone": {
         "default": "mdi:archive-remove-outline"
+      },
+      "active_streams": {
+        "default": "mdi:play-network-outline"
       }
     },
     "binary_sensor": {

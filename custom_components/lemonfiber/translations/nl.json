@@ -88,6 +88,15 @@
       "disk_free_data": {
         "name": "Vrij op de dataschijf"
       },
+      "active_streams": {
+        "name": "Actieve streams",
+        "unit_of_measurement": "streams",
+        "state_attributes": {
+          "sessions": {
+            "name": "Sessies"
+          }
+        }
+      },
       "findings_advisory": {
         "name": "Adviesbevindingen",
         "unit_of_measurement": "bevindingen",
