@@ -180,7 +180,7 @@ jobs:
     needs: [scope, tests]
     if: ${{ !cancelled() && github.event_name == 'pull_request' && (needs.scope.result != 'success' || needs.scope.outputs.code == 'true') }}
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 60
     steps:
       - name: The tests passed, so there is something to measure
         env:
