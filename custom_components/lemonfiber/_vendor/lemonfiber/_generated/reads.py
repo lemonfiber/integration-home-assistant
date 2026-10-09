@@ -37,6 +37,10 @@ class Read(enum.StrEnum):
     """Answers with `household`; takes `member` and `defaults`."""
     HELD = "held"
     """Answers with `held`; takes `member`, `defaults` and `most`."""
+    HELD_ID = "held/{id}"
+    """Answers with `title`, for the `id` in its path; takes `member` and `defaults`."""
+    WATCHING = "watching"
+    """Answers with `part-way`; takes `member` and `most`."""
     PLAYING = "playing"
     """Answers with `playing`; takes `member`."""
     HOSTING = "hosting"
@@ -90,7 +94,7 @@ class Read(enum.StrEnum):
 
     @property
     def path(self) -> str:
-        """Return the path this read is served on."""
+        """Return the path this read is served on, each segment a caller fills written as `{name}`."""
         return f"{API}/{self.value}"
 
 
@@ -117,6 +121,8 @@ class Readable(typing.NamedTuple):
     """Every kind it may answer with."""
     parameters: tuple[ReadParameter, ...]
     """Every query parameter it takes, in the order the contract lists them."""
+    segments: tuple[str, ...] = ()
+    """Every segment of its path a caller fills, by name."""
 
 
 READS: typing.Final[typing.Mapping[Read, Readable]] = types.MappingProxyType(
@@ -133,6 +139,12 @@ READS: typing.Final[typing.Mapping[Read, Readable]] = types.MappingProxyType(
         Read.HELD: Readable(
             ("held",),
             (ReadParameter("member", False), ReadParameter("defaults", False), ReadParameter("most", False)),
+        ),
+        Read.HELD_ID: Readable(
+            ("title",), (ReadParameter("member", False), ReadParameter("defaults", False)), ("id",)
+        ),
+        Read.WATCHING: Readable(
+            ("part-way",), (ReadParameter("member", False), ReadParameter("most", False))
         ),
         Read.PLAYING: Readable(("playing",), (ReadParameter("member", False),)),
         Read.HOSTING: Readable(("hosting",), ()),
