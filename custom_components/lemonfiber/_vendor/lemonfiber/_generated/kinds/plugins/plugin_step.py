@@ -19,6 +19,7 @@ from .api_kind import (
     PluginOverriding,
     PluginPair,
     PluginPlaced,
+    PluginStepAdapter,
 )
 from ...shared.doctor__error__plugins import StepCame
 from ...shared.plugins__undo import UndoReversal
@@ -95,6 +96,21 @@ class PluginInstall(typing.TypedDict):
     """
     would: PluginInstalled
     """What the install settled, said whether or not it was written down."""
+
+
+class PluginNonconforming(typing.TypedDict):
+    """One answer a plugin's adapter gave outside a contract it speaks."""
+
+    at: str
+    """When it answered so, as RFC 3339."""
+    capability: str
+    """The capability it was asked as."""
+    operation: str
+    """The operation it was asked."""
+    plugin: str
+    """The plugin whose adapter answered."""
+    why: str
+    """What was outside the contract."""
 
 
 class PluginProving(typing.TypedDict):
@@ -191,6 +207,23 @@ class PluginRemoval(typing.TypedDict):
     """
 
 
+class PluginReproof(typing.TypedDict):
+    """What asking an installed plugin's adapters again came to."""
+
+    asked: bool
+    """Whether its adapters were asked, rather than only said to be."""
+    cleared: bool
+    """Whether every answer kept against the plugin was cleared, which a proof that did
+    not hold never does.
+    """
+    kept: list[PluginNonconforming]
+    """Every answer kept against the plugin when it was proved, which a pass clears."""
+    plugin: str
+    """The plugin proved."""
+    proofs: list[PluginProving]
+    """Each proof asked, or that would be asked, with what it came to."""
+
+
 class PluginRestored(typing.TypedDict):
     """Where an update did not hold: what putting the version it replaced back came to."""
 
@@ -268,15 +301,6 @@ class PluginStep(typing.TypedDict):
     """Where it calls: a service of this stack's or the plugin's own, or a name outside
     both, as the manifest wrote it. Never a resolved address.
     """
-
-
-class PluginStepAdapter(typing.TypedDict):
-    """The adapter a call reaches its destination through."""
-
-    kind: ApiKind
-    """Which of lemonfiber's adapters it is."""
-    owner: PluginAdapterOwner
-    """Whose it is, which is lemonfiber's."""
 
 
 class PluginStepRan(typing.TypedDict):
@@ -471,10 +495,12 @@ of.
 __all__ = [
     "PluginInstall",
     "PluginInstalled",
+    "PluginNonconforming",
     "PluginProving",
     "PluginRecipe",
     "PluginRecipeRan",
     "PluginRemoval",
+    "PluginReproof",
     "PluginRestored",
     "PluginServiceAdapter",
     "PluginSource",
@@ -483,7 +509,6 @@ __all__ = [
     "PluginSourceStandingUnasked",
     "PluginSourceStandingUnreachable",
     "PluginStep",
-    "PluginStepAdapter",
     "PluginStepRan",
     "PluginSubstituted",
     "PluginUnfilled",
