@@ -5,9 +5,11 @@ import json
 import urllib.parse
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass, field
-from http import HTTPMethod
+from http import HTTPMethod, HTTPStatus
 from typing import TYPE_CHECKING, Final
 
+from lemonfiber._generated import READS
+from lemonfiber.problems import MisaskedError
 from lemonfiber.reads import ACTIONS, BUNDLE, CAPABILITIES, JOBS, LOGS, SESSION
 
 if TYPE_CHECKING:
@@ -28,6 +30,9 @@ NOTHING_SAFE: Final = ""
 
 JSON_TYPE: Final = "application/json"
 """What every request but the one for a file asks to be answered in, and what a body is sent as."""
+
+UNKEPT_SEGMENTS: Final = frozenset({"", ".", ".."})
+"""Values a URL does not keep as a segment: the folder itself, the path's own folder, the one above it."""
 
 ANY_TYPE: Final = "*/*"
 """What a request for a file takes, whatever it is served as."""
@@ -98,9 +103,29 @@ def with_credential(call: Call, credential: Credential) -> Call:
     return Call(call.method, call.path, {**call.headers, **credential.header()}, call.body)
 
 
+def filled_in(read: Read, query: Query | None) -> tuple[str, Query]:
+    """Return a read's path with each segment a caller fills written in, and the query left to send.
+
+    A segment is one value, written escaped so it stays one segment and cannot
+    reach a path beside the read's own. One not given, given as a list, or one a
+    URL would resolve away is refused before anything is sent.
+    """
+    given = dict(query or {})
+    path = read.path
+    for name in READS[read].segments:
+        value = given.pop(name, None)
+        one = written(value) if isinstance(value, str | int) else None
+        if one is None or one in UNKEPT_SEGMENTS:
+            sentence = f"This read needs one `{name}` it can send, and was not given one."
+            raise MisaskedError(sentence, status=HTTPStatus.BAD_REQUEST)
+        path = path.replace(f"{{{name}}}", segment(one))
+    return path, given
+
+
 def read_call(read: Read, query: Query | None) -> Call:
     """Ask for what a command prints under `--json`."""
-    return Call(HTTPMethod.GET, read.path + search(query), {"Accept": JSON_TYPE})
+    path, rest = filled_in(read, query)
+    return Call(HTTPMethod.GET, path + search(rest), {"Accept": JSON_TYPE})
 
 
 def capabilities_call() -> Call:
