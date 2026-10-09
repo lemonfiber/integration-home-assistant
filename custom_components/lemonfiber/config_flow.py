@@ -9,7 +9,7 @@ is never asked for.
 from typing import TYPE_CHECKING, Any, Final, override
 
 import probatio as vol
-from homeassistant.config_entries import ConfigFlow, ConfigFlowResult
+from homeassistant.config_entries import ConfigEntry, ConfigFlow, ConfigFlowResult
 from homeassistant.const import CONF_API_KEY, CONF_URL
 
 from .connection import BASE, NotConnectedError, connect
@@ -27,6 +27,24 @@ PIN: Final = vol.Required(CONF_PIN)
 SETUP: Final = vol.Schema({ADDRESS: str, KEY: str, PIN: str})
 REAUTHENTICATION: Final = vol.Schema({KEY: str})
 RECONFIGURATION: Final = vol.Schema({ADDRESS: str, PIN: str})
+
+
+ANOTHER_STACK: Final = "another_stack"
+"""Why a new key, or a new address and pin, is refused: it answers as another stack, or another member of it."""
+
+
+def keyed_by_address(entry: ConfigEntry) -> bool:
+    """Tell whether an entry is still identified by its address, as entries were before a stack named itself."""
+    return entry.unique_id == entry.data[CONF_URL]
+
+
+def answers_for(entry: ConfigEntry, connected: Connected) -> bool:
+    """Tell whether what answered is what the entry was added for: the same stack, and for a member's key the same member.
+
+    An entry still identified by its address cannot say which stack it was
+    added for, so whatever answers is taken as that stack.
+    """
+    return keyed_by_address(entry) or entry.unique_id == connected.identity
 
 
 def entered(connected: Connected) -> dict[str, str]:
@@ -68,7 +86,7 @@ class LemonfiberConfigFlow(ConfigFlow, domain=DOMAIN):
                 SETUP,
             )
             if connected is not None:
-                await self.async_set_unique_id(connected.client.address.base)
+                await self.async_set_unique_id(connected.identity)
                 self._abort_if_unique_id_configured()
                 return self.async_create_entry(
                     title=connected.client.address.host,
@@ -99,7 +117,13 @@ class LemonfiberConfigFlow(ConfigFlow, domain=DOMAIN):
                 REAUTHENTICATION,
             )
             if connected is not None:
-                return self.async_update_reload_and_abort(entry, data_updates={CONF_API_KEY: key})
+                if not answers_for(entry, connected):
+                    return self.async_abort(reason=ANOTHER_STACK)
+                return self.async_update_reload_and_abort(
+                    entry,
+                    unique_id=connected.identity,
+                    data_updates={CONF_API_KEY: key},
+                )
         return self.async_show_form(
             step_id="reauth_confirm",
             data_schema=REAUTHENTICATION,
@@ -120,13 +144,14 @@ class LemonfiberConfigFlow(ConfigFlow, domain=DOMAIN):
                 RECONFIGURATION,
             )
             if connected is not None:
-                address = connected.client.address.base
-                held = self.hass.config_entries.async_entry_for_domain_unique_id(DOMAIN, address)
+                if not answers_for(entry, connected):
+                    return self.async_abort(reason=ANOTHER_STACK)
+                held = self.hass.config_entries.async_entry_for_domain_unique_id(DOMAIN, connected.identity)
                 if held is not None and held.entry_id != entry.entry_id:
                     return self.async_abort(reason="already_configured")
                 return self.async_update_reload_and_abort(
                     entry,
-                    unique_id=address,
+                    unique_id=connected.identity,
                     data_updates=entered(connected),
                 )
         return self.async_show_form(

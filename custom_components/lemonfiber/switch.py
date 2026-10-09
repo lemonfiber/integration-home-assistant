@@ -1,10 +1,12 @@
 # Copyright (c) 2026 NightWorksIO
-"""Pausing and resuming every download client, shown as the last thing asked of them."""
+"""Pausing and resuming every download client, shown as the clients read it back."""
 
 from typing import TYPE_CHECKING, Any, Final, override
 
 from homeassistant.components.switch import SwitchEntity, SwitchEntityDescription
+from homeassistant.core import callback
 
+from . import readings
 from .coordinator import StreamCoordinator
 from .entity import StackEntity, technical_side
 from .jobs import carry_out
@@ -36,23 +38,34 @@ async def async_setup_entry(
 
 
 class DownloadsPaused(StackEntity[StreamCoordinator], SwitchEntity):
-    """On once every download client has been asked to pause, off once asked to resume.
+    """On while the download clients say they are paused, off while any says it is fetching.
 
-    The stack reports no paused state, so the switch shows what it last asked
-    for, and is unknown until it has asked anything.
+    Turning it on or off asks every client to pause or resume, and the switch
+    then shows what the clients read back on the stream, not what it asked for.
+    Unknown where no client could be asked.
     """
 
-    _attr_assumed_state = True
+    def __init__(
+        self,
+        coordinator: StreamCoordinator,
+        entry: LemonfiberConfigEntry,
+        technical: Technical,
+        description: SwitchEntityDescription,
+    ) -> None:
+        """Describe the switch and read the clients from the dashboard the stream last carried."""
+        super().__init__(coordinator, entry, technical, description)
+        self._attr_is_on = readings.paused(coordinator.data)
 
-    async def _ask(self, action: str, *, paused: bool) -> None:
-        await carry_out(self.hass, self.coordinator.config_entry, action)
-        self._attr_is_on = paused
-        self.async_write_ha_state()
+    @callback
+    @override
+    def _handle_coordinator_update(self) -> None:
+        self._attr_is_on = readings.paused(self.coordinator.data)
+        super()._handle_coordinator_update()
 
     @override
     async def async_turn_on(self, **kwargs: Any) -> None:
-        await self._ask(PAUSE, paused=True)
+        await carry_out(self.hass, self.coordinator.config_entry, PAUSE)
 
     @override
     async def async_turn_off(self, **kwargs: Any) -> None:
-        await self._ask(RESUME, paused=False)
+        await carry_out(self.hass, self.coordinator.config_entry, RESUME)

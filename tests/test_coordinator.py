@@ -9,6 +9,7 @@ from homeassistant.const import STATE_ON, STATE_UNAVAILABLE
 from homeassistant.util import dt as dt_util
 from pytest_homeassistant_custom_component.common import async_fire_time_changed
 
+from custom_components.lemonfiber.connection import Reason
 from custom_components.lemonfiber.coordinator import State
 from tests.conftest import capabilities, dashboard, reauthenticating, serve, until
 from tests.stack import Feed, Reply, event, problem
@@ -127,6 +128,25 @@ async def test_a_scope_that_changed_across_a_gap_reloads_the_entry(
         hass,
         lambda: entry.state is ConfigEntryState.LOADED and entry.runtime_data.connected.scope == "act",
     )
+
+
+async def test_an_answer_to_the_operator_across_a_gap_reloads_the_entry_and_is_refused(
+    hass: HomeAssistant,
+    stack: Stack,
+    entry: MockConfigEntry,
+) -> None:
+    first, second = Feed(), Feed()
+    serve(stack, "read", first, second)
+    await set_up(hass, entry)
+    stack.reply("/api/capabilities", Reply(body=capabilities("operator")))
+    first.end()
+    await until(hass, lambda: stack.asked("/api/events") == 2)
+    second.say(event("dashboard", dashboard()))
+    await until(
+        hass,
+        lambda: entry.state is ConfigEntryState.SETUP_ERROR or entry.state is ConfigEntryState.SETUP_RETRY,
+    )
+    assert entry.error_reason_translation_key == Reason.NOT_A_KEY
 
 
 async def test_a_scope_that_cannot_be_read_again_leaves_the_entry_as_it_is(

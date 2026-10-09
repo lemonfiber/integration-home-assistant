@@ -68,8 +68,10 @@ With a `read` or `act` key, one device for the stack, carrying:
 | Download queue | How many items wait in every queue together |
 | Download speed | What every active download comes to |
 | Data disk free | The bytes free on the data volume |
+| Config disk free | The bytes free on the volume the services keep their configuration and databases on |
 | Active streams | How many sessions the media server is playing, with who is watching what, on which device, and whether it is paused, as an attribute |
 | VPN | Whether downloads leave through the tunnel; present only where the stack has a VPN |
+| Each download client paused | Whether the client says it is paused, unknown where it could not be asked; a diagnostic, off until enabled |
 | Advisory, warning, error and critical findings | How many of the doctor's findings carry each severity, with what each says happened as an attribute. Advisory findings are advice rather than anything wrong, and their entity is off until enabled |
 | Stack update | Every service that is off its pin, by its id, at the version it stands on and the version it would move to, with what each step means as the release notes. Where nothing would move, both versions are the version of lemonfiber the stack runs |
 | Update of each service | The version a service stands on and the version this build of lemonfiber pins it at, for every service the dashboard names, with what the step means as the release summary. Off until enabled; the stack update covers them all |
@@ -83,9 +85,9 @@ With an `act` key, where the stack says the key may call the action, also:
 | Restart the stack | Restarts every service the stack runs. Shown under the device's configuration |
 | Restart each service | Restarts the one service, leaving the rest of the stack alone, for every service the dashboard names. Shown under the device's configuration, and off until enabled |
 | Install, on the stack update and on each service's update | Updates the stack, or the one service, to the versions this build of lemonfiber pins. Pressing install agrees to what the step costs. A step the stack refuses to take offers no install |
-| Downloads paused | Pauses every download client when turned on, and resumes them when turned off. The stack does not report whether they are paused, so the switch shows what it last asked for |
+| Downloads paused | Pauses every download client when turned on, and resumes them when turned off. It shows what the clients read back: on while they say they are paused, off while any says it is fetching, unknown where none could be asked |
 
-A control follows the job it started to its end. A failure is shown in the stack's own words, and every outcome is fired as a `lemonfiber_job` event carrying the entry, the action, the job's name where it started one, the outcome (`finished`, `ended` or `failed`) and, for a failure, the stack's sentence.
+Restarting, updating and pausing or resuming are rehearsed first: the stack says what the call would do, and the real call carries that back, so what is carried out is what was rehearsed. Where the stack has moved in between, the call is refused and the refusal is the control's outcome. Running the doctor has no rehearsal. A control follows the job it started to its end. A failure is shown in the stack's own words, and every outcome is fired as a `lemonfiber_job` event carrying the entry, the action, the job's name where it started one, the outcome (`finished`, `ended` or `failed`) and, for a failure, the stack's sentence.
 
 With a member's key, made with `--scope member:<account>`, one device for the entry, carrying nothing technical: no version, no address, and nothing of the stack's health. It follows a stream the stack opens for that member alone:
 
@@ -185,13 +187,11 @@ Every entity shows unavailable while the stream has a gap, including the doctor'
 
 The doctor's findings are read when the entry starts, every hour, and whenever the stream says the stack's health moved. The services' versions are read when the entry starts and every hour.
 
-When the key is refused, Home Assistant asks for a new one; only the key is asked for. When the stack cannot be reached, the entry is set up again with Home Assistant's own retry. The address and pin can be changed from the entry's **Reconfigure** without removing it.
+An entry is identified by the stack's own identifier, and a member's entry by that and the member's. A new key, or a new address and pin, that answers as another stack or another member is refused. When the key is refused, Home Assistant asks for a new one; only the key is asked for. When the stack cannot be reached, the entry is set up again with Home Assistant's own retry. The address and pin can be changed from the entry's **Reconfigure** without removing it.
 
 ## Known limitations
 
-- Disk free is shown for the data volume, the one the event stream carries.
-- An entry is identified by the stack's address, so a second key for the same stack, a member's among them, cannot be added beside the first.
-- The stack does not report whether the download clients are paused, so the downloads switch shows what it last asked for.
+- A stack has one entry for a `read` or `act` key; a second such key for the same stack is refused as already added. Each member's own key is an entry of its own beside it.
 
 ## Troubleshooting
 

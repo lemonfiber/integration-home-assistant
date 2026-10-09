@@ -228,7 +228,11 @@ class Following[T](DataUpdateCoordinator[T]):
             capabilities = await self._connected.client.capabilities()
         except LemonfiberError:
             return
-        if scope_of(capabilities) is not self._connected.scope:
+        try:
+            moved = scope_of(capabilities) is not self._connected.scope
+        except NotConnectedError:
+            moved = True
+        if moved:
             self.hass.config_entries.async_schedule_reload(self.config_entry.entry_id)
 
 

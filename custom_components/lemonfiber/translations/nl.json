@@ -50,13 +50,15 @@
       "not_lemonfiber": "Op dit adres antwoordde iets, maar het is niet lemonfiber.",
       "version_mismatch": "Deze integratie spreekt versie {spoken} van de interface van lemonfiber en de stack spreekt versie {served}. Werk de oudste van de twee bij.",
       "no_dashboard": "De stack antwoordde, maar stuurde zijn dashboard niet op tijd.",
+      "not_a_key": "De stack beantwoordde dit als zijn beheerder, niet als een integratiesleutel. Maak een sleutel aan op de stack en plak die.",
       "nothing_said": "De stack antwoordde, maar zei niet op tijd wat deze sleutel bereikt.",
       "refused": "De stack weigerde: {sentence}"
     },
     "abort": {
       "already_configured": "Deze stack is al toegevoegd.",
       "reauth_successful": "De nieuwe sleutel is in gebruik.",
-      "reconfigure_successful": "Het nieuwe adres en de nieuwe pin zijn in gebruik."
+      "reconfigure_successful": "Het nieuwe adres en de nieuwe pin zijn in gebruik.",
+      "another_stack": "Dit antwoordt als een andere stack, of als een ander lid ervan, dan waarvoor deze vermelding is toegevoegd. Voeg het toe als een eigen vermelding."
     }
   },
   "entity": {
@@ -87,6 +89,9 @@
       },
       "disk_free_data": {
         "name": "Vrij op de dataschijf"
+      },
+      "disk_free_config": {
+        "name": "Vrij op de configuratieschijf"
       },
       "active_streams": {
         "name": "Actieve streams",
@@ -203,6 +208,9 @@
       },
       "vpn": {
         "name": "VPN"
+      },
+      "client_paused": {
+        "name": "{client} gepauzeerd"
       }
     },
     "update": {
@@ -319,6 +327,9 @@
     },
     "no_dashboard": {
       "message": "De stack antwoordde, maar stuurde zijn dashboard niet op tijd. Home Assistant probeert het opnieuw."
+    },
+    "not_a_key": {
+      "message": "De stack beantwoordde de opgeslagen gegevens als zijn beheerder, niet als een integratiesleutel. Vervang ze door een sleutel."
     },
     "nothing_said": {
       "message": "De stack antwoordde, maar zei niet op tijd wat deze sleutel bereikt. Home Assistant probeert het opnieuw."

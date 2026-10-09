@@ -22,6 +22,10 @@ if TYPE_CHECKING:
     from homeassistant.core import HomeAssistant
 
 KEY: Final = "lfk_" + "a" * 32
+STACK_ID: Final = "01J9STACK0000000000000000"
+"""The identifier the stand-in names itself by, to every credential."""
+MEMBER_ID: Final = "a1"
+"""The identifier the media server files Ana under, as her shelf names it."""
 VERSION: Final = "0.17.0"
 PATIENCE: Final = 10.0
 """Seconds a test waits for the stream or a read to come round: a reopening waits a second first."""
@@ -44,7 +48,11 @@ def capabilities(scope: str) -> dict[str, object]:
     actions = {f"{ACTIONS}/{action}": callable_by_scope for action in KEY_CALLABLE}
     return envelope(
         "capabilities",
-        {"capabilities": {**reads, **actions, f"{ACTIONS}/repair": "unpermitted"}},
+        {
+            "capabilities": {**reads, **actions, f"{ACTIONS}/repair": "unpermitted"},
+            "scope": scope,
+            "stack": STACK_ID,
+        },
     )
 
 
@@ -66,6 +74,11 @@ def unavailable(reason: str = "The source did not answer.") -> dict[str, object]
 def transfer(speed: dict[str, object]) -> dict[str, object]:
     """Return one active download at a speed."""
     return {"name": "A film", "progress": 40, "protocol": "torrent", "speed": speed}
+
+
+def downloader(client: str, state: str) -> dict[str, object]:
+    """Return one download client and whether it says it is paused."""
+    return {"client": client, "state": state}
 
 
 def service(identifier: str, name: str) -> dict[str, object]:
@@ -93,7 +106,10 @@ def dashboard(**panels: object) -> dict[str, object]:
         "services": ready(
             [service("sonarr", "Sonarr"), service("radarr", "Radarr"), service("jellyfin", "Jellyfin")],
         ),
-        "storage": ready({"free": reading(500_000_000_000), "hardlink": "linking"}),
+        "storage": ready(
+            {"free": reading(500_000_000_000), "config_free": reading(40_000_000_000), "hardlink": "linking"},
+        ),
+        "downloaders": ready([downloader("qbittorrent", "fetching"), downloader("sabnzbd", "fetching")]),
         "stuck": [],
         "telemetry": "live",
         "transfers": ready([transfer(reading(1_500_000)), transfer(reading(500_000))]),
@@ -246,6 +262,13 @@ def playing(*sessions: dict[str, object], available: bool = True) -> dict[str, o
     return {"available": available, "findings": [], "member": "Ana", "sessions": list(sessions)}
 
 
+HELD: Final = envelope(
+    "held",
+    {"available": True, "findings": [], "holdings": [], "id": MEMBER_ID, "member": "Ana", "rehearsed": False},
+)
+"""Ana's shelf, read to learn whose key it is."""
+
+
 def serve(stack: Stack, scope: str = "read", *feeds: Feed) -> Feed:
     """Have the stand-in answer as a stack does for a key of a scope, its stream opening as each feed in turn.
 
@@ -258,6 +281,7 @@ def serve(stack: Stack, scope: str = "read", *feeds: Feed) -> Feed:
     stack.reply("/api/provenance", Reply(body=PROVENANCE))
     stack.reply("/api/update", Reply(body=UPDATE))
     opened = feeds or (Feed(),)
+    stack.reply("/api/held", Reply(body=HELD))
     if scope == "member":
         opened[0].say(event("household", HOUSEHOLD, "1"), event("playing", playing(), "2"))
     else:
@@ -279,11 +303,11 @@ async def stack(hass: HomeAssistant, socket_enabled: None) -> AsyncIterator[Stac
 
 
 def entry_for(stack: Stack, unique_id: str | None = None) -> MockConfigEntry:
-    """Return an entry holding the stand-in's address, pin and a key, identified by the address unless told otherwise."""
+    """Return an entry holding the stand-in's address, pin and a key, identified by the stack unless told otherwise."""
     return MockConfigEntry(
         domain=DOMAIN,
         title="127.0.0.1",
-        unique_id=unique_id or stack.url,
+        unique_id=unique_id or STACK_ID,
         data={CONF_URL: stack.url, CONF_API_KEY: KEY, CONF_PIN: stack.pin},
     )
 

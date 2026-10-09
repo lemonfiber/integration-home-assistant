@@ -13,6 +13,9 @@
       "disk_free_data": {
         "default": "mdi:harddisk"
       },
+      "disk_free_config": {
+        "default": "mdi:harddisk"
+      },
       "findings_advisory": {
         "default": "mdi:information-outline"
       },
@@ -53,6 +56,12 @@
     "binary_sensor": {
       "vpn": {
         "default": "mdi:vpn"
+      },
+      "client_paused": {
+        "default": "mdi:pause-circle-outline",
+        "state": {
+          "off": "mdi:download-circle-outline"
+        }
       }
     },
     "button": {

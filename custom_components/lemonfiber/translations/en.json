@@ -50,13 +50,15 @@
       "not_lemonfiber": "Something answered at this address, and it is not lemonfiber.",
       "version_mismatch": "This integration speaks version {spoken} of lemonfiber's interface and the stack speaks version {served}. Update whichever of the two is older.",
       "no_dashboard": "The stack answered but did not send its dashboard in time.",
+      "not_a_key": "The stack answered this as its operator, not as an integration key. Mint a key on the stack and paste that.",
       "nothing_said": "The stack answered but did not say in time what this key reaches.",
       "refused": "The stack refused: {sentence}"
     },
     "abort": {
       "already_configured": "This stack is already added.",
       "reauth_successful": "The new key is in use.",
-      "reconfigure_successful": "The new address and pin are in use."
+      "reconfigure_successful": "The new address and pin are in use.",
+      "another_stack": "This answers as another stack, or as another member of it, than the one this entry was added for. Add it as an entry of its own."
     }
   },
   "entity": {
@@ -87,6 +89,9 @@
       },
       "disk_free_data": {
         "name": "Data disk free"
+      },
+      "disk_free_config": {
+        "name": "Config disk free"
       },
       "active_streams": {
         "name": "Active streams",
@@ -203,6 +208,9 @@
       },
       "vpn": {
         "name": "VPN"
+      },
+      "client_paused": {
+        "name": "{client} paused"
       }
     },
     "update": {
@@ -319,6 +327,9 @@
     },
     "no_dashboard": {
       "message": "The stack answered but did not send its dashboard in time. Home Assistant tries again."
+    },
+    "not_a_key": {
+      "message": "The stack answered the stored credential as its operator, not as an integration key. Replace it with a key."
     },
     "nothing_said": {
       "message": "The stack answered but did not say in time what this key reaches. Home Assistant tries again."

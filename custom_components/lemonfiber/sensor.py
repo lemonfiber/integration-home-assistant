@@ -77,6 +77,15 @@ DASHBOARD_SENSORS: Final = (
         suggested_unit_of_measurement=UnitOfInformation.GIGABYTES,
         value=readings.disk_free,
     ),
+    DashboardSensorDescription(
+        key="disk_free_config",
+        translation_key="disk_free_config",
+        device_class=SensorDeviceClass.DATA_SIZE,
+        state_class=SensorStateClass.MEASUREMENT,
+        native_unit_of_measurement=UnitOfInformation.BYTES,
+        suggested_unit_of_measurement=UnitOfInformation.GIGABYTES,
+        value=readings.config_free,
+    ),
 )
 
 
