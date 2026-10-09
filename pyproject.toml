@@ -26,7 +26,7 @@ dev = [
     "mutmut>=3.8",
     "pyright[nodejs]>=1.1.414",
     "pytest-cov>=7.1",
-    "pytest-homeassistant-custom-component==0.13.368",
+    "pytest-homeassistant-custom-component==0.13.369",
     "ruff>=0.16",
     "rust-just>=1.58",
     "trustme>=1.2",
