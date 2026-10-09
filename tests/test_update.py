@@ -50,6 +50,7 @@ RADARR: Final = "update.127_0_0_1_update_of_radarr"
 JELLYFIN: Final = "update.127_0_0_1_update_of_jellyfin"
 STACK: Final = "update.127_0_0_1_stack_update"
 UPDATED: Final = Reply(202, envelope("job", {"action": "update", "job": "j-3"}))
+UPDATE_OFFER: Final = Reply(body=envelope("update", {"offer": "o-update", "rehearsed": True}))
 
 
 async def set_up(hass: HomeAssistant, entry: MockConfigEntry) -> None:
@@ -197,13 +198,16 @@ async def test_installing_a_service_agrees_to_its_step_and_reads_the_versions_ag
     entry: MockConfigEntry,
 ) -> None:
     serve(stack, "act")
-    stack.reply("/api/actions/update", UPDATED)
+    stack.reply("/api/actions/update", UPDATE_OFFER, UPDATED)
     stack.reply("/api/jobs/j-3", Reply(body=envelope("update", {"rehearsed": False})))
     await set_up(hass, entry)
     assert UpdateEntityFeature.INSTALL in features(hass, SONARR)
     assert UpdateEntityFeature.INSTALL not in features(hass, RADARR)
     await install(hass, SONARR)
-    assert stack.bodies == [("/api/actions/update", {"service": "sonarr", "confirm": True})]
+    assert stack.bodies == [
+        ("/api/actions/update", {"service": "sonarr", "confirm": True, "dry_run": True}),
+        ("/api/actions/update", {"service": "sonarr", "confirm": True, "offer": "o-update"}),
+    ]
     await until(hass, lambda: stack.asked("/api/provenance") == 2)
 
 
@@ -295,11 +299,14 @@ async def test_installing_the_stack_names_no_service(
     entry: MockConfigEntry,
 ) -> None:
     serve(stack, "act")
-    stack.reply("/api/actions/update", UPDATED)
+    stack.reply("/api/actions/update", UPDATE_OFFER, UPDATED)
     stack.reply("/api/jobs/j-3", Reply(body=envelope("update", {"rehearsed": False})))
     await set_up(hass, entry)
     await install(hass, STACK)
-    assert stack.bodies == [("/api/actions/update", {"confirm": True})]
+    assert stack.bodies == [
+        ("/api/actions/update", {"confirm": True, "dry_run": True}),
+        ("/api/actions/update", {"confirm": True, "offer": "o-update"}),
+    ]
     await until(hass, lambda: stack.asked("/api/provenance") == 2)
 
 

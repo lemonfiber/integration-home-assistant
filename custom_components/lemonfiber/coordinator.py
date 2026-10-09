@@ -22,13 +22,16 @@ if TYPE_CHECKING:
 
     from homeassistant.core import HomeAssistant
     from lemonfiber import Arrival, AsyncClient, AsyncStream
-    from lemonfiber.contract import Alert, DoctorReport, Snapshot, UpdateChange
+    from lemonfiber.contract import Alert, DoctorReport, PlayingReport, Snapshot, UpdateChange
 
     from .connection import Connected
     from .runtime import LemonfiberConfigEntry
 
 DASHBOARD: Final = "dashboard"
 """The kind the stream carries the dashboard in."""
+
+PLAYING: Final = "playing"
+"""The kind a stream carries what is playing in: every session on the stack's, a member's own on theirs."""
 
 STACK: Final = {"what": "stack"}
 """What the `update` read is asked about: the services the stack runs, rather than lemonfiber itself."""
@@ -52,6 +55,13 @@ def dashboard_in(arrival: Arrival) -> Snapshot | None:
     if not isinstance(arrival, Live) or arrival.envelope["kind"] != DASHBOARD:
         return None
     return expect(arrival.envelope, DASHBOARD)["data"]
+
+
+def playing_in(arrival: Arrival) -> PlayingReport | None:
+    """Return what is playing as an arrival carries it live, or None where it is anything else."""
+    if not isinstance(arrival, Live) or arrival.envelope["kind"] != PLAYING:
+        return None
+    return expect(arrival.envelope, PLAYING)["data"]
 
 
 async def first_snapshot(stream: AsyncStream) -> Snapshot:
@@ -218,12 +228,20 @@ class Following[T](DataUpdateCoordinator[T]):
             capabilities = await self._connected.client.capabilities()
         except LemonfiberError:
             return
-        if scope_of(capabilities) is not self._connected.scope:
+        try:
+            moved = scope_of(capabilities) is not self._connected.scope
+        except NotConnectedError:
+            moved = True
+        if moved:
             self.hass.config_entries.async_schedule_reload(self.config_entry.entry_id)
 
 
 class StreamCoordinator(Following["Snapshot"]):
-    """The dashboard as the event stream carries it, and each alert it carries fired."""
+    """The dashboard and what is playing as the event stream carries them, and each alert it carries fired.
+
+    What is playing is held apart from the dashboard: it is None until the
+    stream says it, and again from a gap until the stream says it again.
+    """
 
     def __init__(
         self,
@@ -237,6 +255,7 @@ class StreamCoordinator(Following["Snapshot"]):
         super().__init__(hass, entry, connected, stream, first)
         self.diagnosis = DiagnosisCoordinator(hass, entry, connected.client)
         self._alert_listeners: list[Callable[[Alert], None]] = []
+        self.playing: PlayingReport | None = None
 
     @callback
     def async_add_alert_listener(self, listener: Callable[[Alert], None]) -> CALLBACK_TYPE:
@@ -255,7 +274,15 @@ class StreamCoordinator(Following["Snapshot"]):
                     self.diagnosis.async_request_refresh(),
                     f"{DOMAIN} diagnosis",
                 )
+        elif (playing := playing_in(arrival)) is not None:
+            self.playing = playing
+            self.async_update_listeners()
         elif (alert := alert_in(arrival)) is not None:
             fire(self.hass, self.config_entry, alert)
             for listener in tuple(self._alert_listeners):
                 listener(alert)
+
+    @override
+    def _lost(self, state: State) -> None:
+        self.playing = None
+        super()._lost(state)

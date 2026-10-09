@@ -15,7 +15,12 @@ from custom_components.lemonfiber.connection import Reason
 from custom_components.lemonfiber.event import ALERTS, MOMENTS
 from custom_components.lemonfiber.media_player import PLAYING
 from custom_components.lemonfiber.readings import SEVERITIES, STANDINGS
-from custom_components.lemonfiber.sensor import DASHBOARD_SENSORS, FINDINGS_SENSORS, REQUESTS_SENSORS
+from custom_components.lemonfiber.sensor import (
+    ACTIVE_STREAMS,
+    DASHBOARD_SENSORS,
+    FINDINGS_SENSORS,
+    REQUESTS_SENSORS,
+)
 from custom_components.lemonfiber.switch import DOWNLOADS_PAUSED
 from custom_components.lemonfiber.update import SERVICE_UPDATE, STACK_UPDATE
 
@@ -74,7 +79,10 @@ def test_every_standing_has_its_words(standing: str) -> None:
 
 def test_every_entity_has_its_name_and_icon() -> None:
     icons = leaves(load("icons.json"))
-    sensors = [one.translation_key for one in (*DASHBOARD_SENSORS, *FINDINGS_SENSORS, *REQUESTS_SENSORS)]
+    sensors = [
+        one.translation_key
+        for one in (*DASHBOARD_SENSORS, *FINDINGS_SENSORS, *REQUESTS_SENSORS, ACTIVE_STREAMS)
+    ]
     assert len(FINDINGS_SENSORS) == len(SEVERITIES)
     for key in sensors:
         assert f"entity.sensor.{key}.name" in ENGLISH

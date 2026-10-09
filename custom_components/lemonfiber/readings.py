@@ -14,14 +14,16 @@ from typing import TYPE_CHECKING, Final
 from lemonfiber.contract import HealthStanding, ProblemSeverity
 
 if TYPE_CHECKING:
-    from lemonfiber.contract import DashboardReading, DoctorReport, Service, Snapshot
+    from lemonfiber.contract import DashboardReading, DoctorReport, Downloader, Playback, Service, Snapshot
 
 READY: Final = "ready"
 """A panel whose source answered."""
 KNOWN: Final = "known"
 """A reading the source gave this time."""
 UNKNOWN: Final = "unknown"
-"""The standing of a stack nothing could be said about."""
+"""The standing of a stack nothing could be said about, and the state of a download client that could not be asked."""
+PAUSED: Final = "paused"
+"""A download client that says it is paused."""
 
 STANDINGS: Final[tuple[HealthStanding, ...]] = tuple(
     standing for standing in typing.get_args(HealthStanding.__value__) if standing != UNKNOWN
@@ -89,6 +91,40 @@ def disk_free(snapshot: Snapshot) -> int | None:
     return known(panel["data"]["free"])
 
 
+def config_free(snapshot: Snapshot) -> int | None:
+    """Return the bytes free on the volume the services keep their configuration and databases on."""
+    panel = snapshot["storage"]
+    if panel["panel"] != READY:
+        return None
+    return known(panel["data"]["config_free"])
+
+
+def downloaders(snapshot: Snapshot) -> list[Downloader]:
+    """Return every download client the stack runs, or none where the panel could not be filled."""
+    panel = snapshot["downloaders"]
+    return panel["data"] if panel["panel"] == READY else []
+
+
+def paused(snapshot: Snapshot) -> bool | None:
+    """Return whether downloads are paused, as the clients read it back.
+
+    Paused where every client that could be asked says so, not paused where any
+    says it is fetching, and unknown where none could be asked.
+    """
+    states = {one["state"] for one in downloaders(snapshot)} - {UNKNOWN}
+    if not states:
+        return None
+    return states == {PAUSED}
+
+
+def client_paused(snapshot: Snapshot, client: str) -> bool | None:
+    """Return whether one download client says it is paused, or None where it could not be asked or is gone."""
+    for one in downloaders(snapshot):
+        if one["client"] == client:
+            return None if one["state"] == UNKNOWN else one["state"] == PAUSED
+    return None
+
+
 def services(snapshot: Snapshot) -> list[Service]:
     """Return every service the stack runs, or none where the panel could not be filled."""
     panel = snapshot["services"]
@@ -115,4 +151,18 @@ def findings(report: DoctorReport, severity: ProblemSeverity) -> list[str]:
         verdict = finding["verdict"]
         if (verdict["outcome"] == "fail" or verdict["outcome"] == "warn") and verdict["severity"] == severity:
             said.append(verdict["summary"])
+    return said
+
+
+def watching(session: Playback) -> dict[str, object]:
+    """Return who is watching what, on which device and whether it is paused, with the series an episode is of."""
+    said: dict[str, object] = {
+        "member": session["member"],
+        "title": session["title"],
+        "device": session["device"],
+        "paused": session["paused"],
+    }
+    for numbered in ("series", "season", "episode"):
+        if (value := session.get(numbered)) is not None:
+            said[numbered] = value
     return said

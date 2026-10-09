@@ -1,5 +1,5 @@
 # Copyright (c) 2026 NightWorksIO
-"""The stack's figures: its health, its downloads, its disk, and the doctor's findings by severity; and a member's requests by state."""
+"""The stack's figures: its health, its downloads, its disk, what is playing, and the doctor's findings by severity; and a member's requests by state."""
 
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Final, override
@@ -77,6 +77,15 @@ DASHBOARD_SENSORS: Final = (
         suggested_unit_of_measurement=UnitOfInformation.GIGABYTES,
         value=readings.disk_free,
     ),
+    DashboardSensorDescription(
+        key="disk_free_config",
+        translation_key="disk_free_config",
+        device_class=SensorDeviceClass.DATA_SIZE,
+        state_class=SensorStateClass.MEASUREMENT,
+        native_unit_of_measurement=UnitOfInformation.BYTES,
+        suggested_unit_of_measurement=UnitOfInformation.GIGABYTES,
+        value=readings.config_free,
+    ),
 )
 
 
@@ -118,6 +127,13 @@ REQUESTS_SENSORS: Final = tuple(
 )
 
 
+ACTIVE_STREAMS: Final = SensorEntityDescription(
+    key="active_streams",
+    translation_key="active_streams",
+    state_class=SensorStateClass.MEASUREMENT,
+)
+
+
 @technical_side
 async def add_technical(
     entry: LemonfiberConfigEntry,
@@ -129,6 +145,7 @@ async def add_technical(
         [
             *(DashboardSensor(technical.stream, entry, technical, one) for one in DASHBOARD_SENSORS),
             *(FindingsSensor(technical.diagnosis, entry, technical, one) for one in FINDINGS_SENSORS),
+            ActiveStreams(technical.stream, entry, technical, ACTIVE_STREAMS),
         ],
     )
 
@@ -165,6 +182,42 @@ class DashboardSensor(StackEntity[StreamCoordinator], SensorEntity):
         snapshot = self.coordinator.data
         self._attr_native_value = self._reading.value(snapshot)
         self._attr_extra_state_attributes = dict(self._reading.attributes(snapshot))
+
+    @callback
+    @override
+    def _handle_coordinator_update(self) -> None:
+        self._read()
+        super()._handle_coordinator_update()
+
+
+class ActiveStreams(StackEntity[StreamCoordinator], SensorEntity):
+    """How many sessions the media server is playing, and who is watching what on which device.
+
+    Unavailable until the stream has said what is playing, and again from a gap
+    until it says it again; unknown where the media server could not say.
+    """
+
+    def __init__(
+        self,
+        coordinator: StreamCoordinator,
+        entry: LemonfiberConfigEntry,
+        technical: Technical,
+        description: SensorEntityDescription,
+    ) -> None:
+        """Describe the figure and read what the stream last said is playing."""
+        super().__init__(coordinator, entry, technical, description)
+        self._read()
+
+    def _read(self) -> None:
+        playing = self.coordinator.playing
+        sessions = None if playing is None or not playing["available"] else playing["sessions"]
+        self._attr_native_value = None if sessions is None else len(sessions)
+        self._attr_extra_state_attributes = {"sessions": [readings.watching(one) for one in sessions or []]}
+
+    @property
+    @override
+    def available(self) -> bool:
+        return super().available and self.coordinator.playing is not None
 
     @callback
     @override

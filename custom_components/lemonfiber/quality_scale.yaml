@@ -78,13 +78,13 @@ rules:
     comment: An entry is one stack, and the stack is its one device.
   entity-category:
     status: done
-    comment: The restart buttons are configuration; every other entity is a primary reading or control of the stack.
+    comment: The restart buttons are configuration, each download client's paused state is a diagnostic, and every other entity is a primary reading or control.
   entity-device-class: done
   entity-disabled-by-default:
     status: done
     comment: >-
       Advisory findings, advice rather than anything wrong, are counted by an entity left off
-      until enabled; each service's restart button and update entity are left off beside the
+      until enabled; each service's restart button and update entity and each download client's paused state are left off beside the
       stack's own; and a member's requests gone are counted by an entity left off beside the rest.
   entity-translations: done
   exception-translations: done

@@ -1,5 +1,5 @@
 # Copyright (c) 2026 NightWorksIO
-"""The controls an `act` key gets without a rehearsal: running the doctor, restarting, and pausing or resuming downloads."""
+"""The controls an `act` key gets: running the doctor, and restarting and pausing or resuming downloads, rehearsed first."""
 
 from typing import TYPE_CHECKING, Final, cast
 
@@ -18,8 +18,19 @@ from pytest_homeassistant_custom_component.common import async_capture_events
 
 from custom_components.lemonfiber.connection import Reason
 from custom_components.lemonfiber.jobs import JOB_EVENT
-from tests.conftest import DIAGNOSIS, capabilities, enabled, reauthenticating, serve, until
-from tests.stack import Reply, envelope, problem
+from tests.conftest import (
+    DIAGNOSIS,
+    capabilities,
+    dashboard,
+    downloader,
+    enabled,
+    ready,
+    reauthenticating,
+    serve,
+    unavailable,
+    until,
+)
+from tests.stack import Reply, envelope, event, problem
 
 if TYPE_CHECKING:
     from homeassistant.core import HomeAssistant
@@ -33,7 +44,13 @@ RESTART_STACK: Final = "button.127_0_0_1_restart_the_stack"
 RESTART_SONARR: Final = "button.127_0_0_1_restart_sonarr"
 RESTARTED: Final = Reply(202, envelope("job", {"action": "restart", "job": "j-2"}))
 STARTED: Final = Reply(202, envelope("job", {"action": "diagnose", "job": "j-1"}))
-PAUSING: Final = Reply(body=envelope("pausing", {"asked": "pause", "clients": [], "rehearsed": False}))
+RESTART_OFFER: Final = Reply(body=envelope("lifecycle", {"offer": "o-restart", "rehearsed": True}))
+PAUSE_OFFER: Final = Reply(
+    body=envelope("pausing", {"asked": "pause", "clients": [], "offer": "o-pause", "rehearsed": True}),
+)
+PAUSING: Final = Reply(
+    body=envelope("pausing", {"asked": "pause", "clients": [], "offer": "o-pause", "rehearsed": False}),
+)
 
 
 async def set_up(hass: HomeAssistant, entry: MockConfigEntry) -> None:
@@ -159,29 +176,53 @@ async def test_a_key_refused_on_a_press_asks_for_a_new_one(
     await until(hass, lambda: reauthenticating(hass))
 
 
-async def test_the_downloads_switch_shows_what_it_last_asked_for(
+async def test_the_downloads_switch_shows_what_the_clients_say(
+    hass: HomeAssistant,
+    stack: Stack,
+    entry: MockConfigEntry,
+) -> None:
+    feed = serve(stack, "act")
+    await set_up(hass, entry)
+    held = hass.states.get(PAUSED)
+    assert held is not None
+    assert held.state == STATE_OFF
+    assert ATTR_ASSUMED_STATE not in held.attributes
+    clients = ready([downloader("qbittorrent", "paused"), downloader("sabnzbd", "unknown")])
+    feed.say(event("dashboard", dashboard(downloaders=clients)))
+    await until(hass, lambda: state(hass, PAUSED) == STATE_ON)
+    mixed = ready([downloader("qbittorrent", "paused"), downloader("sabnzbd", "fetching")])
+    feed.say(event("dashboard", dashboard(downloaders=mixed)))
+    await until(hass, lambda: state(hass, PAUSED) == STATE_OFF)
+    feed.say(event("dashboard", dashboard(downloaders=ready([downloader("qbittorrent", "unknown")]))))
+    await until(hass, lambda: state(hass, PAUSED) == STATE_UNKNOWN)
+    feed.say(event("dashboard", dashboard(downloaders=unavailable())))
+    await hass.async_block_till_done()
+    assert state(hass, PAUSED) == STATE_UNKNOWN
+
+
+async def test_toggling_rehearses_then_asks_with_the_offer_and_waits_for_the_clients_to_say_so(
     hass: HomeAssistant,
     stack: Stack,
     entry: MockConfigEntry,
 ) -> None:
     serve(stack, "act")
-    stack.reply("/api/actions/downloads-pause", PAUSING)
-    stack.reply("/api/actions/downloads-resume", PAUSING)
+    stack.reply("/api/actions/downloads-pause", PAUSE_OFFER, PAUSING)
+    stack.reply("/api/actions/downloads-resume", PAUSE_OFFER, PAUSING)
     await set_up(hass, entry)
-    held = hass.states.get(PAUSED)
-    assert held is not None
-    assert held.state == STATE_UNKNOWN
-    assert held.attributes[ATTR_ASSUMED_STATE] is True
     fired = async_capture_events(hass, JOB_EVENT)
     await hass.services.async_call("switch", "turn_on", {ATTR_ENTITY_ID: PAUSED}, blocking=True)
-    assert state(hass, PAUSED) == STATE_ON
-    await hass.services.async_call("switch", "turn_off", {ATTR_ENTITY_ID: PAUSED}, blocking=True)
     assert state(hass, PAUSED) == STATE_OFF
+    await hass.services.async_call("switch", "turn_off", {ATTR_ENTITY_ID: PAUSED}, blocking=True)
     assert [event.data["action"] for event in fired] == ["downloads-pause", "downloads-resume"]
-    assert stack.asked("/api/actions/downloads-pause") == stack.asked("/api/actions/downloads-resume") == 1
+    assert stack.bodies == [
+        ("/api/actions/downloads-pause", {"dry_run": True}),
+        ("/api/actions/downloads-pause", {"offer": "o-pause"}),
+        ("/api/actions/downloads-resume", {"dry_run": True}),
+        ("/api/actions/downloads-resume", {"offer": "o-pause"}),
+    ]
 
 
-async def test_a_refused_toggle_leaves_the_switch_as_it_was(
+async def test_a_refused_toggle_leaves_the_switch_as_the_clients_say(
     hass: HomeAssistant,
     stack: Stack,
     entry: MockConfigEntry,
@@ -191,7 +232,24 @@ async def test_a_refused_toggle_leaves_the_switch_as_it_was(
     await set_up(hass, entry)
     with pytest.raises(HomeAssistantError):
         await hass.services.async_call("switch", "turn_on", {ATTR_ENTITY_ID: PAUSED}, blocking=True)
-    assert state(hass, PAUSED) == STATE_UNKNOWN
+    assert state(hass, PAUSED) == STATE_OFF
+    assert stack.asked("/api/actions/downloads-pause") == 1
+
+
+async def test_a_call_whose_offer_has_moved_is_refused_in_the_stacks_words(
+    hass: HomeAssistant,
+    stack: Stack,
+    entry: MockConfigEntry,
+) -> None:
+    serve(stack, "act")
+    moved = Reply(409, problem("RATE-6", "A client changed since this was offered."))
+    stack.reply("/api/actions/downloads-pause", PAUSE_OFFER, moved)
+    await set_up(hass, entry)
+    fired = async_capture_events(hass, JOB_EVENT)
+    with pytest.raises(HomeAssistantError) as raised:
+        await hass.services.async_call("switch", "turn_on", {ATTR_ENTITY_ID: PAUSED}, blocking=True)
+    assert raised.value.translation_placeholders == {"sentence": "A client changed since this was offered."}
+    assert fired[0].data["outcome"] == "failed"
 
 
 async def test_a_service_is_restarted_alone_and_the_restart_followed(
@@ -200,13 +258,16 @@ async def test_a_service_is_restarted_alone_and_the_restart_followed(
     entry: MockConfigEntry,
 ) -> None:
     serve(stack, "act")
-    stack.reply("/api/actions/restart", RESTARTED)
+    stack.reply("/api/actions/restart", RESTART_OFFER, RESTARTED)
     stack.reply("/api/jobs/j-2", Reply(body=envelope("lifecycle", {"rehearsed": False})))
     enabled(hass, entry, RESTART_SONARR, "restart_sonarr")
     await set_up(hass, entry)
     fired = async_capture_events(hass, JOB_EVENT)
     await hass.services.async_call("button", "press", {ATTR_ENTITY_ID: RESTART_SONARR}, blocking=True)
-    assert stack.bodies == [("/api/actions/restart", {"services": ["sonarr"]})]
+    assert stack.bodies == [
+        ("/api/actions/restart", {"services": ["sonarr"], "dry_run": True}),
+        ("/api/actions/restart", {"services": ["sonarr"], "offer": "o-restart"}),
+    ]
     assert [event.data for event in fired] == [
         {"entry_id": entry.entry_id, "action": "restart", "job": "j-2", "outcome": "finished"},
     ]
@@ -218,11 +279,39 @@ async def test_the_whole_stack_is_restarted_by_naming_no_service(
     entry: MockConfigEntry,
 ) -> None:
     serve(stack, "act")
-    stack.reply("/api/actions/restart", RESTARTED)
+    stack.reply("/api/actions/restart", RESTART_OFFER, RESTARTED)
     stack.reply("/api/jobs/j-2", Reply(body=envelope("lifecycle", {"rehearsed": False})))
     await set_up(hass, entry)
     await hass.services.async_call("button", "press", {ATTR_ENTITY_ID: RESTART_STACK}, blocking=True)
-    assert stack.bodies == [("/api/actions/restart", {})]
+    assert stack.bodies == [
+        ("/api/actions/restart", {"dry_run": True}),
+        ("/api/actions/restart", {"offer": "o-restart"}),
+    ]
+
+
+async def test_a_rehearsal_naming_no_offer_is_followed_by_the_call_as_it_was(
+    hass: HomeAssistant,
+    stack: Stack,
+    entry: MockConfigEntry,
+) -> None:
+    serve(stack, "act")
+    stack.reply("/api/actions/restart", Reply(body=envelope("lifecycle", {"rehearsed": True})), RESTARTED)
+    stack.reply("/api/jobs/j-2", Reply(body=envelope("lifecycle", {"rehearsed": False})))
+    await set_up(hass, entry)
+    await hass.services.async_call("button", "press", {ATTR_ENTITY_ID: RESTART_STACK}, blocking=True)
+    assert stack.bodies == [("/api/actions/restart", {"dry_run": True}), ("/api/actions/restart", {})]
+
+
+async def test_the_doctor_is_run_without_a_rehearsal(
+    hass: HomeAssistant,
+    stack: Stack,
+    entry: MockConfigEntry,
+) -> None:
+    serve(stack, "act")
+    stack.reply("/api/actions/diagnose", Reply(body=DIAGNOSIS))
+    await set_up(hass, entry)
+    await press(hass)
+    assert stack.bodies == [("/api/actions/diagnose", {})]
 
 
 async def test_a_refused_restart_is_said_in_the_stacks_words(

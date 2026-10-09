@@ -10,7 +10,7 @@ from homeassistant.helpers import issue_registry as ir
 from custom_components.lemonfiber import coordinator, member
 from custom_components.lemonfiber.connection import Reason, Scope
 from custom_components.lemonfiber.const import DOMAIN
-from tests.conftest import HOUSEHOLD, reauthenticating, serve
+from tests.conftest import HOUSEHOLD, STACK_ID, dashboard, entry_for, reauthenticating, serve
 from tests.stack import Feed, Reply, event, problem
 
 if TYPE_CHECKING:
@@ -37,7 +37,7 @@ async def test_a_read_key_follows_the_stream_and_builds_the_entities(
     assert entry.state is ConfigEntryState.LOADED
     assert entry.runtime_data.connected.scope is Scope.READ
     entities = er.async_entries_for_config_entry(er.async_get(hass), entry.entry_id)
-    assert len(entities) == 15
+    assert len(entities) == 19
     assert all(one.unique_id.startswith(f"{entry.entry_id}-") for one in entities)
     assert stack.asked("/api/events") == 1
     assert await hass.config_entries.async_unload(entry.entry_id)
@@ -210,3 +210,51 @@ async def test_a_stream_in_another_version_is_tried_again(
     await set_up(hass, entry)
     assert entry.state is ConfigEntryState.SETUP_RETRY
     assert entry.error_reason_translation_key == Reason.VERSION_MISMATCH
+
+
+async def test_an_entry_keyed_by_its_address_takes_the_stacks_identifier_on_setup(
+    hass: HomeAssistant,
+    stack: Stack,
+) -> None:
+    serve(stack)
+    entry = entry_for(stack, stack.url)
+    entry.add_to_hass(hass)
+    await set_up(hass, entry)
+    assert entry.unique_id == STACK_ID
+
+
+async def test_an_entry_keyed_by_its_address_keeps_it_where_another_entry_has_the_stacks_identifier(
+    hass: HomeAssistant,
+    stack: Stack,
+) -> None:
+    other = Feed()
+    other.say(event("dashboard", dashboard()))
+    serve(stack, "read", Feed(), other)
+    entry_for(stack).add_to_hass(hass)
+    entry = entry_for(stack, stack.url)
+    entry.add_to_hass(hass)
+    await set_up(hass, entry)
+    assert entry.unique_id == stack.url
+
+
+async def test_an_entry_already_keyed_by_a_stack_is_left_as_it_is(
+    hass: HomeAssistant,
+    stack: Stack,
+    entry: MockConfigEntry,
+) -> None:
+    serve(stack)
+    hass.config_entries.async_update_entry(entry, unique_id="01J9ELSEWHERE000000000000")
+    await set_up(hass, entry)
+    assert entry.unique_id == "01J9ELSEWHERE000000000000"
+
+
+async def test_a_member_whose_shelf_cannot_be_read_is_tried_again(
+    hass: HomeAssistant,
+    stack: Stack,
+    entry: MockConfigEntry,
+) -> None:
+    serve(stack, "member")
+    stack.reply("/api/held", Reply(500, problem("FAIL-1", "The media server is not answering.")))
+    await set_up(hass, entry)
+    assert entry.state is ConfigEntryState.SETUP_RETRY
+    assert entry.error_reason_translation_placeholders == {"sentence": "The media server is not answering."}

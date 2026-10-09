@@ -17,6 +17,7 @@ from homeassistant.const import CONF_API_KEY, CONF_URL, Platform
 from homeassistant.exceptions import ConfigEntryAuthFailed, ConfigEntryNotReady
 from homeassistant.helpers import issue_registry as ir
 
+from .config_flow import keyed_by_address
 from .connection import NotConnectedError, Reason, connect
 from .const import CONF_PIN, DOMAIN
 from .coordinator import StreamCoordinator, VersionsCoordinator, first_snapshot
@@ -77,6 +78,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: LemonfiberConfigEntry) -
         raise not_set_up(refusal) from refusal
     for reason in REPAIRABLE:
         ir.async_delete_issue(hass, DOMAIN, issue_of(entry, reason))
+    rekey(hass, entry, connected.identity)
     entry.runtime_data = Runtime(connected, technical, theirs)
     if technical is not None:
         entry.async_create_background_task(hass, technical.stream.follow(), f"{DOMAIN} stream")
@@ -86,6 +88,15 @@ async def async_setup_entry(hass: HomeAssistant, entry: LemonfiberConfigEntry) -
         entry.async_create_background_task(hass, theirs.follow(), f"{DOMAIN} stream")
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
     return True
+
+
+def rekey(hass: HomeAssistant, entry: LemonfiberConfigEntry, identity: str) -> None:
+    """Identify an entry still keyed by its address by the stack and key that answered, where no other entry is."""
+    if (
+        keyed_by_address(entry)
+        and hass.config_entries.async_entry_for_domain_unique_id(DOMAIN, identity) is None
+    ):
+        hass.config_entries.async_update_entry(entry, unique_id=identity)
 
 
 async def set_up_technical(

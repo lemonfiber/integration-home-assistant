@@ -1,7 +1,7 @@
 # Copyright (c) 2026 NightWorksIO
 """Adding a stack, replacing its key and moving its address and pin, each checked against the stand-in first."""
 
-from typing import TYPE_CHECKING, Any, Final
+from typing import TYPE_CHECKING, Any, Final, cast
 
 import pytest
 from homeassistant.config_entries import SOURCE_USER
@@ -9,9 +9,10 @@ from homeassistant.const import CONF_API_KEY, CONF_URL
 from homeassistant.data_entry_flow import FlowResultType
 from lemonfiber import ConfigurationError, LemonfiberError, UnexpectedKindError, UnknownKindError
 
+from custom_components.lemonfiber.config_flow import ANOTHER_STACK
 from custom_components.lemonfiber.connection import Reason, refused
 from custom_components.lemonfiber.const import CONF_PIN, DOMAIN
-from tests.conftest import KEY, capabilities, entry_for, said, serve
+from tests.conftest import KEY, MEMBER_ID, STACK_ID, capabilities, entry_for, said, serve
 from tests.stack import LOOPBACK, Reply, Stack, envelope, problem, unused_port
 
 if TYPE_CHECKING:
@@ -60,13 +61,39 @@ async def test_a_stack_is_added_once_the_address_key_and_pin_are_answered_for(
     assert result["type"] is FlowResultType.CREATE_ENTRY
     assert result["title"] == LOOPBACK
     assert result["data"] == {CONF_URL: stack.url, CONF_API_KEY: KEY, CONF_PIN: stack.pin}
-    assert result["result"].unique_id == stack.url
+    assert result["result"].unique_id == STACK_ID
     assert stack.arrived[0][2]["X-Lemonfiber-Token"] == KEY
 
 
-async def test_a_members_key_is_added_too(hass: HomeAssistant, stack: Stack) -> None:
+async def test_a_members_key_is_added_beside_the_stacks_own_as_theirs(
+    hass: HomeAssistant,
+    stack: Stack,
+) -> None:
     serve(stack, "member")
-    assert (await submit(hass, answers(stack)))["type"] is FlowResultType.CREATE_ENTRY
+    entry_for(stack).add_to_hass(hass)
+    result = await submit(hass, answers(stack))
+    assert result["type"] is FlowResultType.CREATE_ENTRY
+    assert result["result"].unique_id == f"{STACK_ID}:member:{MEMBER_ID}"
+    assert ("/api/held", {"most": "1"}) in stack.queries
+
+
+async def test_a_stack_that_keeps_no_identifier_is_known_by_its_address(
+    hass: HomeAssistant,
+    stack: Stack,
+) -> None:
+    serve(stack)
+    nameless = capabilities("read")
+    cast("dict[str, object]", nameless["data"])["stack"] = None
+    stack.reply("/api/capabilities", Reply(body=nameless))
+    result = await submit(hass, answers(stack))
+    assert result["result"].unique_id == stack.url
+
+
+async def test_an_answer_to_the_operator_is_no_key(hass: HomeAssistant, stack: Stack) -> None:
+    serve(stack)
+    stack.reply("/api/capabilities", Reply(body=capabilities("operator")))
+    shown = await submit(hass, answers(stack))
+    assert shown["errors"] == {CONF_API_KEY: Reason.NOT_A_KEY}
 
 
 async def test_a_stack_already_added_is_not_added_twice(hass: HomeAssistant, stack: Stack) -> None:
@@ -194,7 +221,7 @@ async def test_the_address_and_pin_move_without_removing_the_entry(
     assert done["type"] is FlowResultType.ABORT
     assert done["reason"] == "reconfigure_successful"
     assert entry.data == {CONF_URL: moved.url, CONF_API_KEY: KEY, CONF_PIN: moved.pin}
-    assert entry.unique_id == moved.url
+    assert entry.unique_id == STACK_ID
 
 
 async def test_a_key_refused_while_the_address_moves_is_said_on_the_form(
@@ -214,6 +241,7 @@ async def test_the_address_cannot_move_onto_a_stack_another_entry_holds(
     stack: Stack,
     entry: MockConfigEntry,
 ) -> None:
+    hass.config_entries.async_update_entry(entry, unique_id=stack.url)
     async with Stack() as taken:
         serve(taken)
         entry_for(taken).add_to_hass(hass)
@@ -221,3 +249,51 @@ async def test_the_address_cannot_move_onto_a_stack_another_entry_holds(
         result = await configure(hass, shown["flow_id"], {CONF_URL: taken.url, CONF_PIN: taken.pin})
     assert result["type"] is FlowResultType.ABORT
     assert result["reason"] == "already_configured"
+
+
+def answering_as(stack: Stack, identity: str) -> Reply:
+    """Return the capabilities of a stack naming itself by another identifier."""
+    other = capabilities("read")
+    cast("dict[str, object]", other["data"])["stack"] = identity
+    return Reply(body=other)
+
+
+async def test_the_address_cannot_move_onto_another_stack(
+    hass: HomeAssistant,
+    stack: Stack,
+    entry: MockConfigEntry,
+) -> None:
+    async with Stack() as other:
+        serve(other)
+        other.reply("/api/capabilities", answering_as(other, "01J9ANOTHER00000000000000"))
+        shown = said(await entry.start_reconfigure_flow(hass))
+        result = await configure(hass, shown["flow_id"], {CONF_URL: other.url, CONF_PIN: other.pin})
+    assert result["type"] is FlowResultType.ABORT
+    assert result["reason"] == ANOTHER_STACK
+    assert entry.data[CONF_URL] == stack.url
+
+
+async def test_a_new_key_must_reach_the_stack_the_entry_was_added_for(
+    hass: HomeAssistant,
+    stack: Stack,
+    entry: MockConfigEntry,
+) -> None:
+    serve(stack, "member")
+    shown = said(await entry.start_reauth_flow(hass))
+    result = await configure(hass, shown["flow_id"], {CONF_API_KEY: NEW_KEY})
+    assert result["type"] is FlowResultType.ABORT
+    assert result["reason"] == ANOTHER_STACK
+    assert entry.data[CONF_API_KEY] == KEY
+
+
+async def test_an_entry_keyed_by_its_address_takes_the_stacks_identifier_when_its_key_is_replaced(
+    hass: HomeAssistant,
+    stack: Stack,
+) -> None:
+    serve(stack)
+    entry = entry_for(stack, stack.url)
+    entry.add_to_hass(hass)
+    shown = said(await entry.start_reauth_flow(hass))
+    done = await configure(hass, shown["flow_id"], {CONF_API_KEY: NEW_KEY})
+    assert done["reason"] == "reauth_successful"
+    assert entry.unique_id == STACK_ID

@@ -4,12 +4,23 @@
 from typing import TYPE_CHECKING, Final
 
 import pytest
-from homeassistant.const import STATE_OFF, STATE_ON, STATE_UNKNOWN
+from homeassistant.const import STATE_OFF, STATE_ON, STATE_UNKNOWN, EntityCategory
 from homeassistant.helpers import device_registry as dr
 from homeassistant.helpers import entity_registry as er
 
 from custom_components.lemonfiber.const import DOMAIN, MANUFACTURER, MODEL
-from tests.conftest import VERSION, dashboard, reading, ready, serve, transfer, unavailable, until
+from tests.conftest import (
+    VERSION,
+    dashboard,
+    downloader,
+    enabled,
+    reading,
+    ready,
+    serve,
+    transfer,
+    unavailable,
+    until,
+)
 from tests.stack import Feed, event
 
 if TYPE_CHECKING:
@@ -21,8 +32,8 @@ if TYPE_CHECKING:
 PREFIX: Final = "127_0_0_1"
 
 
-async def shown(hass: HomeAssistant, stack: Stack, entry: MockConfigEntry, **panels: object) -> None:
-    """Set the entry up on a stream whose first dashboard has these panels, and wait for the doctor to be read."""
+async def shown(hass: HomeAssistant, stack: Stack, entry: MockConfigEntry, **panels: object) -> Feed:
+    """Set the entry up on a stream whose first dashboard has these panels, wait for the doctor to be read, and return the stream."""
     feed = Feed()
     serve(stack, "read", feed)
     feed.queue.get_nowait()
@@ -30,6 +41,7 @@ async def shown(hass: HomeAssistant, stack: Stack, entry: MockConfigEntry, **pan
     await hass.config_entries.async_setup(entry.entry_id)
     await hass.async_block_till_done()
     await until(hass, lambda: entry.runtime_data.technical.diagnosis.data is not None)
+    return feed
 
 
 def state(hass: HomeAssistant, platform: str, name: str) -> str:
@@ -58,6 +70,7 @@ async def test_a_healthy_stack_shows_its_figures(
     assert state(hass, "sensor", "download_speed") == "2.0"
     assert attributes(hass, "sensor", "download_speed")["unit_of_measurement"] == "MB/s"
     assert state(hass, "sensor", "data_disk_free") == "500.0"
+    assert state(hass, "sensor", "config_disk_free") == "40.0"
     assert state(hass, "binary_sensor", "needs_attention") == STATE_OFF
     assert state(hass, "binary_sensor", "vpn") == STATE_ON
 
@@ -116,7 +129,23 @@ async def test_a_stack_nothing_can_be_said_about_shows_unknown(
         ({"transfers": ready([transfer(reading(1)), transfer(reading(2, "stale"))])}, "download_speed"),
         ({"transfers": ready([transfer(reading(None, "unknown"))])}, "download_speed"),
         ({"storage": unavailable()}, "data_disk_free"),
-        ({"storage": ready({"free": reading(7, "stale"), "hardlink": "linking"})}, "data_disk_free"),
+        (
+            {
+                "storage": ready(
+                    {"free": reading(7, "stale"), "config_free": reading(1), "hardlink": "linking"},
+                ),
+            },
+            "data_disk_free",
+        ),
+        ({"storage": unavailable()}, "config_disk_free"),
+        (
+            {
+                "storage": ready(
+                    {"free": reading(7), "config_free": reading(None, "unknown"), "hardlink": "linking"},
+                ),
+            },
+            "config_disk_free",
+        ),
     ],
 )
 async def test_a_figure_the_stack_cannot_give_now_is_unknown_rather_than_shown(
@@ -186,3 +215,35 @@ async def test_the_stack_is_one_device_named_by_its_entry(
         VERSION,
     )
     assert device.configuration_url == stack.url
+
+
+async def test_each_download_clients_paused_state_is_a_diagnostic_left_off_until_enabled(
+    hass: HomeAssistant,
+    stack: Stack,
+    entry: MockConfigEntry,
+) -> None:
+    qbittorrent = f"binary_sensor.{PREFIX}_qbittorrent_paused"
+    sabnzbd = f"binary_sensor.{PREFIX}_sabnzbd_paused"
+    enabled(hass, entry, qbittorrent, "paused_qbittorrent")
+    enabled(hass, entry, sabnzbd, "paused_sabnzbd")
+    clients = ready([downloader("qbittorrent", "paused"), downloader("sabnzbd", "unknown")])
+    await shown(hass, stack, entry, downloaders=clients)
+    assert state(hass, "binary_sensor", "qbittorrent_paused") == STATE_ON
+    assert state(hass, "binary_sensor", "sabnzbd_paused") == STATE_UNKNOWN
+    held = er.async_get(hass).async_get(qbittorrent)
+    assert held is not None
+    assert held.entity_category is EntityCategory.DIAGNOSTIC
+
+
+async def test_a_client_paused_state_is_off_by_default_and_unknown_once_the_client_is_gone(
+    hass: HomeAssistant,
+    stack: Stack,
+    entry: MockConfigEntry,
+) -> None:
+    qbittorrent = f"binary_sensor.{PREFIX}_qbittorrent_paused"
+    enabled(hass, entry, qbittorrent, "paused_qbittorrent")
+    feed = await shown(hass, stack, entry)
+    assert state(hass, "binary_sensor", "qbittorrent_paused") == STATE_OFF
+    assert hass.states.get(f"binary_sensor.{PREFIX}_sabnzbd_paused") is None
+    feed.say(event("dashboard", dashboard(downloaders=ready([]))))
+    await until(hass, lambda: state(hass, "binary_sensor", "qbittorrent_paused") == STATE_UNKNOWN)

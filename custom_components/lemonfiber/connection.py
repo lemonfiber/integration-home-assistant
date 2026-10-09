@@ -8,7 +8,6 @@ from typing import TYPE_CHECKING, Final
 from homeassistant.const import CONF_API_KEY, CONF_URL
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from lemonfiber import (
-    KEY_CALLABLE,
     REFUSAL_CODES,
     Address,
     AddressRefusedError,
@@ -39,13 +38,19 @@ if TYPE_CHECKING:
 
     from homeassistant.core import HomeAssistant
     from lemonfiber import CapabilitySet
-    from lemonfiber.contract import CapabilityState
+    from lemonfiber.contract import CapabilityState, CredentialScope
 
 BASE: Final = "base"
 """Where a config flow puts an error that belongs to no one field."""
 
-UNPERMITTED: Final[CapabilityState] = "unpermitted"
-"""What a capability comes to for a credential whose scope does not reach it."""
+OPERATOR: Final[CredentialScope] = "operator"
+"""The scope the stack answers the operator's own session with, which no key has."""
+
+MEMBER_OF: Final = ":member:"
+"""What joins a stack's identifier to a member's, in the identity of an entry for that member's key."""
+
+ONE_HELD: Final = {"most": 1}
+"""The shelf asked for to learn whose it is: one title, since only the member it names is read."""
 
 AVAILABLE: Final[CapabilityState] = "available"
 """What a capability comes to for a credential that may use it now."""
@@ -70,6 +75,7 @@ class Reason(StrEnum):
     NOT_LEMONFIBER = "not_lemonfiber"
     VERSION_MISMATCH = "version_mismatch"
     NO_DASHBOARD = "no_dashboard"
+    NOT_A_KEY = "not_a_key"
     NOTHING_SAID = "nothing_said"
     REFUSED = "refused"
 
@@ -86,6 +92,7 @@ FIELD_OF: Final[Mapping[Reason, str]] = {
     Reason.NOT_LEMONFIBER: CONF_URL,
     Reason.VERSION_MISMATCH: BASE,
     Reason.NO_DASHBOARD: BASE,
+    Reason.NOT_A_KEY: CONF_API_KEY,
     Reason.NOTHING_SAID: BASE,
     Reason.REFUSED: BASE,
 }
@@ -143,12 +150,27 @@ class Scope(StrEnum):
 
 
 def scope_of(capabilities: CapabilitySet) -> Scope:
-    """Return a key's scope from what the stack says the key may ask for."""
-    if capabilities.of_read(Read.STATUS) == UNPERMITTED:
-        return Scope.MEMBER
-    if any(capabilities.of_action(action) not in {None, UNPERMITTED} for action in KEY_CALLABLE):
-        return Scope.ACT
-    return Scope.READ
+    """Return a key's scope as the stack says it, refusing an answer given to the operator rather than to a key."""
+    if capabilities.scope == OPERATOR:
+        raise NotConnectedError(Reason.NOT_A_KEY)
+    return Scope(capabilities.scope)
+
+
+def identity_of(stack: str, member: str | None) -> str:
+    """Return what an entry is identified by: the stack, and for a member's key the member it is theirs.
+
+    A stack has one entry for its technical side, and one for each member who
+    adds their own key.
+    """
+    return stack if member is None else f"{stack}{MEMBER_OF}{member}"
+
+
+async def member_of(client: AsyncClient) -> str:
+    """Return the identifier the media server files a member's key's member under, as their shelf names it."""
+    try:
+        return expect(await client.read(Read.HELD, ONE_HELD), "held")["data"]["id"]
+    except LemonfiberError as error:
+        raise refused(error) from None
 
 
 @dataclass(frozen=True, slots=True)
@@ -159,6 +181,8 @@ class Connected:
     pin: CertificatePin = field(repr=False)
     capabilities: CapabilitySet
     scope: Scope
+    identity: str
+    """What an entry for this stack and key is identified by."""
 
     def may_call(self, action: str) -> bool:
         """Tell whether this key may call an action now: one the contract lets a key call, available to it."""
@@ -209,4 +233,7 @@ async def connect(hass: HomeAssistant, url: str, key: str, pin: str) -> Connecte
         capabilities = await client.capabilities()
     except LemonfiberError as error:
         raise refused(error) from None
-    return Connected(client, held, capabilities, scope_of(capabilities))
+    scope = scope_of(capabilities)
+    member = await member_of(client) if scope is Scope.MEMBER else None
+    stack = capabilities.stack or client.address.base
+    return Connected(client, held, capabilities, scope, identity_of(stack, member))
