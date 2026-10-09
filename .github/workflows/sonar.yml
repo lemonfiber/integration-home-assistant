@@ -181,7 +181,7 @@ jobs:
     permissions:
       contents: read
       pull-requests: write
-    uses: lemonfiber/spec/.github/workflows/sonar-gate.yml@f1f7ba7d5cdb455ecb6e2a232763b460487a4bd5 # v1.0.58
+    uses: lemonfiber/spec/.github/workflows/sonar-gate.yml@9e4af595a441995073b44629dcac592813f646bf # v1.0.60
     with:
       allowed-open: 0
     secrets:

@@ -25,8 +25,8 @@ KEY: Final = "lfk_" + "a" * 32
 VERSION: Final = "0.17.0"
 PATIENCE: Final = 10.0
 """Seconds a test waits for the stream or a read to come round: a reopening waits a second first."""
-MEMBER_READS: Final = frozenset({Read.REQUESTS, Read.HELD})
-"""The reads a member's key reaches: their own row of the household and their own shelf."""
+MEMBER_READS: Final = frozenset({Read.REQUESTS, Read.HELD, Read.PLAYING})
+"""The reads a member's key reaches: their own row of the household, their own shelf and what they are playing."""
 
 
 @pytest.fixture(autouse=True)
@@ -186,15 +186,82 @@ UPDATE: Final = update(SONARR_STEP)
 """What updating the stack would move: Sonarr, from the tag it stands on to its pin."""
 
 
+def request(state: str | None, title: str | None = None) -> dict[str, object]:
+    """Return one of a member's requests, standing at a state where the service reports one we know, named where it has a title yet."""
+    asked: dict[str, object] = {"id": 7}
+    if state is not None:
+        asked["state"] = state
+    if title is not None:
+        asked["title"] = title
+    return asked
+
+
+def household(*requests: dict[str, object], available: bool = True) -> dict[str, object]:
+    """Return a member's row of the household as their stream says it: Ana, and what she asked for."""
+    row: dict[str, object] = {
+        "access": {
+            "administrator": False,
+            "disabled": False,
+            "every_library": True,
+            "libraries": [],
+            "restriction": "unrestricted",
+            "unrated": "let-through",
+        },
+        "claimed": True,
+        "name": "Ana",
+        "requests": list(requests),
+        "standing": "active",
+        "to_hand_over": [],
+    }
+    return {"available": available, "findings": [], "members": [row] if available else [], "rehearsed": False}
+
+
+HOUSEHOLD: Final = household(
+    request("waiting-for-approval"),
+    request("getting", "Dune: Part Two"),
+    request("getting", "Severance"),
+    request("here", "Paddington in Peru"),
+    request(None, "A title in a state this build does not know"),
+)
+"""Ana's row: one request waiting, two on their way, one here, and one in a state nobody knows."""
+
+
+def playback(*, paused: bool = False) -> dict[str, object]:
+    """Return Ana watching an episode on the living room television."""
+    return {
+        "device": "Living room TV",
+        "episode": 3,
+        "medium": "series",
+        "member": "Ana",
+        "member_id": "a1",
+        "paused": paused,
+        "season": 2,
+        "series": "Severance",
+        "title": "Who Is Alive?",
+    }
+
+
+def playing(*sessions: dict[str, object], available: bool = True) -> dict[str, object]:
+    """Return what a member is playing, as their stream says it."""
+    return {"available": available, "findings": [], "member": "Ana", "sessions": list(sessions)}
+
+
 def serve(stack: Stack, scope: str = "read", *feeds: Feed) -> Feed:
-    """Have the stand-in answer as a stack does for a key of a scope, its stream opening as each feed in turn."""
+    """Have the stand-in answer as a stack does for a key of a scope, its stream opening as each feed in turn.
+
+    A member's stream opens with their household row and what they are playing;
+    every other opens with the dashboard.
+    """
     stack.reply("/api/capabilities", Reply(body=capabilities(scope)))
     stack.reply("/api/version", Reply(body=envelope("version", {"binary": VERSION, "stack": "1"})))
     stack.reply("/api/checks", Reply(body=DIAGNOSIS))
     stack.reply("/api/provenance", Reply(body=PROVENANCE))
     stack.reply("/api/update", Reply(body=UPDATE))
     opened = feeds or (Feed(),)
-    opened[0].say(event("dashboard", dashboard(), "1"))
+    if scope == "member":
+        opened[0].say(event("household", HOUSEHOLD, "1"), event("playing", playing(), "2"))
+    else:
+        opened[0].say(event("dashboard", dashboard(), "1"))
     stack.stream(*opened)
     return opened[0]
 

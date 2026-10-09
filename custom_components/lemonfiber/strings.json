@@ -50,6 +50,7 @@
       "not_lemonfiber": "Something answered at this address, and it is not lemonfiber.",
       "version_mismatch": "This integration speaks version {spoken} of lemonfiber's interface and the stack speaks version {served}. Update whichever of the two is older.",
       "no_dashboard": "The stack answered but did not send its dashboard in time.",
+      "nothing_said": "The stack answered but did not say in time what this key reaches.",
       "refused": "The stack refused: {sentence}"
     },
     "abort": {
@@ -120,6 +121,69 @@
         "state_attributes": {
           "findings": {
             "name": "Findings"
+          }
+        }
+      },
+      "requests_waiting_for_approval": {
+        "name": "Requests waiting for approval",
+        "unit_of_measurement": "requests",
+        "state_attributes": {
+          "titles": {
+            "name": "Titles"
+          }
+        }
+      },
+      "requests_declined": {
+        "name": "Requests declined",
+        "unit_of_measurement": "requests",
+        "state_attributes": {
+          "titles": {
+            "name": "Titles"
+          }
+        }
+      },
+      "requests_failed": {
+        "name": "Requests that failed",
+        "unit_of_measurement": "requests",
+        "state_attributes": {
+          "titles": {
+            "name": "Titles"
+          }
+        }
+      },
+      "requests_getting": {
+        "name": "Requests on their way",
+        "unit_of_measurement": "requests",
+        "state_attributes": {
+          "titles": {
+            "name": "Titles"
+          }
+        }
+      },
+      "requests_partly_here": {
+        "name": "Requests partly here",
+        "unit_of_measurement": "requests",
+        "state_attributes": {
+          "titles": {
+            "name": "Titles"
+          }
+        }
+      },
+      "requests_here": {
+        "name": "Requests here",
+        "unit_of_measurement": "requests",
+        "state_attributes": {
+          "titles": {
+            "name": "Titles"
+          }
+        }
+      },
+      "requests_gone": {
+        "name": "Requests gone",
+        "unit_of_measurement": "requests",
+        "state_attributes": {
+          "titles": {
+            "name": "Titles"
           }
         }
       }
@@ -201,6 +265,16 @@
           }
         }
       }
+    },
+    "media_player": {
+      "playing": {
+        "name": "Playing",
+        "state_attributes": {
+          "device": {
+            "name": "Device"
+          }
+        }
+      }
     }
   },
   "exceptions": {
@@ -236,6 +310,9 @@
     },
     "no_dashboard": {
       "message": "The stack answered but did not send its dashboard in time. Home Assistant tries again."
+    },
+    "nothing_said": {
+      "message": "The stack answered but did not say in time what this key reaches. Home Assistant tries again."
     },
     "refused": {
       "message": "The stack refused: {sentence}"

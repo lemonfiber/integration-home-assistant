@@ -24,6 +24,27 @@
       },
       "findings_critical": {
         "default": "mdi:alert-octagon-outline"
+      },
+      "requests_waiting_for_approval": {
+        "default": "mdi:account-clock-outline"
+      },
+      "requests_declined": {
+        "default": "mdi:cancel"
+      },
+      "requests_failed": {
+        "default": "mdi:alert-circle-outline"
+      },
+      "requests_getting": {
+        "default": "mdi:progress-download"
+      },
+      "requests_partly_here": {
+        "default": "mdi:progress-check"
+      },
+      "requests_here": {
+        "default": "mdi:check-circle-outline"
+      },
+      "requests_gone": {
+        "default": "mdi:archive-remove-outline"
       }
     },
     "binary_sensor": {
@@ -47,6 +68,11 @@
     "event": {
       "alerts": {
         "default": "mdi:bell-alert-outline"
+      }
+    },
+    "media_player": {
+      "playing": {
+        "default": "mdi:television-play"
       }
     }
   }

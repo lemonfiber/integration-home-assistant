@@ -1,5 +1,5 @@
 # Copyright (c) 2026 NightWorksIO
-"""What every entity of a stack shares: its device, and how it is named and identified."""
+"""What every entity of a stack shares: its device, and how it is named and identified, on the technical side and on a member's own."""
 
 from typing import TYPE_CHECKING, Any, override
 
@@ -17,6 +17,7 @@ if TYPE_CHECKING:
     from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
 
     from .coordinator import StreamCoordinator
+    from .member import MemberCoordinator
     from .runtime import LemonfiberConfigEntry, Technical
 
 type PlatformSetup = Callable[
@@ -30,6 +31,13 @@ type TechnicalSetup = Callable[
     Coroutine[Any, Any, None],
 ]
 """What a platform adds of the stack's technical side."""
+
+
+type MemberSetup = Callable[
+    [LemonfiberConfigEntry, MemberCoordinator, AddConfigEntryEntitiesCallback],
+    Coroutine[Any, Any, None],
+]
+"""What a platform adds of a member's own side."""
 
 
 def technical_side(adds: TechnicalSetup) -> PlatformSetup:
@@ -49,6 +57,49 @@ def technical_side(adds: TechnicalSetup) -> PlatformSetup:
             await adds(entry, technical, async_add_entities)
 
     return async_setup_entry
+
+
+def member_side(adds: MemberSetup) -> PlatformSetup:
+    """Return a platform's setup that adds its entities only for a member's key, from that member's own stream.
+
+    A `read` or `act` key yields no member's entity, so a platform built this
+    way adds nothing for one.
+    """
+
+    async def async_setup_entry(
+        _hass: HomeAssistant,
+        entry: LemonfiberConfigEntry,
+        async_add_entities: AddConfigEntryEntitiesCallback,
+    ) -> None:
+        theirs = entry.runtime_data.theirs
+        if theirs is not None:
+            await adds(entry, theirs, async_add_entities)
+
+    return async_setup_entry
+
+
+def both(*setups: PlatformSetup) -> PlatformSetup:
+    """Return a platform's setup that runs each of these in turn, for a platform with entities on both sides."""
+
+    async def async_setup_entry(
+        hass: HomeAssistant,
+        entry: LemonfiberConfigEntry,
+        async_add_entities: AddConfigEntryEntitiesCallback,
+    ) -> None:
+        for setup in setups:
+            await setup(hass, entry, async_add_entities)
+
+    return async_setup_entry
+
+
+def theirs_device(entry: LemonfiberConfigEntry) -> DeviceInfo:
+    """Return the one device a member's entry is, naming nothing technical: no version and no address."""
+    return DeviceInfo(
+        identifiers={(DOMAIN, entry.entry_id)},
+        name=entry.title,
+        manufacturer=MANUFACTURER,
+        model=MODEL,
+    )
 
 
 def device_of(entry: LemonfiberConfigEntry, version: str) -> DeviceInfo:
@@ -96,3 +147,21 @@ class StackEntity[CoordinatorT: DataUpdateCoordinator[Any]](CoordinatorEntity[Co
         await super().async_added_to_hass()
         if self.coordinator is not self._stream:
             self.async_on_remove(self._stream.async_add_listener(self.async_write_ha_state))
+
+
+class MemberEntity(CoordinatorEntity["MemberCoordinator"]):
+    """An entity of a member's own side, named by its translation and identified within its entry."""
+
+    _attr_has_entity_name = True
+
+    def __init__(
+        self,
+        coordinator: MemberCoordinator,
+        entry: LemonfiberConfigEntry,
+        description: EntityDescription,
+    ) -> None:
+        """Describe the entity and attach it to the entry's device."""
+        super().__init__(coordinator)
+        self.entity_description = description
+        self._attr_unique_id = f"{entry.entry_id}-{description.key}"
+        self._attr_device_info = theirs_device(entry)

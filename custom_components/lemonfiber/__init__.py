@@ -20,6 +20,7 @@ from homeassistant.helpers import issue_registry as ir
 from .connection import NotConnectedError, Reason, connect
 from .const import CONF_PIN, DOMAIN
 from .coordinator import StreamCoordinator, VersionsCoordinator, first_snapshot
+from .member import MemberCoordinator, first_theirs
 from .runtime import LemonfiberConfigEntry, Runtime, Technical
 
 if TYPE_CHECKING:
@@ -34,6 +35,7 @@ PLATFORMS: Final = [
     Platform.BINARY_SENSOR,
     Platform.BUTTON,
     Platform.EVENT,
+    Platform.MEDIA_PLAYER,
     Platform.SENSOR,
     Platform.SWITCH,
     Platform.UPDATE,
@@ -56,10 +58,11 @@ def issue_of(entry: LemonfiberConfigEntry, reason: Reason) -> str:
 
 
 async def async_setup_entry(hass: HomeAssistant, entry: LemonfiberConfigEntry) -> bool:
-    """Reach the stack, learn the key's scope, and follow the stream where the scope reaches it."""
+    """Reach the stack, learn the key's scope, and follow the stream the scope opens: the stack's, or a member's own."""
     try:
         connected = await connect(hass, entry.data[CONF_URL], entry.data[CONF_API_KEY], entry.data[CONF_PIN])
         technical = await set_up_technical(hass, entry, connected) if connected.technical else None
+        theirs = None if connected.technical else await set_up_theirs(hass, entry, connected)
     except NotConnectedError as refusal:
         if refusal.reason in REPAIRABLE:
             ir.async_create_issue(
@@ -74,11 +77,13 @@ async def async_setup_entry(hass: HomeAssistant, entry: LemonfiberConfigEntry) -
         raise not_set_up(refusal) from refusal
     for reason in REPAIRABLE:
         ir.async_delete_issue(hass, DOMAIN, issue_of(entry, reason))
-    entry.runtime_data = Runtime(connected, technical)
+    entry.runtime_data = Runtime(connected, technical, theirs)
     if technical is not None:
         entry.async_create_background_task(hass, technical.stream.follow(), f"{DOMAIN} stream")
         entry.async_create_background_task(hass, technical.diagnosis.async_refresh(), f"{DOMAIN} diagnosis")
         entry.async_create_background_task(hass, technical.versions.async_refresh(), f"{DOMAIN} versions")
+    if theirs is not None:
+        entry.async_create_background_task(hass, theirs.follow(), f"{DOMAIN} stream")
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
     return True
 
@@ -94,6 +99,16 @@ async def set_up_technical(
     stream_coordinator = StreamCoordinator(hass, entry, connected, stream, await first_snapshot(stream))
     versions = VersionsCoordinator(hass, entry, connected.client)
     return Technical(version, stream_coordinator, stream_coordinator.diagnosis, versions)
+
+
+async def set_up_theirs(
+    hass: HomeAssistant,
+    entry: LemonfiberConfigEntry,
+    connected: Connected,
+) -> MemberCoordinator:
+    """Open the member's own stream and wait until it has said their row and what they are playing."""
+    stream = connected.client.events()
+    return MemberCoordinator(hass, entry, connected, stream, await first_theirs(stream))
 
 
 async def async_unload_entry(hass: HomeAssistant, entry: LemonfiberConfigEntry) -> bool:

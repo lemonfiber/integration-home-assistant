@@ -86,7 +86,12 @@ With an `act` key, where the stack says the key may call the action, also:
 
 A control follows the job it started to its end. A failure is shown in the stack's own words, and every outcome is fired as a `lemonfiber_job` event carrying the entry, the action, the job's name where it started one, the outcome (`finished`, `ended` or `failed`) and, for a failure, the stack's sentence.
 
-A member's key adds the entry and no entity.
+With a member's key, made with `--scope member:<account>`, one device for the entry, carrying nothing technical: no version, no address, and nothing of the stack's health. It follows a stream the stack opens for that member alone:
+
+| Entity | What it shows |
+|---|---|
+| Requests waiting for approval, declined, that failed, on their way, partly here, here and gone | How many of the member's requests stand at each state, with the titles of those that have one yet. Requests gone is off until enabled |
+| Playing | What the member is playing: playing, paused, or idle when nothing is, with the title, the series, season and episode where it is an episode, and the device it plays on. It offers no control |
 
 Every alert is also fired as a `lemonfiber_alert` event, at its onset and at its resolution, carrying the entry, the alert's identity (the same on an onset and on the resolution that ends it), `moment` (`onset` or `resolved`), `severity`, `kind`, `check`, `affected`, `summary` (what happened), `meaning` (what it means), `remedies` (what to do) and, where the stack gave one, `exit`. Neither the event nor the entity carries the key, the address or the pin.
 
@@ -185,6 +190,7 @@ When the key is refused, Home Assistant asks for a new one; only the key is aske
 
 - Disk free is shown for the data volume, the one the event stream carries.
 - There is no entity for active streams.
+- An entry is identified by the stack's address, so a second key for the same stack, a member's among them, cannot be added beside the first.
 - The stack does not report whether the download clients are paused, so the downloads switch shows what it last asked for.
 
 ## Troubleshooting
