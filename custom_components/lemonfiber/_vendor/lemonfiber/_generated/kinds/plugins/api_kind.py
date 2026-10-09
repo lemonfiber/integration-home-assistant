@@ -375,13 +375,17 @@ class PluginPlaced(typing.TypedDict):
     """How it is reached, or nothing where it has no listener."""
     service: str
     """The service's id, which is the name its container is written under."""
+    speaks: typing.NotRequired[list[str]]
+    """Each capability contract it answers as an adapter, as `capability@major`; none in
+    a record written before this was kept.
+    """
     tag: str
     """The readable name that digest went by when it was installed."""
     takes_data: bool
     """Whether the library is mounted for it."""
 
 
-type PluginPuts = typing.Literal["directory", "document", "region"]
+type PluginPuts = typing.Literal["directory", "document", "key", "region"]
 """What an install puts at one path."""
 
 

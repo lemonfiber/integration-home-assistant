@@ -104,6 +104,12 @@ LOGS: typing.Final = "/api/logs"
 BUNDLE: typing.Final = "/api/bundle"
 """Answers with a file, named by `name` in the path."""
 
+HELD_ID_POSTER: typing.Final = "/api/held/{id}/poster"
+"""Answers with a file, for the `id` in its path; takes `member` and `defaults`."""
+
+HELD_ID_BACKDROP: typing.Final = "/api/held/{id}/backdrop"
+"""Answers with a file, for the `id` in its path; takes `member` and `defaults`."""
+
 
 class ReadParameter(typing.NamedTuple):
     """One query parameter a read takes."""
@@ -181,6 +187,8 @@ READS: typing.Final[typing.Mapping[Read, Readable]] = types.MappingProxyType(
 __all__ = [
     "API",
     "BUNDLE",
+    "HELD_ID_BACKDROP",
+    "HELD_ID_POSTER",
     "LOGS",
     "READS",
     "Read",
