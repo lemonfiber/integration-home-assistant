@@ -335,22 +335,19 @@ class PluginPlaced(typing.TypedDict):
     """
     digest: str
     """The digest that fixes what runs."""
+    fronts: typing.NotRequired[str | None]
+    """The service of the same plugin it stands in front of, as an adapter."""
     image: str
     """The registry path, carrying no pin of its own."""
     listens: typing.NotRequired[int | None]
     """The port it answers on inside the stack's network, where it declared one."""
     media_types: typing.NotRequired[list[str]]
     """The media it files, in the stack manifest's vocabulary, which decides what it
-    comes to in each service that asks for what it provides.
-
-    Defaulted for a record written before this was kept, which reads as filing
-    nothing named.
+    comes to in each service that asks for what it provides; none in an older record.
     """
     name: typing.NotRequired[str]
-    """What it is called, for a reader, which is what its dashboard entry is listed as.
-
-    Defaulted for a record written before this was kept, which lists it by its id
-    rather than leaving it off the panel.
+    """What it is called, for a reader, which is what its dashboard entry is listed as;
+    a record written before this was kept lists it by its id.
     """
     networks: typing.NotRequired[list[str]]
     """The stack's own networks it joins beside the default one, because a stack service
@@ -376,9 +373,7 @@ class PluginPlaced(typing.TypedDict):
     service: str
     """The service's id, which is the name its container is written under."""
     speaks: typing.NotRequired[list[str]]
-    """Each capability contract it answers as an adapter, as `capability@major`; none in
-    a record written before this was kept.
-    """
+    """Each capability contract it answers as an adapter, as `capability@major`."""
     tag: str
     """The readable name that digest went by when it was installed."""
     takes_data: bool
@@ -473,6 +468,15 @@ class PluginSecret(typing.TypedDict):
     """What holding it is for."""
 
 
+class PluginStepAdapter(typing.TypedDict):
+    """The adapter a call reaches its destination through."""
+
+    kind: ApiKind
+    """Which of lemonfiber's adapters it is."""
+    owner: PluginAdapterOwner
+    """Whose it is, which is lemonfiber's."""
+
+
 Contribution = typing.TypedDict(
     "Contribution",
     {
@@ -542,4 +546,5 @@ __all__ = [
     "PluginReachedLoopback",
     "PluginRequest",
     "PluginSecret",
+    "PluginStepAdapter",
 ]

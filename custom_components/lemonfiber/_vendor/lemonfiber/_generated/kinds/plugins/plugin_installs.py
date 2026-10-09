@@ -7,10 +7,12 @@ and CI fails on any difference.
 
 import typing
 
-from .plugin_step_adapter import (
+from .plugin_step import (
     PluginInstall,
     PluginInstalled,
+    PluginNonconforming,
     PluginRemoval,
+    PluginReproof,
     PluginSource,
     PluginSubstituted,
     PluginUpdate,
@@ -45,6 +47,14 @@ class PluginInstalls(typing.TypedDict):
     what it settled is in `install` and not here. A listing that counted it
     would report an install that did not happen.
     """
+    nonconforming: typing.NotRequired[list[PluginNonconforming]]
+    """Every answer an installed plugin's adapter gave outside its contract, kept until a
+    proof it passes clears it: the plugin fills none of those capabilities meanwhile.
+
+    Filled on the reading of what is installed, as `substituted` is.
+    """
+    proof: typing.NotRequired[PluginReproof | None]
+    """What proving a plugin again came to, or nothing where nothing was proved."""
     rehearsed: bool
     """Whether this was a rehearsal: what would have happened, with none of it done.
 
