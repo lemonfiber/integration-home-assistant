@@ -82,7 +82,7 @@ PLUGIN: typing.Final[typing.Mapping[RefusalCode, ListedRefusal]] = {
     "PLUGIN-26": ListedRefusal(
         "UNAPPROVED",
         400,
-        "Raised when a value a recipe would carry to a destination was not approved as itself, or an approval names a pair the recipe does not carry.",
+        "Raised when a value a recipe would carry to a destination, or the egress guard's shape a service would take, was not approved as itself, or an approval names something the reading does not list.",
     ),
     "PLUGIN-27": ListedRefusal(
         "ANOTHER_PLUGIN",
