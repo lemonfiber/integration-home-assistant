@@ -443,6 +443,7 @@ PluginInstalled = typing.TypedDict(
         "description": typing.NotRequired[str | None],
         "from": typing.NotRequired[str],
         "installed_at": typing.NotRequired[str],
+        "manifest": typing.NotRequired[str],
         "name": typing.NotRequired[str | None],
         "plugin": str,
         "provides": typing.NotRequired[list[str]],
