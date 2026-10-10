@@ -372,6 +372,8 @@ class PluginPlaced(typing.TypedDict):
     """How it is reached, or nothing where it has no listener."""
     service: str
     """The service's id, which is the name its container is written under."""
+    shape: typing.NotRequired[PluginShape | None]
+    """The privileged shape lemonfiber writes for it, where it took one."""
     speaks: typing.NotRequired[list[str]]
     """Each capability contract it answers as an adapter, as `capability@major`."""
     tag: str
@@ -468,13 +470,8 @@ class PluginSecret(typing.TypedDict):
     """What holding it is for."""
 
 
-class PluginStepAdapter(typing.TypedDict):
-    """The adapter a call reaches its destination through."""
-
-    kind: ApiKind
-    """Which of lemonfiber's adapters it is."""
-    owner: PluginAdapterOwner
-    """Whose it is, which is lemonfiber's."""
+type PluginShape = typing.Literal["egress-guard"]
+"""A privileged shape lemonfiber writes for a plugin's service."""
 
 
 Contribution = typing.TypedDict(
@@ -546,5 +543,5 @@ __all__ = [
     "PluginReachedLoopback",
     "PluginRequest",
     "PluginSecret",
-    "PluginStepAdapter",
+    "PluginShape",
 ]

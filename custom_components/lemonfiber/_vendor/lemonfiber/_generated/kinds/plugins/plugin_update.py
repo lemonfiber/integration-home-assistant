@@ -7,16 +7,17 @@ and CI fails on any difference.
 
 import typing
 
-from .plugin_step import (
+from .plugin_step_adapter import (
     PluginInstall,
     PluginInstalled,
     PluginNonconforming,
     PluginRemoval,
     PluginReproof,
+    PluginRestored,
     PluginSource,
     PluginSubstituted,
-    PluginUpdate,
 )
+from ...shared.plugins__undo import UndoReversal
 
 
 class PluginInstalls(typing.TypedDict):
@@ -105,7 +106,33 @@ class PluginsEnvelope(typing.TypedDict):
     kind: typing.Literal["plugins"]
 
 
+PluginUpdate = typing.TypedDict(
+    "PluginUpdate",
+    {
+        "from": str,
+        "install": PluginInstall,
+        "interrupts": list[str],
+        "plugin": str,
+        "restored": typing.NotRequired[PluginRestored | None],
+        "stopped": typing.NotRequired[str | None],
+        "to": str,
+        "went_back": UndoReversal,
+    },
+)
+"""What updating a plugin came to, or would come to, as one account.
+
+**One account, because it is one operation.** An update is the version installed
+going back and another coming on, and a report that gave those as a removal and an
+install side by side would invite reading them as two things that might each have
+happened. What an operator has to be able to read off this is which version the
+machine is on, and there are exactly two answers: the new one, where
+`install.recorded` is true, or the one it replaced, which `restored` says the state
+of.
+"""
+
+
 __all__ = [
     "PluginInstalls",
+    "PluginUpdate",
     "PluginsEnvelope",
 ]

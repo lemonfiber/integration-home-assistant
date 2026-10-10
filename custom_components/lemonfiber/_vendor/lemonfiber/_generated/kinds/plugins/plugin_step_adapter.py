@@ -19,7 +19,7 @@ from .api_kind import (
     PluginOverriding,
     PluginPair,
     PluginPlaced,
-    PluginStepAdapter,
+    PluginShape,
 )
 from ...shared.doctor__error__plugins import StepCame
 from ...shared.plugins__undo import UndoReversal
@@ -84,6 +84,10 @@ class PluginInstall(typing.TypedDict):
     back, and what did not with the reason each is still standing. Absent on a run
     that had nothing to put back, which is both a rehearsal and an install that
     held.
+    """
+    taking: list[PluginTaking]
+    """Every service taking a privileged shape, with what it is given, each approved
+    apart from the offer.
     """
     verified: typing.NotRequired[PluginVerification | None]
     """What the stack's own checks made of the install, or nothing on a run that
@@ -303,6 +307,15 @@ class PluginStep(typing.TypedDict):
     """
 
 
+class PluginStepAdapter(typing.TypedDict):
+    """The adapter a call reaches its destination through."""
+
+    kind: ApiKind
+    """Which of lemonfiber's adapters it is."""
+    owner: PluginAdapterOwner
+    """Whose it is, which is lemonfiber's."""
+
+
 class PluginStepRan(typing.TypedDict):
     """What one step came to."""
 
@@ -340,6 +353,21 @@ class PluginSubstituted(typing.TypedDict):
     """The plugin whose service it is."""
     service: str
     """The service chosen."""
+
+
+class PluginTaking(typing.TypedDict):
+    """One service taking a privileged shape, as the reading states it."""
+
+    approval: str
+    """What approving it is written as, apart from the offer."""
+    devices: list[str]
+    """The devices it is given."""
+    grants: list[str]
+    """The kernel capabilities it is given."""
+    service: str
+    """The service taking it."""
+    shape: PluginShape
+    """The shape it takes."""
 
 
 class PluginUnfilled(typing.TypedDict):
@@ -468,31 +496,6 @@ PluginSource = typing.TypedDict(
 """Whether one installed plugin's source can still be fetched."""
 
 
-PluginUpdate = typing.TypedDict(
-    "PluginUpdate",
-    {
-        "from": str,
-        "install": PluginInstall,
-        "interrupts": list[str],
-        "plugin": str,
-        "restored": typing.NotRequired[PluginRestored | None],
-        "stopped": typing.NotRequired[str | None],
-        "to": str,
-        "went_back": UndoReversal,
-    },
-)
-"""What updating a plugin came to, or would come to, as one account.
-
-**One account, because it is one operation.** An update is the version installed
-going back and another coming on, and a report that gave those as a removal and an
-install side by side would invite reading them as two things that might each have
-happened. What an operator has to be able to read off this is which version the
-machine is on, and there are exactly two answers: the new one, where
-`install.recorded` is true, or the one it replaced, which `restored` says the state
-of.
-"""
-
-
 __all__ = [
     "PluginInstall",
     "PluginInstalled",
@@ -510,10 +513,11 @@ __all__ = [
     "PluginSourceStandingUnasked",
     "PluginSourceStandingUnreachable",
     "PluginStep",
+    "PluginStepAdapter",
     "PluginStepRan",
     "PluginSubstituted",
+    "PluginTaking",
     "PluginUnfilled",
-    "PluginUpdate",
     "PluginVerdict",
     "PluginVerdictFailed",
     "PluginVerdictFailingAsDeclared",
