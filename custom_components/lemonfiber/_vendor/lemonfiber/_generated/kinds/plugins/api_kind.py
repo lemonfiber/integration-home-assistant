@@ -360,6 +360,8 @@ class PluginPlaced(typing.TypedDict):
     """What it is called, for a reader, which is what its dashboard entry is listed as;
     a record written before this was kept lists it by its id.
     """
+    native: typing.NotRequired[str | None]
+    """The API it answers the stack's other services in, where it names one."""
     networks: typing.NotRequired[list[str]]
     """The stack's own networks it joins beside the default one, because a stack service
     it stands in for is on them.
