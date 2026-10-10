@@ -140,6 +140,15 @@ authority, which nothing here can load.
 """
 
 
+class PluginAsking(typing.TypedDict):
+    """One capability a placed service asks for."""
+
+    capability: str
+    """The core capability asked for."""
+    each: typing.NotRequired[bool]
+    """Whether every service that fills it is reached rather than one."""
+
+
 class PluginChange(typing.TypedDict):
     """One change installing a plugin makes to the machine.
 
@@ -322,6 +331,8 @@ class PluginPlaced(typing.TypedDict):
     Defaulted for a record written before this was kept, which reads as naming
     none: a service operated generically, as it was when installed.
     """
+    asks: typing.NotRequired[list[PluginAsking]]
+    """Every capability it asks for."""
     config_path: str
     """Where inside the container its one configuration directory is mounted.
 
@@ -503,20 +514,6 @@ it carries nothing outside the union of the rows the published points take.
 """
 
 
-PluginPair = typing.TypedDict(
-    "PluginPair",
-    {
-        "approval": typing.NotRequired[str],
-        "from": typing.NotRequired[str],
-        "origin": str,
-        "release": typing.NotRequired[str],
-        "to": str,
-        "value": str,
-    },
-)
-"""One value a recipe could carry to one destination, as the operator agrees to it."""
-
-
 __all__ = [
     "Api",
     "ApiKind",
@@ -526,6 +523,7 @@ __all__ = [
     "ExpectedKind",
     "KeySource",
     "PluginAdapterOwner",
+    "PluginAsking",
     "PluginChange",
     "PluginChangedCheck",
     "PluginConstraint",
@@ -535,7 +533,6 @@ __all__ = [
     "PluginExpectedFailure",
     "PluginFailingAsDeclared",
     "PluginOverriding",
-    "PluginPair",
     "PluginPlaced",
     "PluginPuts",
     "PluginReached",
