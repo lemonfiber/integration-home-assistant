@@ -10,7 +10,7 @@
 #   pin-only pin-only / pin-only
 #   ci               checks, tests and coverage, mutation testing
 #   sonar            gate / gate
-#   sdk-drift        sdk-drift
+#   sdk-drift        sdk-drift / drift
 #   validate         hassfest, hacs
 #
 # `SonarCloud Code Analysis` is required too and is posted by the SonarCloud app
@@ -41,6 +41,6 @@ jobs:
     permissions:
       contents: read
       pull-requests: write
-    uses: lemonfiber/spec/.github/workflows/awaiting-maintainer.yml@559ac3e839144da802825750aaa066ee553549fc # v1.0.75
+    uses: lemonfiber/spec/.github/workflows/awaiting-maintainer.yml@164464d71266bdc36d90272c58eb8bd02f1ba10d # v1.0.80
     secrets:
       DISCORD_MAINTAINERS_WEBHOOK: ${{ secrets.DISCORD_MAINTAINERS_WEBHOOK }}
