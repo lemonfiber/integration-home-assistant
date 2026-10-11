@@ -1,5 +1,5 @@
 # Copyright (c) 2026 NightWorksIO
-"""Reaching a stack with its address, a key and its certificate pin, and naming whichever of the three failed."""
+"""Reaching a stack with its address, a key and its certificate pin, or a key link, and naming whatever failed."""
 
 from dataclasses import dataclass, field
 from enum import StrEnum
@@ -15,9 +15,13 @@ from lemonfiber import (
     AsyncClient,
     CertificatePin,
     CertificateRefusedError,
+    ClaimLapsedError,
+    ClaimRefusedError,
     Credential,
     CredentialRefusedError,
     DeclinedError,
+    KeyLink,
+    KeyLinkRefusedError,
     LemonfiberError,
     NotAdmittedError,
     Read,
@@ -26,12 +30,13 @@ from lemonfiber import (
     UnknownKindError,
     UnreachableError,
     UnreadableResponseError,
+    collect_async,
     expect,
     is_key_callable,
 )
 from lemonfiber.address import ENCRYPTED, split
 
-from .const import CONF_PIN
+from .const import CONF_KEY_LINK, CONF_PIN
 
 if TYPE_CHECKING:
     from collections.abc import Mapping
@@ -78,6 +83,9 @@ class Reason(StrEnum):
     NOT_A_KEY = "not_a_key"
     NOTHING_SAID = "nothing_said"
     REFUSED = "refused"
+    LINK_MALFORMED = "link_malformed"
+    CLAIM_LAPSED = "claim_lapsed"
+    CLAIM_REFUSED = "claim_refused"
 
 
 FIELD_OF: Final[Mapping[Reason, str]] = {
@@ -95,6 +103,9 @@ FIELD_OF: Final[Mapping[Reason, str]] = {
     Reason.NOT_A_KEY: CONF_API_KEY,
     Reason.NOTHING_SAID: BASE,
     Reason.REFUSED: BASE,
+    Reason.LINK_MALFORMED: CONF_KEY_LINK,
+    Reason.CLAIM_LAPSED: CONF_KEY_LINK,
+    Reason.CLAIM_REFUSED: CONF_KEY_LINK,
 }
 """The field each reason names: the one the person has to change."""
 
@@ -237,3 +248,24 @@ async def connect(hass: HomeAssistant, url: str, key: str, pin: str) -> Connecte
     member = await member_of(client) if scope is Scope.MEMBER else None
     stack = capabilities.stack or client.address.base
     return Connected(client, held, capabilities, scope, identity_of(stack, member))
+
+
+async def collected(hass: HomeAssistant, written: str) -> tuple[str, str, str]:
+    """Collect the key a key link's claim was minted for, once, and return the stack's address, the key and the pin.
+
+    The claim goes over the TLS the link's fingerprint verifies, with no
+    credential. Nothing of the link or the claim is kept: the three are what
+    the reply carries, the link's own address and pin where it names neither.
+    """
+    try:
+        link = KeyLink(written)
+        key = await collect_async(link, session=async_get_clientsession(hass))
+    except KeyLinkRefusedError:
+        raise NotConnectedError(Reason.LINK_MALFORMED) from None
+    except ClaimLapsedError:
+        raise NotConnectedError(Reason.CLAIM_LAPSED) from None
+    except ClaimRefusedError as refusal:
+        raise NotConnectedError(Reason.CLAIM_REFUSED, {"sentence": refusal.sentence}) from None
+    except LemonfiberError as error:
+        raise refused(error) from None
+    return key.get("address") or link.address.base, key["secret"], key.get("pin") or link.pin.hex

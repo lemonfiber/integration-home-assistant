@@ -40,10 +40,19 @@ default list.
    The reply shows the stack's address, the key and the certificate pin. The key is shown
    once; if you lose it, mint another.
 
+   Or mint it as a claim, and the reply shows a key link, and its code, in place of the three:
+
+   ```console
+   $ lemonfiber key mint home-assistant --scope read --purpose home-assistant --claim
+   ```
+
+   The link collects the key once, within ten minutes.
+
 3. In HACS, add `https://github.com/lemonfiber/integration-home-assistant` as a custom
    repository of the type *Integration*. Install **lemonfiber** and restart Home Assistant.
-4. In Home Assistant, go to **Settings → Devices & services → Add integration**, choose
-   **lemonfiber**, and paste the three:
+4. In Home Assistant, go to **Settings → Devices & services → Add integration** and choose
+   **lemonfiber**. Choose **With a key link** and paste the link, or **With the address, key and
+   pin** and paste the three:
 
 | Field | What to paste |
 |---|---|
@@ -54,6 +63,10 @@ default list.
 The three are checked against the stack before anything is added. A failure names the field to
 change: an address nothing answers at, a pin the stack's certificate does not match, or a key
 the stack does not admit. Nothing is sent to a stack whose certificate does not match the pin.
+
+A key link's claim is sent once, over the encryption the link's certificate fingerprint
+verifies, and collects the key. Home Assistant keeps the address, the key and the pin, as it does
+when the three are pasted, and neither the link nor the claim.
 
 ## What appears
 
@@ -203,6 +216,8 @@ A changed certificate, something other than lemonfiber answering at the address,
 | The stack presented a certificate other than the one this pin names | Copy the pin again from the mint reply. If the stack's certificate changed, give the new pin through **Reconfigure**. |
 | The stack does not admit this key | The key was revoked or mistyped. Mint a new one and give it when Home Assistant asks. |
 | The stack refuses a key that arrives without the encryption its pin verifies | Use the https address the mint reply gave. |
+| This key link's ten minutes are over | Mint the key as a claim again and paste the new link within ten minutes. |
+| This key link collects no key | The link was used already, or it lapsed. Mint the key as a claim again. |
 
 **Settings → Devices & services → lemonfiber → Download diagnostics** hands over the key's scope, the stack's capabilities and what it last said, with the key, the address and the pin withheld.
 

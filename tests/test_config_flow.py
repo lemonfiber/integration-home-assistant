@@ -4,7 +4,6 @@
 from typing import TYPE_CHECKING, Any, Final, cast
 
 import pytest
-from homeassistant.config_entries import SOURCE_USER
 from homeassistant.const import CONF_API_KEY, CONF_URL
 from homeassistant.data_entry_flow import FlowResultType
 from lemonfiber import (
@@ -15,16 +14,18 @@ from lemonfiber import (
     UnknownKindError,
 )
 
-from custom_components.lemonfiber.config_flow import ANOTHER_STACK
+from custom_components.lemonfiber.config_flow import ANOTHER_STACK, BY_HAND
 from custom_components.lemonfiber.connection import Reason, refused
-from custom_components.lemonfiber.const import CONF_PIN, DOMAIN
-from tests.conftest import KEY, MEMBER_ID, STACK_ID, capabilities, entry_for, said, serve
+from custom_components.lemonfiber.const import CONF_PIN
+from tests.conftest import KEY, MEMBER_ID, STACK_ID, capabilities, configure, entry_for, opened, said, serve
 from tests.stack import LOOPBACK, Reply, Stack, envelope, problem, unused_port
 
 if TYPE_CHECKING:
     from homeassistant.core import HomeAssistant
     from pytest_homeassistant_custom_component.common import MockConfigEntry
 
+
+pytestmark = pytest.mark.usefixtures("no_setup")
 
 OTHER_PIN: Final = "0" * 64
 NEW_KEY: Final = "lfk_" + "b" * 32
@@ -34,26 +35,9 @@ WISHING: Final = sorted(
 """Every refusal of a member's search or ask the contract lists, with the status it is answered with."""
 
 
-@pytest.fixture(autouse=True)
-def no_setup(monkeypatch: pytest.MonkeyPatch) -> None:
-    """Keep an entry a flow creates or changes from being set up, so a flow is judged on its own."""
-
-    async def set_up(*_: object) -> bool:
-        return True
-
-    monkeypatch.setattr("custom_components.lemonfiber.async_setup_entry", set_up)
-
-
-async def configure(hass: HomeAssistant, flow_id: str, answers: dict[str, str]) -> dict[str, Any]:
-    """Answer a flow's form."""
-    return said(await hass.config_entries.flow.async_configure(flow_id, answers))
-
-
 async def submit(hass: HomeAssistant, answers: dict[str, str]) -> dict[str, Any]:
-    """Open the setup form and answer it."""
-    shown = said(await hass.config_entries.flow.async_init(DOMAIN, context={"source": SOURCE_USER}))
-    assert shown["type"] is FlowResultType.FORM
-    assert shown["errors"] == {}
+    """Open the setup form for the address, key and pin, and answer it."""
+    shown = await opened(hass, BY_HAND)
     return await configure(hass, shown["flow_id"], answers)
 
 

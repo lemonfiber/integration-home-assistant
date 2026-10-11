@@ -20,4 +20,5 @@ requirement = [
   { id = "F12-R11", state = "done", evidence = ["custom_components/lemonfiber/translations/en.json", "custom_components/lemonfiber/translations/nl.json", "tests/test_translations.py::test_every_string_is_translated_with_the_same_placeholders"] },
   { id = "F12-R12", state = "done", evidence = ["custom_components/lemonfiber/quality_scale.yaml", "tests/test_quality_scale.py::test_every_rule_is_met_or_exempt_for_a_reason"] },
   { id = "F12-R13", state = "done", evidence = ["hacs.json", ".github/workflows/validate.yml"] },
+  { id = "F12-R14", state = "done", evidence = ["custom_components/lemonfiber/connection.py", "custom_components/lemonfiber/config_flow.py", "tests/test_key_link.py::test_a_key_link_collects_its_key_once_and_keeps_only_what_the_reply_carries", "tests/test_key_link.py::test_a_claim_goes_nowhere_but_the_certificate_the_link_pins", "tests/test_key_link.py::test_a_claim_the_stack_turns_away_says_why_in_the_stacks_words"] },
 ]

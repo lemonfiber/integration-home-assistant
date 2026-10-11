@@ -5,13 +5,15 @@ import asyncio
 from typing import TYPE_CHECKING, Any, Final, cast
 
 import pytest
-from homeassistant.config_entries import SOURCE_REAUTH
+from homeassistant.config_entries import SOURCE_REAUTH, SOURCE_USER
 from homeassistant.const import CONF_API_KEY, CONF_URL
+from homeassistant.data_entry_flow import FlowResultType
 from homeassistant.helpers import entity_registry as er
 from lemonfiber import KEY_CALLABLE, Read
 from lemonfiber.reads import ACTIONS
 from pytest_homeassistant_custom_component.common import MockConfigEntry
 
+from custom_components.lemonfiber.config_flow import WAYS_IN
 from custom_components.lemonfiber.const import CONF_PIN, DOMAIN
 from tests.stack import Feed, Reply, Stack, envelope, event
 
@@ -351,3 +353,29 @@ def reauthenticating(hass: HomeAssistant) -> bool:
         said(flow).get("context", {}).get("source") == SOURCE_REAUTH
         for flow in hass.config_entries.flow.async_progress()
     )
+
+
+@pytest.fixture
+def no_setup(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Keep an entry a flow creates or changes from being set up, so a flow is judged on its own."""
+
+    async def set_up(*_: object) -> bool:
+        return True
+
+    monkeypatch.setattr("custom_components.lemonfiber.async_setup_entry", set_up)
+
+
+async def configure(hass: HomeAssistant, flow_id: str, answers: dict[str, str]) -> dict[str, Any]:
+    """Answer a flow's form."""
+    return said(await hass.config_entries.flow.async_configure(flow_id, answers))
+
+
+async def opened(hass: HomeAssistant, way: str) -> dict[str, Any]:
+    """Open setup, and choose how the stack is added."""
+    menu = said(await hass.config_entries.flow.async_init(DOMAIN, context={"source": SOURCE_USER}))
+    assert menu["type"] is FlowResultType.MENU
+    assert menu["menu_options"] == WAYS_IN
+    shown = said(await hass.config_entries.flow.async_configure(menu["flow_id"], {"next_step_id": way}))
+    assert shown["type"] is FlowResultType.FORM
+    assert shown["errors"] == {}
+    return shown
