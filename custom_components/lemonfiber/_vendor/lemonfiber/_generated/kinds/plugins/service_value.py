@@ -143,6 +143,8 @@ class PluginPlaced(typing.TypedDict):
     """
     asks: typing.NotRequired[list[PluginAsking]]
     """Every capability it asks for."""
+    asks_for: typing.NotRequired[str | None]
+    """What it asks for there, where it says."""
     config_path: str
     """Where inside the container its one configuration directory is mounted.
 
@@ -195,6 +197,8 @@ class PluginPlaced(typing.TypedDict):
     """
     reached: typing.NotRequired[PluginReached | None]
     """How it is reached, or nothing where it has no listener."""
+    reaches: typing.NotRequired[str | None]
+    """Where it reaches outside the machine, where it says."""
     replaces: typing.NotRequired[str | None]
     """The stack's own service it moves in place of, where it names one."""
     service: str
