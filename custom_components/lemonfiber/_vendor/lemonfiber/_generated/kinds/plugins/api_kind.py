@@ -485,8 +485,8 @@ class PluginSecret(typing.TypedDict):
     """What holding it is for."""
 
 
-type PluginShape = typing.Literal["egress-guard"]
-"""A privileged shape lemonfiber writes for a plugin's service."""
+type PluginShape = typing.Literal["egress-guard", "render"]
+"""A privileged shape lemonfiber writes for a service."""
 
 
 Contribution = typing.TypedDict(
