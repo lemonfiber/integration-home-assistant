@@ -7,7 +7,13 @@ import pytest
 from homeassistant.config_entries import SOURCE_USER
 from homeassistant.const import CONF_API_KEY, CONF_URL
 from homeassistant.data_entry_flow import FlowResultType
-from lemonfiber import ConfigurationError, LemonfiberError, UnexpectedKindError, UnknownKindError
+from lemonfiber import (
+    REFUSAL_CODES,
+    ConfigurationError,
+    LemonfiberError,
+    UnexpectedKindError,
+    UnknownKindError,
+)
 
 from custom_components.lemonfiber.config_flow import ANOTHER_STACK
 from custom_components.lemonfiber.connection import Reason, refused
@@ -22,6 +28,10 @@ if TYPE_CHECKING:
 
 OTHER_PIN: Final = "0" * 64
 NEW_KEY: Final = "lfk_" + "b" * 32
+WISHING: Final = sorted(
+    (code, listed.status) for code, listed in REFUSAL_CODES.items() if code.startswith("WISH-")
+)
+"""Every refusal of a member's search or ask the contract lists, with the status it is answered with."""
 
 
 @pytest.fixture(autouse=True)
@@ -158,6 +168,20 @@ async def test_any_other_refusal_carries_the_stacks_own_sentence(hass: HomeAssis
     shown = await submit(hass, answers(stack))
     assert shown["errors"] == {"base": Reason.REFUSED}
     assert shown["description_placeholders"] == {"sentence": "The disk is full."}
+
+
+@pytest.mark.parametrize(("code", "status"), WISHING)
+async def test_a_members_search_or_ask_refused_carries_the_stacks_own_sentence(
+    hass: HomeAssistant,
+    stack: Stack,
+    code: str,
+    status: int,
+) -> None:
+    serve(stack)
+    stack.reply("/api/capabilities", Reply(status, problem(code, "Nothing to ask for here.")))
+    shown = await submit(hass, answers(stack))
+    assert shown["errors"] == {"base": Reason.REFUSED}
+    assert shown["description_placeholders"] == {"sentence": "Nothing to ask for here."}
 
 
 @pytest.mark.parametrize(
