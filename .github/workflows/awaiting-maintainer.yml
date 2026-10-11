@@ -10,7 +10,7 @@
 #   pin-only pin-only / pin-only
 #   ci               checks, tests and coverage, mutation testing
 #   sonar            gate / gate
-#   sdk-drift        sdk-drift
+#   sdk-drift        sdk-drift / drift
 #   validate         hassfest, hacs
 #
 # `SonarCloud Code Analysis` is required too and is posted by the SonarCloud app
