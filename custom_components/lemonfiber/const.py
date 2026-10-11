@@ -12,6 +12,9 @@ DOMAIN: Final = "lemonfiber"
 CONF_PIN: Final = "pin"
 """The entry field holding the stack's certificate pin. The address and the key use Home Assistant's own names."""
 
+CONF_KEY_LINK: Final = "key_link"
+"""The setup field a key link is pasted into. It is read once and never kept."""
+
 LOGGER: Final = logging.getLogger(__package__)
 
 MANUFACTURER: Final = "NightWorksIO"

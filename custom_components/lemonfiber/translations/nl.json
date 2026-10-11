@@ -3,6 +3,24 @@
     "step": {
       "user": {
         "title": "Verbinden met lemonfiber",
+        "description": "Voeg de stack toe met een sleutellink, of met het adres, de sleutel en de certificaatpin die bij het aanmaken van de sleutel werden getoond.",
+        "menu_options": {
+          "key_link": "Met een sleutellink",
+          "by_hand": "Met adres, sleutel en pin"
+        }
+      },
+      "key_link": {
+        "title": "Plak de sleutellink",
+        "description": "Plak de sleutellink die de stack toonde toen de sleutel als claim werd aangemaakt. De sleutel wordt één keer opgehaald, binnen tien minuten na het aanmaken, en de link wordt niet bewaard.",
+        "data": {
+          "key_link": "Sleutellink"
+        },
+        "data_description": {
+          "key_link": "De link die begint met lemonfiber://key."
+        }
+      },
+      "by_hand": {
+        "title": "Verbinden met lemonfiber",
         "description": "Plak wat de stack liet zien toen de integratiesleutel werd aangemaakt: het adres, de sleutel en de certificaatpin. Het beheerderswachtwoord wordt nooit gevraagd.",
         "data": {
           "url": "Adres",
@@ -52,7 +70,10 @@
       "no_dashboard": "De stack antwoordde, maar stuurde zijn dashboard niet op tijd.",
       "not_a_key": "De stack beantwoordde dit als zijn beheerder, niet als een integratiesleutel. Maak een sleutel aan op de stack en plak die.",
       "nothing_said": "De stack antwoordde, maar zei niet op tijd wat deze sleutel bereikt.",
-      "refused": "De stack weigerde: {sentence}"
+      "refused": "De stack weigerde: {sentence}",
+      "link_malformed": "Dit is geen sleutellink. Kopieer de link die begint met lemonfiber://key in zijn geheel.",
+      "claim_lapsed": "De tien minuten van deze sleutellink zijn voorbij, dus er is niets verstuurd. Laat de sleutel opnieuw als claim aanmaken en plak de nieuwe link.",
+      "claim_refused": "Deze sleutellink haalt geen sleutel op. Laat de sleutel opnieuw als claim aanmaken en plak de nieuwe link binnen tien minuten. De stack zei: {sentence}"
     },
     "abort": {
       "already_configured": "Deze stack is al toegevoegd.",
@@ -336,6 +357,15 @@
     },
     "refused": {
       "message": "De stack weigerde: {sentence}"
+    },
+    "link_malformed": {
+      "message": "Dit is geen sleutellink. Kopieer de link die begint met lemonfiber://key in zijn geheel."
+    },
+    "claim_lapsed": {
+      "message": "De tien minuten van de sleutellink zijn voorbij, dus er is niets verstuurd. Laat de sleutel opnieuw als claim aanmaken."
+    },
+    "claim_refused": {
+      "message": "De sleutellink haalt geen sleutel op. Laat de sleutel opnieuw als claim aanmaken. De stack zei: {sentence}"
     }
   },
   "issues": {

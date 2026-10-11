@@ -3,6 +3,24 @@
     "step": {
       "user": {
         "title": "Connect to lemonfiber",
+        "description": "Add the stack with a key link, or with the address, key and certificate pin the stack showed when the key was minted.",
+        "menu_options": {
+          "key_link": "With a key link",
+          "by_hand": "With the address, key and pin"
+        }
+      },
+      "key_link": {
+        "title": "Paste the key link",
+        "description": "Paste the key link the stack showed when the key was minted as a claim. The key is collected once, within ten minutes of the mint, and the link is not kept.",
+        "data": {
+          "key_link": "Key link"
+        },
+        "data_description": {
+          "key_link": "The link that starts with lemonfiber://key."
+        }
+      },
+      "by_hand": {
+        "title": "Connect to lemonfiber",
         "description": "Paste what the stack showed when the integration key was minted: its address, the key and the certificate pin. The operator password is never asked for.",
         "data": {
           "url": "Address",
@@ -52,7 +70,10 @@
       "no_dashboard": "The stack answered but did not send its dashboard in time.",
       "not_a_key": "The stack answered this as its operator, not as an integration key. Mint a key on the stack and paste that.",
       "nothing_said": "The stack answered but did not say in time what this key reaches.",
-      "refused": "The stack refused: {sentence}"
+      "refused": "The stack refused: {sentence}",
+      "link_malformed": "This is not a key link. Copy the whole link that starts with lemonfiber://key.",
+      "claim_lapsed": "This key link's ten minutes are over, so nothing was sent. Ask for the key to be minted as a claim again and paste the new link.",
+      "claim_refused": "This key link collects no key. Ask for the key to be minted as a claim again, and paste the new link within ten minutes. The stack said: {sentence}"
     },
     "abort": {
       "already_configured": "This stack is already added.",
@@ -336,6 +357,15 @@
     },
     "refused": {
       "message": "The stack refused: {sentence}"
+    },
+    "link_malformed": {
+      "message": "This is not a key link. Copy the whole link that starts with lemonfiber://key."
+    },
+    "claim_lapsed": {
+      "message": "The key link's ten minutes are over, so nothing was sent. Ask for the key to be minted as a claim again."
+    },
+    "claim_refused": {
+      "message": "The key link collects no key. Ask for the key to be minted as a claim again. The stack said: {sentence}"
     }
   },
   "issues": {
