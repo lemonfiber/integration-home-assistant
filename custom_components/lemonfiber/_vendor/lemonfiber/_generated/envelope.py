@@ -66,6 +66,7 @@ from .kinds import (
     RestoreEnvelope,
     SeedEnvelope,
     SelfUpdateEnvelope,
+    SettingsEnvelope,
     SetupEnvelope,
     SpaceEnvelope,
     StartEnvelope,
@@ -152,6 +153,7 @@ type Kind = typing.Literal[
     "restore",
     "seed",
     "self-update",
+    "settings",
     "setup",
     "space",
     "start",
@@ -239,6 +241,7 @@ type Envelope = (
     | RestoreEnvelope
     | SeedEnvelope
     | SelfUpdateEnvelope
+    | SettingsEnvelope
     | SetupEnvelope
     | SpaceEnvelope
     | StartEnvelope

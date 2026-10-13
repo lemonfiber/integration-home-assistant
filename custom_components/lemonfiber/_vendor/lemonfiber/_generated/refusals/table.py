@@ -26,6 +26,7 @@ from .rehearse_codes import REHEARSE
 from .repair_codes import REPAIR
 from .restore_codes import RESTORE
 from .serve_codes import SERVE
+from .setting_codes import SETTING
 from .setup_codes import SETUP
 from .space_codes import SPACE
 from .stack_codes import STACK
@@ -53,6 +54,7 @@ REFUSAL_CODES: typing.Final[typing.Mapping[RefusalCode, ListedRefusal]] = types.
         **REPAIR,
         **RESTORE,
         **SERVE,
+        **SETTING,
         **SETUP,
         **SPACE,
         **STACK,

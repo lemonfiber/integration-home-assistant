@@ -115,6 +115,8 @@ class ActionResettle(typing.TypedDict):
     """Put a setting in the settings store back to what it held."""
 
     does: typing.Literal["resettle"]
+    filed: typing.NotRequired[str | None]
+    """The environment file's setting it goes back to, where it was moved out of one."""
     name: str
     """The setting's name."""
     recorded: typing.NotRequired[str | None]
