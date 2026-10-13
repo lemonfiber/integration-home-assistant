@@ -67,6 +67,7 @@ from .kinds import (
     RestoreEnvelope,
     SeedEnvelope,
     SelfUpdateEnvelope,
+    SettingsEnvelope,
     SetupEnvelope,
     SpaceEnvelope,
     StartEnvelope,
@@ -213,6 +214,8 @@ class KindNarrowing(typing.Protocol):
     def __call__(self, envelope: Envelope, kind: typing.Literal["seed"], /) -> SeedEnvelope: ...
     @typing.overload
     def __call__(self, envelope: Envelope, kind: typing.Literal["self-update"], /) -> SelfUpdateEnvelope: ...
+    @typing.overload
+    def __call__(self, envelope: Envelope, kind: typing.Literal["settings"], /) -> SettingsEnvelope: ...
     @typing.overload
     def __call__(self, envelope: Envelope, kind: typing.Literal["setup"], /) -> SetupEnvelope: ...
     @typing.overload

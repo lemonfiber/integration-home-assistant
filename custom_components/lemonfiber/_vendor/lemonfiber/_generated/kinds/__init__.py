@@ -63,6 +63,7 @@ from . import reset as _reset
 from . import restore as _restore
 from . import seed as _seed
 from . import self_update as _self_update
+from . import settings as _settings
 from . import setup as _setup
 from . import space as _space
 from . import start as _start
@@ -144,6 +145,7 @@ from .reset import *
 from .restore import *
 from .seed import *
 from .self_update import *
+from .settings import *
 from .setup import *
 from .space import *
 from .start import *
@@ -226,6 +228,7 @@ __all__ += _reset.__all__
 __all__ += _restore.__all__
 __all__ += _seed.__all__
 __all__ += _self_update.__all__
+__all__ += _settings.__all__
 __all__ += _setup.__all__
 __all__ += _space.__all__
 __all__ += _start.__all__
