@@ -23,6 +23,9 @@ from . import clients as _clients
 from . import config as _config
 from . import credentials as _credentials
 from . import dashboard as _dashboard
+from . import device_challenge as _device_challenge
+from . import device_key as _device_key
+from . import device_keys as _device_keys
 from . import doctor as _doctor
 from . import error as _error
 from . import forms as _forms
@@ -105,6 +108,9 @@ from .clients import *
 from .config import *
 from .credentials import *
 from .dashboard import *
+from .device_challenge import *
+from .device_key import *
+from .device_keys import *
 from .doctor import *
 from .error import *
 from .forms import *
@@ -188,6 +194,9 @@ __all__ += _clients.__all__
 __all__ += _config.__all__
 __all__ += _credentials.__all__
 __all__ += _dashboard.__all__
+__all__ += _device_challenge.__all__
+__all__ += _device_key.__all__
+__all__ += _device_keys.__all__
 __all__ += _doctor.__all__
 __all__ += _error.__all__
 __all__ += _forms.__all__
