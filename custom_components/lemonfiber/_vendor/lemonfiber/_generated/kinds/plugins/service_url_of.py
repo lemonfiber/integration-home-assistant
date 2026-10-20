@@ -498,6 +498,7 @@ PluginInstalled = typing.TypedDict(
         "run_proofs": typing.NotRequired[list[PluginRunProof]],
         "services": list[PluginPlaced],
         "signed": typing.NotRequired[str],
+        "tree": typing.NotRequired[str],
         "version": str,
     },
 )
