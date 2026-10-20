@@ -8,6 +8,7 @@ and CI fails on any difference.
 import typing
 
 from .service_url_of import PluginInstall, PluginInstalled, PluginProving
+from ...shared.lifecycle__plugins__settings__update import Unvetted
 from ...shared.plugins__undo import UndoReversal
 
 
@@ -75,6 +76,10 @@ class PluginInstalls(typing.TypedDict):
     Filled on the reading of what is installed, which is the one read of what each
     plugin is doing; a run that installs, updates or removes one leaves it empty,
     because none of them changes a choice.
+    """
+    unvetted: typing.NotRequired[Unvetted | None]
+    """The operator's overlay and every service it changes, where there is one: merged
+    over the project this run would start, and held to nothing lemonfiber vets.
     """
     update: typing.NotRequired[PluginUpdate | None]
     """What this run's update came to, or nothing where it updated nothing.

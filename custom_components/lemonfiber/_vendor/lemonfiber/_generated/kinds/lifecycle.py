@@ -9,6 +9,7 @@ import typing
 
 from ..shared.dashboard__lifecycle__status import Service
 from ..shared.lifecycle__migration import ConflictReport
+from ..shared.lifecycle__plugins__settings__update import Unvetted
 from ..shared.lifecycle__preview import Plan
 from ..shared.lifecycle__quality__reset__update import StackEdit
 from ..shared.lifecycle__status import Condition
@@ -96,6 +97,10 @@ class LifecycleReport(typing.TypedDict):
     """What narrowing moved, where the command was a switch. Absent for every
     other action, which is what tells a reader that nothing was left running
     on purpose.
+    """
+    unvetted: typing.NotRequired[Unvetted | None]
+    """The operator's overlay and every service it changes, where there is one: merged
+    over the project this run starts, and held to nothing lemonfiber vets.
     """
 
 
