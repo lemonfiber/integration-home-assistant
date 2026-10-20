@@ -22,6 +22,7 @@ type Action = (
     | ActionReinstateDevice
     | ActionResettle
     | ActionRehold
+    | ActionLeave
 )
 """What an undo does.
 
@@ -36,6 +37,18 @@ class ActionDelete(typing.TypedDict):
     does: typing.Literal["delete"]
     path: str
     """The path to remove."""
+
+
+class ActionLeave(typing.TypedDict):
+    """Leave the operator's overlay as it is.
+
+    Worked out so the record of a change to it has a reversal to name, and never
+    carried out: lemonfiber does not write the operator's own file.
+    """
+
+    does: typing.Literal["leave"]
+    path: str
+    """The overlay."""
 
 
 class ActionReconfigure(typing.TypedDict):
@@ -289,6 +302,7 @@ class UndoReversal(typing.TypedDict):
 __all__ = [
     "Action",
     "ActionDelete",
+    "ActionLeave",
     "ActionReconfigure",
     "ActionRehold",
     "ActionReinstate",

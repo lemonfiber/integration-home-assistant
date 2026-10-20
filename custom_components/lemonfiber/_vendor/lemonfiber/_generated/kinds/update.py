@@ -7,6 +7,7 @@ and CI fails on any difference.
 
 import typing
 
+from ..shared.lifecycle__plugins__settings__update import Unvetted
 from ..shared.lifecycle__quality__reset__update import StackEdit
 from ..shared.update__version import Notes
 
@@ -75,6 +76,10 @@ class StackUpdateReport(typing.TypedDict):
     """
     state: UpdateState
     """The one word the run comes to."""
+    unvetted: typing.NotRequired[Unvetted | None]
+    """The operator's overlay and every service it changes, where there is one: merged
+    over the project this run would start, and held to nothing lemonfiber vets.
+    """
 
 
 class UpdateChange(typing.TypedDict):
