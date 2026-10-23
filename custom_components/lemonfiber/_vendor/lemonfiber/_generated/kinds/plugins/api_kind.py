@@ -327,7 +327,7 @@ class PluginOverriding(typing.TypedDict):
     """What changing it is for."""
 
 
-type PluginPuts = typing.Literal["directory", "document", "key", "region", "secrets"]
+type PluginPuts = typing.Literal["directory", "document", "key", "region", "secrets", "starting", "upstream"]
 """What an install puts at one path."""
 
 
@@ -416,6 +416,8 @@ class PluginSecret(typing.TypedDict):
 
     id: str
     """What the value is, within the plugin."""
+    minted: typing.NotRequired[bool]
+    """Whether lemonfiber made the value at install."""
     of: str
     """Whose credential it is."""
     why: str

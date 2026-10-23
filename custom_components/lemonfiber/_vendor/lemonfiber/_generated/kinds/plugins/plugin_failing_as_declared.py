@@ -118,6 +118,10 @@ class PluginPlaced(typing.TypedDict):
     """The readable name that digest went by when it was installed."""
     takes_data: bool
     """Whether the library is mounted for it."""
+    upstream: typing.NotRequired[dict[str, str]]
+    """Each field of the `upstream.json` lemonfiber writes for it as an adapter, to the
+    id of the plugin's secret that field holds.
+    """
 
 
 class PluginProving(typing.TypedDict):
