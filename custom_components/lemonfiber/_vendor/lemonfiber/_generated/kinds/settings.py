@@ -7,7 +7,7 @@ and CI fails on any difference.
 
 import typing
 
-from ..shared.lifecycle__plugins__settings__update import Unvetted
+from ..shared.lifecycle__plugins__settings__substitution__update import Unvetted
 
 
 type Owner = OwnerCore | OwnerNamespace
