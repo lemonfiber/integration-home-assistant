@@ -14,6 +14,8 @@ type Action = (
     | ActionDelete
     | ActionWithdraw
     | ActionRewind
+    | ActionMoveBack
+    | ActionKeepCopy
     | ActionRepin
     | ActionReconfigure
     | ActionRevoke
@@ -37,6 +39,18 @@ class ActionDelete(typing.TypedDict):
     does: typing.Literal["delete"]
     path: str
     """The path to remove."""
+
+
+class ActionKeepCopy(typing.TypedDict):
+    """Keep the copy of a volume where it is: the volume was never changed, so nothing
+    is put back.
+    """
+
+    does: typing.Literal["keep-copy"]
+    to: str
+    """Where the copy is."""
+    volume: str
+    """The volume it was copied from."""
 
 
 class ActionLeave(typing.TypedDict):
@@ -299,10 +313,26 @@ class UndoReversal(typing.TypedDict):
     """
 
 
+ActionMoveBack = typing.TypedDict(
+    "ActionMoveBack",
+    {
+        "does": typing.Literal["move-back"],
+        "from": str,
+        "to": str,
+    },
+)
+"""Move a service's state back to where it was.
+
+Only where nothing has taken its old place, and only from where it was moved to.
+"""
+
+
 __all__ = [
     "Action",
     "ActionDelete",
+    "ActionKeepCopy",
     "ActionLeave",
+    "ActionMoveBack",
     "ActionReconfigure",
     "ActionRehold",
     "ActionReinstate",
