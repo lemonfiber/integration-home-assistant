@@ -1,5 +1,5 @@
 # Copyright (c) 2026 NightWorksIO
-"""The shapes `lifecycle`, `plugins`, `settings` and `update` all carry.
+"""The shapes `lifecycle`, `plugins`, `settings`, `substitution` and `update` all carry.
 
 Generated from the contract vendored in `contract/`. Do not edit: `just generate` rewrites it,
 and CI fails on any difference.
