@@ -20,6 +20,21 @@ from .api_kind import (
     PluginRecipe,
     PluginRequest,
 )
+from ...shared.plugins__undo import PluginGrant
+
+
+type PluginEvidence = typing.Literal["recordings", "service"]
+"""What the verdicts in a report were reached against.
+
+One value, because one is all this build can produce: nothing here asks a service
+anything. It is a field rather than a sentence for the reason a verdict is one — a
+reader handed `demonstrated` has nothing else in the document to tell a recording
+that answered from a service that did, and the weaker of those two claims must not
+be readable as the stronger. The prose says it on the page; this says it to
+whatever consumes the report: an author's own CI, a catalogue, anything counting
+passes. Naming the axis now is what made the second kind of evidence a change the
+compiler walked somebody through rather than one they had to remember.
+"""
 
 
 class PluginFailingAsDeclared(typing.TypedDict):
@@ -446,6 +461,7 @@ PluginInstalled = typing.TypedDict(
         "declared": typing.NotRequired[PluginDeclaration],
         "description": typing.NotRequired[str | None],
         "from": typing.NotRequired[str],
+        "granted": typing.NotRequired[list[PluginGrant]],
         "installed_at": typing.NotRequired[str],
         "manifest": typing.NotRequired[str],
         "name": typing.NotRequired[str | None],
@@ -476,6 +492,7 @@ ServiceMount = typing.TypedDict(
 
 
 __all__ = [
+    "PluginEvidence",
     "PluginFailingAsDeclared",
     "PluginInstalled",
     "PluginPlaced",
