@@ -7,8 +7,9 @@ and CI fails on any difference.
 
 import typing
 
-from .api_kind import PluginChange, PluginDemand, PluginEvidence, PluginOverriding, PluginRecipeRan
-from .plugin_failing_as_declared import (
+from .api_kind import PluginChange, PluginDemand, PluginOverriding, PluginRecipeRan
+from .plugin_evidence import (
+    PluginEvidence,
     PluginInstalled,
     PluginProving,
     PluginTaking,
