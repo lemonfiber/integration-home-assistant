@@ -453,6 +453,18 @@ class WiringContest(typing.TypedDict):
     """Every claimant, named — a plugin's with the plugin beside it."""
 
 
+PluginGranting = typing.TypedDict(
+    "PluginGranting",
+    {
+        "approval": str,
+        "credential": str,
+        "for": str,
+        "of": str,
+    },
+)
+"""One credential that would cross to a plugin, as the reading states it."""
+
+
 PluginInstalled = typing.TypedDict(
     "PluginInstalled",
     {
@@ -494,6 +506,7 @@ ServiceMount = typing.TypedDict(
 __all__ = [
     "PluginEvidence",
     "PluginFailingAsDeclared",
+    "PluginGranting",
     "PluginInstalled",
     "PluginPlaced",
     "PluginProving",
