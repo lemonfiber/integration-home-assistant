@@ -15,7 +15,6 @@ from .plugin_evidence import (
     PluginProving,
     PluginTaking,
     PluginVerification,
-    WiringContest,
 )
 from ...shared.lifecycle__plugins__settings__substitution__update import Unvetted
 from ...shared.plugins__undo import UndoReversal
@@ -354,6 +353,19 @@ class PluginsEnvelope(typing.TypedDict):
     kind: typing.Literal["plugins"]
 
 
+class WiringContest(typing.TypedDict):
+    """An ask several services claim and nothing has chosen between, so it reaches
+    nothing.
+    """
+
+    by: str
+    """The service that asked."""
+    capability: str
+    """What it asked for."""
+    claimants: list[str]
+    """Every claimant, named — a plugin's with the plugin beside it."""
+
+
 PluginSource = typing.TypedDict(
     "PluginSource",
     {
@@ -406,4 +418,5 @@ __all__ = [
     "PluginUnfilled",
     "PluginUpdate",
     "PluginsEnvelope",
+    "WiringContest",
 ]
