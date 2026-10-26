@@ -356,6 +356,12 @@ class PluginVerification(typing.TypedDict):
     """
 
 
+type RecordedWith = str | int | bool
+"""What a recording gives a service in the operator's place: a constant reaching no third
+party, or, written `\"minted\"`, a value made for that run alone.
+"""
+
+
 type ServiceConstant = str | int | bool
 """A value written exactly as declared."""
 
@@ -417,6 +423,10 @@ class ServiceSetting(typing.TypedDict):
 
     default: ServiceConstant
     """What is written while the operator has recorded no value."""
+    recorded_with: typing.NotRequired[RecordedWith | None]
+    """What a recording gives the service in the operator's place, where only the
+    operator holds the value and the service needs one to start.
+    """
     setting: str
     """The setting's name."""
 
@@ -438,19 +448,6 @@ type ServiceUserMode = typing.Literal["image", "puid-env", "uid"]
 
 type ServiceValue = ServiceConstant | ServiceSetting | ServiceUrlOf | ServiceSecretOf
 """One environment variable's value."""
-
-
-class WiringContest(typing.TypedDict):
-    """An ask several services claim and nothing has chosen between, so it reaches
-    nothing.
-    """
-
-    by: str
-    """The service that asked."""
-    capability: str
-    """What it asked for."""
-    claimants: list[str]
-    """Every claimant, named — a plugin's with the plugin beside it."""
 
 
 PluginGranting = typing.TypedDict(
@@ -525,6 +522,7 @@ __all__ = [
     "PluginVerdictPassed",
     "PluginVerdictUnproven",
     "PluginVerification",
+    "RecordedWith",
     "ServiceConstant",
     "ServiceFields",
     "ServiceMount",
@@ -536,5 +534,4 @@ __all__ = [
     "ServiceUrlOf",
     "ServiceUserMode",
     "ServiceValue",
-    "WiringContest",
 ]
