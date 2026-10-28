@@ -15,6 +15,7 @@ type Action = (
     | ActionWithdraw
     | ActionRewind
     | ActionMoveBack
+    | ActionRenameBack
     | ActionKeepCopy
     | ActionRepin
     | ActionReconfigure
@@ -25,6 +26,7 @@ type Action = (
     | ActionResettle
     | ActionRegrant
     | ActionRehold
+    | ActionUnreplaced
     | ActionLeave
 )
 """What an undo does.
@@ -232,6 +234,18 @@ class ActionRewind(typing.TypedDict):
     """
 
 
+class ActionUnreplaced(typing.TypedDict):
+    """Leave the media server's internal certificate as it is.
+
+    Worked out so the record of a replacement has a reversal to name, and never carried
+    out: the certificate is put back only by replacing it again.
+    """
+
+    does: typing.Literal["unreplaced"]
+    service: str
+    """The media server's service."""
+
+
 class ActionWithdraw(typing.TypedDict):
     """Take a region lemonfiber wrote back out of the file it was written into.
 
@@ -340,6 +354,21 @@ Only where nothing has taken its old place, and only from where it was moved to.
 """
 
 
+ActionRenameBack = typing.TypedDict(
+    "ActionRenameBack",
+    {
+        "does": typing.Literal["rename-back"],
+        "from": str,
+        "to": str,
+    },
+)
+"""Move a value in the environment file back to the key it was under.
+
+Only where the key it is under now holds a value and the one it goes back to holds
+none.
+"""
+
+
 PluginGrant = typing.TypedDict(
     "PluginGrant",
     {
@@ -366,12 +395,14 @@ __all__ = [
     "ActionReinstate",
     "ActionReinstateDevice",
     "ActionRemove",
+    "ActionRenameBack",
     "ActionRepin",
     "ActionResettle",
     "ActionRestore",
     "ActionRevoke",
     "ActionRevokeDevice",
     "ActionRewind",
+    "ActionUnreplaced",
     "ActionWithdraw",
     "PluginGrant",
     "Undo",
