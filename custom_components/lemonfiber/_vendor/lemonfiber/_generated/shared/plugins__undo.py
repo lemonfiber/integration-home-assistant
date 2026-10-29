@@ -27,6 +27,7 @@ type Action = (
     | ActionRegrant
     | ActionRehold
     | ActionUnreplaced
+    | ActionRun
     | ActionLeave
 )
 """What an undo does.
@@ -234,6 +235,16 @@ class ActionRewind(typing.TypedDict):
     """
 
 
+class ActionRun(typing.TypedDict):
+    """Start a service again, or stop it again."""
+
+    does: typing.Literal["run"]
+    running: bool
+    """Whether it is left running."""
+    service: str
+    """The service."""
+
+
 class ActionUnreplaced(typing.TypedDict):
     """Leave the media server's internal certificate as it is.
 
@@ -402,6 +413,7 @@ __all__ = [
     "ActionRevoke",
     "ActionRevokeDevice",
     "ActionRewind",
+    "ActionRun",
     "ActionUnreplaced",
     "ActionWithdraw",
     "PluginGrant",
