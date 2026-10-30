@@ -90,6 +90,12 @@ class PluginInstall(typing.TypedDict):
     that had nothing to put back, which is both a rehearsal and an install that
     held.
     """
+    secured: typing.NotRequired[str | None]
+    """What asking the egress guard among its services to hold its control server to the
+    credential its adapter was handed came to, where it was more than held at once:
+    the guard restarted to take it up, or why it did not. Absent where none of its
+    services is a guard speaking its contract, and on every rehearsal.
+    """
     sharing: list[PluginSharing]
     """Every adapter that writes the files of the service it fronts."""
     taking: list[PluginTaking]
