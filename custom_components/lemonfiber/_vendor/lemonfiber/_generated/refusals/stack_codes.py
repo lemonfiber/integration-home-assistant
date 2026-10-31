@@ -30,7 +30,6 @@ STACK: typing.Final[typing.Mapping[RefusalCode, ListedRefusal]] = {
     "STACK-2": ListedRefusal(
         "STACK_UNUSABLE", 500, "Raised when a manifest is readable and this build cannot use it."
     ),
-    "STACK-3": ListedRefusal("STACK_NOT_EMBEDDED", 500, "Raised when the embedded stack is not intact."),
     "STACK-4": ListedRefusal(
         "STACK_NOT_SET_UP", 500, "Raised when lemonfiber has nowhere to write the stack."
     ),
