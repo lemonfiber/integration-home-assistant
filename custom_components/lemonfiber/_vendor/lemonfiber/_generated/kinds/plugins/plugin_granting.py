@@ -375,9 +375,13 @@ class ServiceFields(typing.TypedDict):
 
 
 class ServiceNetwork(typing.TypedDict):
-    """The network a service runs inside instead of its own."""
+    """The network a service runs inside instead of its own: its filler's, or a fence's."""
 
-    via: str
+    fenced: typing.NotRequired[bool]
+    """Whether it fetches whatever address it is handed, and so runs inside a fence that
+    refuses every private address.
+    """
+    via: typing.NotRequired[str | None]
     """The capability whose filler's network it runs inside."""
 
 
