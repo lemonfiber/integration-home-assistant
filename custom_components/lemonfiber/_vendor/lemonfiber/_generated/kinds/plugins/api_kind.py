@@ -396,6 +396,11 @@ class PluginRequest(typing.TypedDict):
     """The HTTP method."""
     path: str
     """The path on the service being asked."""
+    varies: typing.NotRequired[dict[str, str]]
+    """Each place in the answer whose value the service makes afresh on every run, a JSON
+    Pointer into its JSON, to the RE2 shape the whole value there is held to wherever a
+    recording is taken again. Never sent.
+    """
 
 
 class PluginStep(typing.TypedDict):
