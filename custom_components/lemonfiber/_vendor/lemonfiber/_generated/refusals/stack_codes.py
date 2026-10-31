@@ -24,6 +24,9 @@ STACK: typing.Final[typing.Mapping[RefusalCode, ListedRefusal]] = {
     "STACK-13": ListedRefusal(
         "RESET_MOVED", 400, "Raised where the offer a reset answers is not the one a reading of it makes now."
     ),
+    "STACK-15": ListedRefusal(
+        "SERVICE_UNFENCED", 409, "Raised where a start names a fenced service no fence can be written for."
+    ),
     "STACK-2": ListedRefusal(
         "STACK_UNUSABLE", 500, "Raised when a manifest is readable and this build cannot use it."
     ),
