@@ -499,6 +499,7 @@ PluginSecret = typing.TypedDict(
     {
         "for": typing.NotRequired[str | None],
         "id": str,
+        "lapses_s": typing.NotRequired[int | None],
         "minted": typing.NotRequired[bool],
         "needed_to_start": typing.NotRequired[bool],
         "needs": typing.NotRequired[dict[str, list[ServiceConstant]]],
