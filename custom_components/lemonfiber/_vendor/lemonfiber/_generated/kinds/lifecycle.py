@@ -9,6 +9,7 @@ import typing
 
 from ..shared.dashboard__lifecycle__status import Service
 from ..shared.lifecycle__migration import ConflictReport
+from ..shared.lifecycle__plugins__reset__settings__substitution__update import StackMoveTaken
 from ..shared.lifecycle__plugins__settings__substitution__update import Unvetted
 from ..shared.lifecycle__preview import Plan
 from ..shared.lifecycle__quality__reset__update import StackEdit
@@ -45,6 +46,11 @@ class LifecycleReport(typing.TypedDict):
     there is no tunnel to forward through — and a sentence where the client was
     moved, or could not be.
     """
+    guards: typing.NotRequired[list[StackMoveTaken]]
+    """Each of lemonfiber's own guards this act moved onto its plugin, or on a rehearsal
+    would move, for good and with no yes of its own; one it could not move stays on
+    offer and says why.
+    """
     held: typing.NotRequired[str | None]
     """Why nothing was run, where a start declined to run anything.
 
@@ -56,6 +62,11 @@ class LifecycleReport(typing.TypedDict):
     stopped on purpose, autostart was never asked for, or this machine is on its
     battery and nobody said to start anyway — and a run nobody is watching has to
     leave the reason somewhere a reader finds later.
+    """
+    installing: typing.NotRequired[list[UpInstallOffered]]
+    """Each part this build carries that the forms hold and this machine has never run,
+    offered as an install from the build, offline, before anything of the forms is
+    written or started; answered by [`Self::offer`].
     """
     moves: typing.NotRequired[list[MoveOffered]]
     """Each part this release installs as a plugin that the stack still runs as its own
@@ -90,6 +101,10 @@ class LifecycleReport(typing.TypedDict):
     """
     rehearsed: bool
     """Whether this was a rehearsal."""
+    rendering: typing.NotRequired[str | None]
+    """Why the group owning the render devices of the engine's host was not asked or not
+    kept, where a service takes `render` and it was not. Absent for every other action.
+    """
     secured: typing.NotRequired[str | None]
     """What asking the egress guard to hold its control server to the credential its
     adapter was handed came to, where it was more than held at once: the guard
@@ -126,6 +141,10 @@ class LifecycleReport(typing.TypedDict):
     """Each fenced service a start holds back because no fence can be written for it, in
     words naming it and why. Empty for every other action.
     """
+    unrendered: typing.NotRequired[list[str]]
+    """Each service taking `render` a start writes without the host's render devices, in
+    words naming it. Empty for every other action.
+    """
     unvetted: typing.NotRequired[Unvetted | None]
     """The operator's overlay and every service it changes, where there is one: merged
     over the project this run starts, and held to nothing lemonfiber vets.
@@ -158,8 +177,22 @@ class Switched(typing.TypedDict):
     """Stopped, because the new closure does not hold them."""
 
 
+class UpInstallOffered(typing.TypedDict):
+    """An install of a part the bundle installs that a start offers, by the plugin and the
+    offer its install reads as.
+    """
+
+    offer: typing.NotRequired[str | None]
+    """The name its install's offer goes by, where it could be read."""
+    plugin: str
+    """The plugin the bundle installs, in place of the stack's own service of its id."""
+    why: typing.NotRequired[str | None]
+    """Why its install could not be read, where it could not."""
+
+
 __all__ = [
     "LifecycleEnvelope",
     "LifecycleReport",
     "Switched",
+    "UpInstallOffered",
 ]
