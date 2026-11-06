@@ -14,6 +14,7 @@ type Action = (
     | ActionDelete
     | ActionWithdraw
     | ActionRewind
+    | ActionReseed
     | ActionMoveBack
     | ActionRenameBack
     | ActionKeepCopy
@@ -27,6 +28,7 @@ type Action = (
     | ActionRegrant
     | ActionRehold
     | ActionUnreplaced
+    | ActionUnmoved
     | ActionRun
     | ActionLeave
 )
@@ -168,6 +170,25 @@ class ActionRepin(typing.TypedDict):
     """The version to put back."""
 
 
+class ActionReseed(typing.TypedDict):
+    """Write the value the secret store holds of a plugin's minted secret back into a
+    starting file, where the shipped file puts the placeholder.
+
+    Only where it still holds what was written. One written since is somebody else's
+    work now, and is left exactly as it is.
+    """
+
+    does: typing.Literal["reseed"]
+    path: str
+    """The file to write back."""
+    plugin: str
+    """The plugin the secret is of."""
+    secret: str
+    """The secret, by its id."""
+    written: int
+    """The checksum of what lemonfiber wrote, which has to still be what is there."""
+
+
 class ActionResettle(typing.TypedDict):
     """Put a setting in the settings store back to what it held."""
 
@@ -243,6 +264,18 @@ class ActionRun(typing.TypedDict):
     """Whether it is left running."""
     service: str
     """The service."""
+
+
+class ActionUnmoved(typing.TypedDict):
+    """Leave one of lemonfiber's own guards on its plugin.
+
+    Worked out so the record of the move has a reversal to name, and never carried out:
+    the release that moved the guard moves it for good.
+    """
+
+    does: typing.Literal["unmoved"]
+    service: str
+    """The stack's own service the guard's plugin took the place of."""
 
 
 class ActionUnreplaced(typing.TypedDict):
@@ -408,12 +441,14 @@ __all__ = [
     "ActionRemove",
     "ActionRenameBack",
     "ActionRepin",
+    "ActionReseed",
     "ActionResettle",
     "ActionRestore",
     "ActionRevoke",
     "ActionRevokeDevice",
     "ActionRewind",
     "ActionRun",
+    "ActionUnmoved",
     "ActionUnreplaced",
     "ActionWithdraw",
     "PluginGrant",

@@ -34,6 +34,7 @@ from .setup_codes import SETUP
 from .space_codes import SPACE
 from .stack_codes import STACK
 from .storage_codes import STORAGE
+from .undo_codes import UNDO
 from .update_codes import UPDATE
 from .wire_codes import WIRE
 from .wish_codes import WISH
@@ -66,6 +67,7 @@ REFUSAL_CODES: typing.Final[typing.Mapping[RefusalCode, ListedRefusal]] = types.
         **SPACE,
         **STACK,
         **STORAGE,
+        **UNDO,
         **UPDATE,
         **WIRE,
         **WISH,

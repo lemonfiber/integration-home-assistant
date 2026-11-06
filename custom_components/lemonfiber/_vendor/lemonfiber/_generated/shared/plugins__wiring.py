@@ -8,6 +8,7 @@ and CI fails on any difference.
 import typing
 
 from .config__credentials__doctor__outbound__plugins__wiring__wizard import ValueOrigin
+from .plugins__substitution__wiring import Apis
 
 
 type Reaches = ReachesAsked | ReachesByName
@@ -19,10 +20,12 @@ class ReachesAsked(typing.TypedDict):
 
     capability: str
     """The capability asked for."""
+    files: typing.NotRequired[str | None]
+    """The medium the filler it reaches files, where the ask is narrowed to one."""
     how: typing.Literal["asked"]
-    native: typing.NotRequired[str | None]
-    """The upstream's own API the ask talks in, where it reaches the upstream an
-    adapter fronts rather than the adapter.
+    native: typing.NotRequired[Apis | None]
+    """The upstream's own API the ask talks in, or every API it talks in any of,
+    where it reaches the upstream an adapter fronts rather than the adapter.
     """
     origins: dict[str, ValueOrigin]
     """Where each service that claims it came from: this build's stack, or a
