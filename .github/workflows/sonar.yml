@@ -45,7 +45,7 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e # v10.3.2
+      - uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
       - name: Install exactly what the lockfile says
         run: uv sync --locked --no-build --no-install-package mock-open --no-install-package pyric
       # The same recipe the `tests and coverage` job runs, so the coverage the scan
@@ -124,7 +124,7 @@ jobs:
       - name: SonarQube Cloud scan
         id: scan
         if: github.event_name != 'pull_request' || steps.token.outputs.present == 'true'
-        uses: SonarSource/sonarqube-scan-action@d209202bc7d53ff1cc128f7f907dac145c9d6ae9 # v8.3.0
+        uses: SonarSource/sonarqube-scan-action@e805d875275f728fac1885b413934be6d7c63f65 # v8.4.1
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         # The report's path is given here rather than in `sonar-project.properties`.
