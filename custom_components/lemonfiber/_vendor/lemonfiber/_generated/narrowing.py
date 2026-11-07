@@ -62,6 +62,8 @@ from .kinds import (
     PreviewEnvelope,
     ProvenanceEnvelope,
     PullEnvelope,
+    PushEndpointEnvelope,
+    PushEndpointsEnvelope,
     QualityEnvelope,
     RemovalEnvelope,
     RepairEnvelope,
@@ -209,6 +211,14 @@ class KindNarrowing(typing.Protocol):
     def __call__(self, envelope: Envelope, kind: typing.Literal["provenance"], /) -> ProvenanceEnvelope: ...
     @typing.overload
     def __call__(self, envelope: Envelope, kind: typing.Literal["pull"], /) -> PullEnvelope: ...
+    @typing.overload
+    def __call__(
+        self, envelope: Envelope, kind: typing.Literal["push-endpoint"], /
+    ) -> PushEndpointEnvelope: ...
+    @typing.overload
+    def __call__(
+        self, envelope: Envelope, kind: typing.Literal["push-endpoints"], /
+    ) -> PushEndpointsEnvelope: ...
     @typing.overload
     def __call__(self, envelope: Envelope, kind: typing.Literal["quality"], /) -> QualityEnvelope: ...
     @typing.overload

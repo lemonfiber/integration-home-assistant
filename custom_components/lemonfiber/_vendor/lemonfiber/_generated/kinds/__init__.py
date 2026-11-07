@@ -58,6 +58,8 @@ from . import plugins as _plugins
 from . import preview as _preview
 from . import provenance as _provenance
 from . import pull as _pull
+from . import push_endpoint as _push_endpoint
+from . import push_endpoints as _push_endpoints
 from . import quality as _quality
 from . import removal as _removal
 from . import repair as _repair
@@ -143,6 +145,8 @@ from .plugins import *
 from .preview import *
 from .provenance import *
 from .pull import *
+from .push_endpoint import *
+from .push_endpoints import *
 from .quality import *
 from .removal import *
 from .repair import *
@@ -229,6 +233,8 @@ __all__ += _plugins.__all__
 __all__ += _preview.__all__
 __all__ += _provenance.__all__
 __all__ += _pull.__all__
+__all__ += _push_endpoint.__all__
+__all__ += _push_endpoints.__all__
 __all__ += _quality.__all__
 __all__ += _removal.__all__
 __all__ += _repair.__all__
