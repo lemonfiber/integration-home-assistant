@@ -24,6 +24,7 @@ type Action = (
     | ActionReinstate
     | ActionRevokeDevice
     | ActionReinstateDevice
+    | ActionPushEndpoint
     | ActionResettle
     | ActionRegrant
     | ActionRehold
@@ -69,6 +70,18 @@ class ActionLeave(typing.TypedDict):
     does: typing.Literal["leave"]
     path: str
     """The overlay."""
+
+
+class ActionPushEndpoint(typing.TypedDict):
+    """Leave a push endpoint as it stands.
+
+    Worked out so the record of a registration or a removal has a reversal to name, and
+    never carried out: only the phone holds what a registration is made from.
+    """
+
+    does: typing.Literal["push-endpoint"]
+    name: str
+    """The endpoint's name."""
 
 
 class ActionReconfigure(typing.TypedDict):
@@ -433,6 +446,7 @@ __all__ = [
     "ActionKeepCopy",
     "ActionLeave",
     "ActionMoveBack",
+    "ActionPushEndpoint",
     "ActionReconfigure",
     "ActionRegrant",
     "ActionRehold",

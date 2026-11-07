@@ -21,6 +21,7 @@ from .listed import ListedRefusal, RefusalCode
 from .migrate_codes import MIGRATE
 from .play_codes import PLAY
 from .plugin_codes import PLUGIN
+from .push_codes import PUSH
 from .quota_codes import QUOTA
 from .rate_codes import RATE
 from .read_codes import READ
@@ -54,6 +55,7 @@ REFUSAL_CODES: typing.Final[typing.Mapping[RefusalCode, ListedRefusal]] = types.
         **MIGRATE,
         **PLAY,
         **PLUGIN,
+        **PUSH,
         **QUOTA,
         **RATE,
         **READ,
