@@ -93,6 +93,7 @@ from .kinds import (
     WalkthroughEnvelope,
     WatchEnvelope,
     WatchedEnvelope,
+    WatcherEnvelope,
     WiringEnvelope,
     WizardEnvelope,
     WordEnvelope,
@@ -282,6 +283,8 @@ class KindNarrowing(typing.Protocol):
     def __call__(self, envelope: Envelope, kind: typing.Literal["watch"], /) -> WatchEnvelope: ...
     @typing.overload
     def __call__(self, envelope: Envelope, kind: typing.Literal["watched"], /) -> WatchedEnvelope: ...
+    @typing.overload
+    def __call__(self, envelope: Envelope, kind: typing.Literal["watcher"], /) -> WatcherEnvelope: ...
     @typing.overload
     def __call__(self, envelope: Envelope, kind: typing.Literal["wiring"], /) -> WiringEnvelope: ...
     @typing.overload

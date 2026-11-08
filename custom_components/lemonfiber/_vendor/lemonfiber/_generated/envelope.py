@@ -92,6 +92,7 @@ from .kinds import (
     WalkthroughEnvelope,
     WatchEnvelope,
     WatchedEnvelope,
+    WatcherEnvelope,
     WiringEnvelope,
     WizardEnvelope,
     WordEnvelope,
@@ -185,6 +186,7 @@ type Kind = typing.Literal[
     "walkthrough",
     "watch",
     "watched",
+    "watcher",
     "wiring",
     "wizard",
     "word",
@@ -279,6 +281,7 @@ type Envelope = (
     | WalkthroughEnvelope
     | WatchEnvelope
     | WatchedEnvelope
+    | WatcherEnvelope
     | WiringEnvelope
     | WizardEnvelope
     | WordEnvelope

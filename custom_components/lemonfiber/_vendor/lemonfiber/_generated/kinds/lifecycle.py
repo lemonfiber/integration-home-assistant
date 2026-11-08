@@ -154,6 +154,11 @@ class LifecycleReport(typing.TypedDict):
     """The operator's overlay and every service it changes, where there is one: merged
     over the project this run starts, and held to nothing lemonfiber vets.
     """
+    watched: typing.NotRequired[str | None]
+    """What holding the outside watcher to the stack's monitors came to, where it was
+    more than held already: given them, or why not. Absent where it already held them
+    or nothing fills `status.watch`.
+    """
 
 
 class Switched(typing.TypedDict):

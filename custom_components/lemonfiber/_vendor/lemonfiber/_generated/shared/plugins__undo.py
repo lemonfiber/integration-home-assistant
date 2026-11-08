@@ -7,6 +7,8 @@ and CI fails on any difference.
 
 import typing
 
+from .askable__asked__plugins__undo import TitleKind
+
 
 type Action = (
     ActionRemove
@@ -26,6 +28,7 @@ type Action = (
     | ActionReinstateDevice
     | ActionPushEndpoint
     | ActionResettle
+    | ActionRegrab
     | ActionRegrant
     | ActionRehold
     | ActionUnreplaced
@@ -101,6 +104,20 @@ class ActionReconfigure(typing.TypedDict):
     """The kind of resource."""
     value: typing.NotRequired[str | None]
     """What to put back, or `None` where it held nothing."""
+
+
+class ActionRegrab(typing.TypedDict):
+    """Ask a curator to grab a release again by its fingerprint and lift its blocklist
+    entry.
+    """
+
+    does: typing.Literal["regrab"]
+    kind: TitleKind
+    """The kind of media the curator files it as."""
+    release: str
+    """The release's fingerprint."""
+    title: int
+    """The curator's id for the title."""
 
 
 class ActionRegrant(typing.TypedDict):
@@ -448,6 +465,7 @@ __all__ = [
     "ActionMoveBack",
     "ActionPushEndpoint",
     "ActionReconfigure",
+    "ActionRegrab",
     "ActionRegrant",
     "ActionRehold",
     "ActionReinstate",
