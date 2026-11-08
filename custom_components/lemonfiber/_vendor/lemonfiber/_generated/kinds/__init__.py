@@ -15,6 +15,7 @@ from . import asked as _asked
 from . import backup as _backup
 from . import bandwidth as _bandwidth
 from . import beside as _beside
+from . import boot as _boot
 from . import bundle as _bundle
 from . import capabilities as _capabilities
 from . import catalogue as _catalogue
@@ -102,6 +103,7 @@ from .asked import *
 from .backup import *
 from .bandwidth import *
 from .beside import *
+from .boot import *
 from .bundle import *
 from .capabilities import *
 from .catalogue import *
@@ -190,6 +192,7 @@ __all__ += _asked.__all__
 __all__ += _backup.__all__
 __all__ += _bandwidth.__all__
 __all__ += _beside.__all__
+__all__ += _boot.__all__
 __all__ += _bundle.__all__
 __all__ += _capabilities.__all__
 __all__ += _catalogue.__all__

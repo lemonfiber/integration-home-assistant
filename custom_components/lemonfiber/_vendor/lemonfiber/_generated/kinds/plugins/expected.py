@@ -96,6 +96,8 @@ class PluginAsking(typing.TypedDict):
     """Whether every service that fills it is reached rather than one."""
     files: typing.NotRequired[str | None]
     """The medium the filler it reaches files, where it narrows the ask to one."""
+    media_types: typing.NotRequired[list[str]]
+    """The media it asks a filler of, where it narrows the ask to the fillers of those."""
     native: typing.NotRequired[Apis | None]
     """The upstream's own API it talks in, or every API it talks in any of, which it
     reaches in place of the adapter.

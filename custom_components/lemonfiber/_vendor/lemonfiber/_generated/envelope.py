@@ -18,6 +18,7 @@ from .kinds import (
     BackupEnvelope,
     BandwidthEnvelope,
     BesideEnvelope,
+    BootEnvelope,
     BundleEnvelope,
     CapabilitiesEnvelope,
     CatalogueEnvelope,
@@ -110,6 +111,7 @@ type Kind = typing.Literal[
     "backup",
     "bandwidth",
     "beside",
+    "boot",
     "bundle",
     "capabilities",
     "catalogue",
@@ -203,6 +205,7 @@ type Envelope = (
     | BackupEnvelope
     | BandwidthEnvelope
     | BesideEnvelope
+    | BootEnvelope
     | BundleEnvelope
     | CapabilitiesEnvelope
     | CatalogueEnvelope

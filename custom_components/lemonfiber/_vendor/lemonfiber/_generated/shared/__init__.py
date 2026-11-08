@@ -16,6 +16,7 @@ from . import askable__dashboard__household as _askable__dashboard__household
 from . import backup__restore as _backup__restore
 from . import bandwidth__pausing as _bandwidth__pausing
 from . import beside__migration as _beside__migration
+from . import boot__lifecycle as _boot__lifecycle
 from . import catalogue__dashboard__lifecycle__status as _catalogue__dashboard__lifecycle__status
 from . import (
     config__credentials__doctor__outbound__plugins__wiring__wizard as _config__credentials__doctor__outbound__plugins__wiring__wizard,
@@ -69,6 +70,7 @@ from .askable__dashboard__household import *
 from .backup__restore import *
 from .bandwidth__pausing import *
 from .beside__migration import *
+from .boot__lifecycle import *
 from .catalogue__dashboard__lifecycle__status import *
 from .config__credentials__doctor__outbound__plugins__wiring__wizard import *
 from .config__wizard import *
@@ -117,6 +119,7 @@ __all__ += _askable__dashboard__household.__all__
 __all__ += _backup__restore.__all__
 __all__ += _bandwidth__pausing.__all__
 __all__ += _beside__migration.__all__
+__all__ += _boot__lifecycle.__all__
 __all__ += _catalogue__dashboard__lifecycle__status.__all__
 __all__ += _config__credentials__doctor__outbound__plugins__wiring__wizard.__all__
 __all__ += _config__wizard.__all__

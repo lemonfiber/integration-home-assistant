@@ -7,6 +7,7 @@ and CI fails on any difference.
 
 import typing
 
+from ..shared.boot__lifecycle import Forwarded
 from ..shared.dashboard__lifecycle__status import Service
 from ..shared.lifecycle__migration import ConflictReport
 from ..shared.lifecycle__plugins__reset__settings__substitution__update import StackMoveTaken
@@ -39,6 +40,10 @@ class LifecycleReport(typing.TypedDict):
     fencing: typing.NotRequired[str | None]
     """Why the addresses of the engine's host were not asked or not kept for a fence, where
     a service is fenced and they were not. Absent for every other action.
+    """
+    forwarded: typing.NotRequired[Forwarded | None]
+    """The VPN's forwarded port before the start and after it, and whether every client
+    takes it, where the guard forwards one or the clients took one before.
     """
     forwarding: typing.NotRequired[str | None]
     """What starting the stack did about the VPN's forwarded port, where it did
