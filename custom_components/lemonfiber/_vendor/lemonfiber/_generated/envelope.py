@@ -65,6 +65,7 @@ from .kinds import (
     PushEndpointEnvelope,
     PushEndpointsEnvelope,
     QualityEnvelope,
+    QueueEnvelope,
     RemovalEnvelope,
     RepairEnvelope,
     ReplacementEnvelope,
@@ -159,6 +160,7 @@ type Kind = typing.Literal[
     "push-endpoint",
     "push-endpoints",
     "quality",
+    "queue",
     "removal",
     "repair",
     "replacement",
@@ -254,6 +256,7 @@ type Envelope = (
     | PushEndpointEnvelope
     | PushEndpointsEnvelope
     | QualityEnvelope
+    | QueueEnvelope
     | RemovalEnvelope
     | RepairEnvelope
     | ReplacementEnvelope

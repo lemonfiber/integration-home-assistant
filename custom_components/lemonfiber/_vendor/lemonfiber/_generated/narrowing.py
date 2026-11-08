@@ -66,6 +66,7 @@ from .kinds import (
     PushEndpointEnvelope,
     PushEndpointsEnvelope,
     QualityEnvelope,
+    QueueEnvelope,
     RemovalEnvelope,
     RepairEnvelope,
     ReplacementEnvelope,
@@ -225,6 +226,8 @@ class KindNarrowing(typing.Protocol):
     ) -> PushEndpointsEnvelope: ...
     @typing.overload
     def __call__(self, envelope: Envelope, kind: typing.Literal["quality"], /) -> QualityEnvelope: ...
+    @typing.overload
+    def __call__(self, envelope: Envelope, kind: typing.Literal["queue"], /) -> QueueEnvelope: ...
     @typing.overload
     def __call__(self, envelope: Envelope, kind: typing.Literal["removal"], /) -> RemovalEnvelope: ...
     @typing.overload

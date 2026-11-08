@@ -59,6 +59,8 @@ class Read(enum.StrEnum):
     """Answers with `boot`."""
     WATCHER = "watcher"
     """Answers with `watcher`."""
+    QUEUE = "queue"
+    """Answers with `queue`."""
     CONFIG = "config"
     """Answers with `config`; takes `key`."""
     QUALITY = "quality"
@@ -175,6 +177,7 @@ READS: typing.Final[typing.Mapping[Read, Readable]] = types.MappingProxyType(
         Read.STUCK: Readable(("stuck",), ()),
         Read.BOOT: Readable(("boot",), ()),
         Read.WATCHER: Readable(("watcher",), ()),
+        Read.QUEUE: Readable(("queue",), ()),
         Read.CONFIG: Readable(("config",), (ReadParameter("key", False),)),
         Read.QUALITY: Readable(("quality",), ()),
         Read.EXPLAIN: Readable(("glossary", "word"), (ReadParameter("word", False),)),
