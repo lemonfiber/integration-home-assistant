@@ -89,6 +89,7 @@ from . import version as _version
 from . import walkthrough as _walkthrough
 from . import watch as _watch
 from . import watched as _watched
+from . import watcher as _watcher
 from . import wiring as _wiring
 from . import wizard as _wizard
 from . import word as _word
@@ -177,6 +178,7 @@ from .version import *
 from .walkthrough import *
 from .watch import *
 from .watched import *
+from .watcher import *
 from .wiring import *
 from .wizard import *
 from .word import *
@@ -266,6 +268,7 @@ __all__ += _version.__all__
 __all__ += _walkthrough.__all__
 __all__ += _watch.__all__
 __all__ += _watched.__all__
+__all__ += _watcher.__all__
 __all__ += _wiring.__all__
 __all__ += _wizard.__all__
 __all__ += _word.__all__
