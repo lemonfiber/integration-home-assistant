@@ -25,6 +25,8 @@ class Unfilled(typing.TypedDict):
     """What it asked for."""
     files: typing.NotRequired[str | None]
     """The medium it asked a filler of, where nothing filling it files that medium."""
+    media_types: typing.NotRequired[list[str]]
+    """The media it asked a filler of, where nothing filling it files one of them."""
     native: typing.NotRequired[Apis | None]
     """The upstream's own API it asked in, or every API it asked in any of, where no
     upstream filling it declares one of them.

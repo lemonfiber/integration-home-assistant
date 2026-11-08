@@ -19,6 +19,7 @@ from .kinds import (
     BackupEnvelope,
     BandwidthEnvelope,
     BesideEnvelope,
+    BootEnvelope,
     BundleEnvelope,
     CapabilitiesEnvelope,
     CatalogueEnvelope,
@@ -121,6 +122,8 @@ class KindNarrowing(typing.Protocol):
     def __call__(self, envelope: Envelope, kind: typing.Literal["bandwidth"], /) -> BandwidthEnvelope: ...
     @typing.overload
     def __call__(self, envelope: Envelope, kind: typing.Literal["beside"], /) -> BesideEnvelope: ...
+    @typing.overload
+    def __call__(self, envelope: Envelope, kind: typing.Literal["boot"], /) -> BootEnvelope: ...
     @typing.overload
     def __call__(self, envelope: Envelope, kind: typing.Literal["bundle"], /) -> BundleEnvelope: ...
     @typing.overload
