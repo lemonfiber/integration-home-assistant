@@ -7,8 +7,6 @@ and CI fails on any difference.
 
 import typing
 
-from .askable__asked__plugins__undo import TitleKind
-
 
 type Action = (
     ActionRemove
@@ -112,7 +110,7 @@ class ActionRegrab(typing.TypedDict):
     """
 
     does: typing.Literal["regrab"]
-    kind: TitleKind
+    kind: VideoKind
     """The kind of media the curator files it as."""
     release: str
     """The release's fingerprint."""
@@ -414,6 +412,12 @@ class UndoReversal(typing.TypedDict):
     """
 
 
+type VideoKind = typing.Literal["tv", "movies"]
+"""Whether a title a curator of video files is a series or a film, as a document that
+names one of those two alone publishes it.
+"""
+
+
 ActionMoveBack = typing.TypedDict(
     "ActionMoveBack",
     {
@@ -488,4 +492,5 @@ __all__ = [
     "UndoLeft",
     "UndoNoted",
     "UndoReversal",
+    "VideoKind",
 ]
