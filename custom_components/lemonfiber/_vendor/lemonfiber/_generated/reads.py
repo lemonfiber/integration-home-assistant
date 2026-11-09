@@ -42,7 +42,7 @@ class Read(enum.StrEnum):
     WATCHING = "watching"
     """Answers with `part-way`; takes `member` and `most`."""
     ASKABLE = "askable"
-    """Answers with `askable`; takes `member`, `term` and `after`."""
+    """Answers with `askable`; takes `member`, `term`, `after`, `kind` and `unit`."""
     PLAYING = "playing"
     """Answers with `playing`; takes `member`."""
     HOSTING = "hosting"
@@ -167,7 +167,13 @@ READS: typing.Final[typing.Mapping[Read, Readable]] = types.MappingProxyType(
         ),
         Read.ASKABLE: Readable(
             ("askable",),
-            (ReadParameter("member", False), ReadParameter("term", False), ReadParameter("after", False)),
+            (
+                ReadParameter("member", False),
+                ReadParameter("term", False),
+                ReadParameter("after", False),
+                ReadParameter("kind", False),
+                ReadParameter("unit", False),
+            ),
         ),
         Read.PLAYING: Readable(("playing",), (ReadParameter("member", False),)),
         Read.HOSTING: Readable(("hosting",), ()),
