@@ -125,7 +125,10 @@ HELD_ID_BACKDROP: typing.Final = "/api/held/{id}/backdrop"
 """Answers with a file, for the `id` in its path; takes `member` and `defaults`."""
 
 ASKABLE_ID_POSTER: typing.Final = "/api/askable/{id}/poster"
-"""Answers with a file, for the `id` in its path; takes `member` and `kind`."""
+"""Answers with a file, for the `id` in its path; takes `member`, `kind` and `unit`."""
+
+REQUESTS_REFERENCE_POSTER: typing.Final = "/api/requests/{reference}/poster"
+"""Answers with a file, for the `reference` in its path; takes `member`."""
 
 
 class ReadParameter(typing.NamedTuple):
@@ -225,6 +228,7 @@ __all__ = [
     "HELD_ID_POSTER",
     "LOGS",
     "READS",
+    "REQUESTS_REFERENCE_POSTER",
     "Read",
     "ReadParameter",
     "Readable",
