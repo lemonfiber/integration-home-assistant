@@ -43,12 +43,16 @@ class Read(enum.StrEnum):
     """Answers with `part-way`; takes `member` and `most`."""
     ASKABLE = "askable"
     """Answers with `askable`; takes `member`, `term`, `after`, `kind` and `unit`."""
+    ASKABLE_KINDS = "askable/kinds"
+    """Answers with `askable-kinds`; takes `member`."""
     PLAYING = "playing"
     """Answers with `playing`; takes `member`."""
     HOSTING = "hosting"
     """Answers with `hosting`."""
     FRONT_DOOR = "front-door"
     """Answers with `front-door`."""
+    STACK = "stack"
+    """Answers with `stack`."""
     NEWS = "news"
     """Answers with `news-items`."""
     TRACE = "trace"
@@ -175,9 +179,11 @@ READS: typing.Final[typing.Mapping[Read, Readable]] = types.MappingProxyType(
                 ReadParameter("unit", False),
             ),
         ),
+        Read.ASKABLE_KINDS: Readable(("askable-kinds",), (ReadParameter("member", False),)),
         Read.PLAYING: Readable(("playing",), (ReadParameter("member", False),)),
         Read.HOSTING: Readable(("hosting",), ()),
         Read.FRONT_DOOR: Readable(("front-door",), ()),
+        Read.STACK: Readable(("stack",), ()),
         Read.NEWS: Readable(("news-items",), ()),
         Read.TRACE: Readable(("trace",), (ReadParameter("term", False), ReadParameter("season", False))),
         Read.STUCK: Readable(("stuck",), ()),
