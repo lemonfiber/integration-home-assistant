@@ -17,7 +17,7 @@ from .expected import (
     PluginPlaceholder,
     PluginRecipeRan,
 )
-from .plugin_reached_household import PluginInstalled, PluginProving, PluginSharing, PluginTaking
+from .plugin_reached_household import PluginInstalled, PluginProving, PluginShape, PluginSharing
 from ...shared.lifecycle__plugins__reset__settings__substitution__update import StackMoveTaken
 from ...shared.lifecycle__plugins__settings__substitution__update import Unvetted
 from ...shared.plugins__settings__status import Waiting
@@ -362,6 +362,23 @@ class PluginSubstituted(typing.TypedDict):
     """The service chosen."""
 
 
+class PluginTaking(typing.TypedDict):
+    """One service taking a privileged shape, as the reading states it."""
+
+    approval: str
+    """What approving it is written as, apart from the offer."""
+    devices: list[str]
+    """The devices it is given."""
+    grants: list[str]
+    """The kernel capabilities it is given."""
+    grouped: bool
+    """Whether it is added to the group owning those devices on the engine's host."""
+    service: str
+    """The service taking it."""
+    shape: PluginShape
+    """The shape it takes."""
+
+
 class PluginUnfilled(typing.TypedDict):
     """A capability that would have nothing filling it."""
 
@@ -470,6 +487,7 @@ __all__ = [
     "PluginSourceStandingUnasked",
     "PluginSourceStandingUnreachable",
     "PluginSubstituted",
+    "PluginTaking",
     "PluginUnfilled",
     "PluginUpdate",
     "PluginVerification",
