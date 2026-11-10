@@ -7,7 +7,7 @@ and CI fails on any difference.
 
 import typing
 
-from ..shared.askable__asked import TitleKind, TitleUnit
+from ..shared.askable__askable_kinds__asked import TitleKind, TitleUnit
 from ..shared.askable__dashboard__household import MemberAsking
 
 

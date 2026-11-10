@@ -14,6 +14,7 @@ from .kinds import (
     AlertsEnvelope,
     ArchivesEnvelope,
     AskableEnvelope,
+    AskableKindsEnvelope,
     AskedEnvelope,
     BackupEnvelope,
     BandwidthEnvelope,
@@ -76,6 +77,7 @@ from .kinds import (
     SettingsEnvelope,
     SetupEnvelope,
     SpaceEnvelope,
+    StackEnvelope,
     StartEnvelope,
     StatusEnvelope,
     StepEnvelope,
@@ -109,6 +111,7 @@ type Kind = typing.Literal[
     "alerts",
     "archives",
     "askable",
+    "askable-kinds",
     "asked",
     "backup",
     "bandwidth",
@@ -171,6 +174,7 @@ type Kind = typing.Literal[
     "settings",
     "setup",
     "space",
+    "stack",
     "start",
     "status",
     "step",
@@ -205,6 +209,7 @@ type Envelope = (
     | AlertsEnvelope
     | ArchivesEnvelope
     | AskableEnvelope
+    | AskableKindsEnvelope
     | AskedEnvelope
     | BackupEnvelope
     | BandwidthEnvelope
@@ -267,6 +272,7 @@ type Envelope = (
     | SettingsEnvelope
     | SetupEnvelope
     | SpaceEnvelope
+    | StackEnvelope
     | StartEnvelope
     | StatusEnvelope
     | StepEnvelope

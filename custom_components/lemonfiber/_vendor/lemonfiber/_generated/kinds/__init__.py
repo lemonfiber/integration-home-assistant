@@ -11,6 +11,7 @@ from . import alert as _alert
 from . import alerts as _alerts
 from . import archives as _archives
 from . import askable as _askable
+from . import askable_kinds as _askable_kinds
 from . import asked as _asked
 from . import backup as _backup
 from . import bandwidth as _bandwidth
@@ -73,6 +74,7 @@ from . import self_update as _self_update
 from . import settings as _settings
 from . import setup as _setup
 from . import space as _space
+from . import stack as _stack
 from . import start as _start
 from . import status as _status
 from . import step as _step
@@ -101,6 +103,7 @@ from .alert import *
 from .alerts import *
 from .archives import *
 from .askable import *
+from .askable_kinds import *
 from .asked import *
 from .backup import *
 from .bandwidth import *
@@ -163,6 +166,7 @@ from .self_update import *
 from .settings import *
 from .setup import *
 from .space import *
+from .stack import *
 from .start import *
 from .status import *
 from .step import *
@@ -192,6 +196,7 @@ __all__ += _alert.__all__
 __all__ += _alerts.__all__
 __all__ += _archives.__all__
 __all__ += _askable.__all__
+__all__ += _askable_kinds.__all__
 __all__ += _asked.__all__
 __all__ += _backup.__all__
 __all__ += _bandwidth.__all__
@@ -254,6 +259,7 @@ __all__ += _self_update.__all__
 __all__ += _settings.__all__
 __all__ += _setup.__all__
 __all__ += _space.__all__
+__all__ += _stack.__all__
 __all__ += _start.__all__
 __all__ += _status.__all__
 __all__ += _step.__all__
