@@ -245,23 +245,6 @@ class PluginSharing(typing.TypedDict):
     """The service whose files it writes."""
 
 
-class PluginTaking(typing.TypedDict):
-    """One service taking a privileged shape, as the reading states it."""
-
-    approval: str
-    """What approving it is written as, apart from the offer."""
-    devices: list[str]
-    """The devices it is given."""
-    grants: list[str]
-    """The kernel capabilities it is given."""
-    grouped: bool
-    """Whether it is added to the group owning those devices on the engine's host."""
-    service: str
-    """The service taking it."""
-    shape: PluginShape
-    """The shape it takes."""
-
-
 type PluginVerdict = (
     PluginVerdictPassed
     | PluginVerdictFailed
@@ -347,6 +330,8 @@ class ServiceFields(typing.TypedDict):
     record already holds.
     """
 
+    args: typing.NotRequired[list[str]]
+    """The arguments its image's own entrypoint is handed, in order."""
     certificate: typing.NotRequired[ServiceCertificate | None]
     """The certificate lemonfiber makes for it, where it declares one."""
     config_ro: typing.NotRequired[bool]
@@ -523,7 +508,6 @@ __all__ = [
     "PluginRunProof",
     "PluginShape",
     "PluginSharing",
-    "PluginTaking",
     "PluginVerdict",
     "PluginVerdictFailed",
     "PluginVerdictFailingAsDeclared",
