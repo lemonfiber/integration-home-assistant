@@ -197,6 +197,10 @@ class PluginInstalls(typing.TypedDict):
     plugin is doing; a run that installs, updates or removes one leaves it empty,
     because none of them changes a choice.
     """
+    unproxied: typing.NotRequired[bool]
+    """Whether the stack runs no proxy, so a proxied service is reached on this machine
+    alone.
+    """
     unvetted: typing.NotRequired[Unvetted | None]
     """The operator's overlay and every service it changes, where there is one: merged
     over the project this run would start, and held to nothing lemonfiber vets.
