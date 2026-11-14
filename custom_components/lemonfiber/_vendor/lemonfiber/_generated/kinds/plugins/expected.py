@@ -9,6 +9,7 @@ import typing
 
 from ...shared.doctor__error__plugins import StepCame
 from ...shared.doctor__plugins import DoctorVerdict, Finding
+from ...shared.plugin_claims__plugins import PluginConstraint
 from ...shared.plugins__substitution__wiring import Apis
 
 
@@ -148,28 +149,6 @@ class PluginChangedCheck(typing.TypedDict):
     """
 
 
-type PluginConstraint = typing.Literal[
-    "status",
-    "json",
-    "json_has_keys",
-    "json_types",
-    "json_at_least",
-    "json_array_min",
-    "json_is_absent",
-    "content_type",
-    "body_starts_with",
-    "exit",
-    "stdout_starts_with",
-]
-"""A kind of constraint an expectation can put on a body.
-
-The same vocabulary a proof's expectation and a contributed check's use, so that
-\"a status alone is not evidence\" is one rule rather than three. Read as well as
-written: a declaration that an assertion fails on a recording names the one of these
-that fails there.
-"""
-
-
 class PluginDeclaration(typing.TypedDict):
     """What a plugin declared about itself, as its install read it."""
 
@@ -223,20 +202,6 @@ class PluginDemand(typing.TypedDict):
     """The recipe as the operator agrees to it: its calls, what it asks for, and every
     value it would carry where.
     """
-
-
-type PluginEvidence = typing.Literal["recordings", "service"]
-"""What the verdicts in a report were reached against.
-
-One value, because one is all this build can produce: nothing here asks a service
-anything. It is a field rather than a sentence for the reason a verdict is one — a
-reader handed `demonstrated` has nothing else in the document to tell a recording
-that answered from a service that did, and the weaker of those two claims must not
-be readable as the stronger. The prose says it on the page; this says it to
-whatever consumes the report: an author's own CI, a catalogue, anything counting
-passes. Naming the axis now is what made the second kind of evidence a change the
-compiler walked somebody through rather than one they had to remember.
-"""
 
 
 class PluginExpectedFailure(typing.TypedDict):
@@ -297,6 +262,28 @@ type PluginPlaceholderForm = typing.Literal["plain", "pbkdf2", "bcrypt"]
 
 type PluginPuts = typing.Literal["directory", "document", "key", "secrets", "starting", "upstream"]
 """What an install puts at one path."""
+
+
+class PluginReachedHousehold(typing.TypedDict):
+    """From the household, through the stack's own proxy, at this label."""
+
+    group: typing.NotRequired[str | None]
+    """The group on the bundled dashboard, where the manifest named one."""
+    hostname: str
+    """The single label in front of the operator's domain."""
+    port: int
+    """The port the service listens on."""
+    tier: typing.Literal["household"]
+
+
+class PluginReachedLoopback(typing.TypedDict):
+    """From this machine and nowhere else. No route, and no label to route to."""
+
+    group: typing.NotRequired[str | None]
+    """The group on the bundled dashboard, where the manifest named one."""
+    port: int
+    """The port the service listens on."""
+    tier: typing.Literal["loopback"]
 
 
 class PluginRecipe(typing.TypedDict):
@@ -479,6 +466,18 @@ it carries nothing outside the union of the rows the published points take.
 """
 
 
+PluginGranting = typing.TypedDict(
+    "PluginGranting",
+    {
+        "approval": str,
+        "credential": str,
+        "for": str,
+        "of": str,
+    },
+)
+"""One credential that would cross to a plugin, as the reading states it."""
+
+
 PluginPair = typing.TypedDict(
     "PluginPair",
     {
@@ -519,17 +518,18 @@ __all__ = [
     "PluginAsking",
     "PluginChange",
     "PluginChangedCheck",
-    "PluginConstraint",
     "PluginDeclaration",
     "PluginDeclaredVerdict",
     "PluginDemand",
-    "PluginEvidence",
     "PluginExpectedFailure",
+    "PluginGranting",
     "PluginOverriding",
     "PluginPair",
     "PluginPlaceholder",
     "PluginPlaceholderForm",
     "PluginPuts",
+    "PluginReachedHousehold",
+    "PluginReachedLoopback",
     "PluginRecipe",
     "PluginRecipeInput",
     "PluginRecipeOn",

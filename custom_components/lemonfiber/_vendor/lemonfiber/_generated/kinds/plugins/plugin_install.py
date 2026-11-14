@@ -9,16 +9,23 @@ import typing
 
 from .expected import (
     PluginChange,
-    PluginChangedCheck,
     PluginDemand,
-    PluginEvidence,
+    PluginGranting,
     PluginOverriding,
     PluginPlaceholder,
     PluginRecipeRan,
 )
-from .plugin_failing_as_declared import PluginGranting, PluginInstalled, PluginShape, PluginVerdict
+from .plugin_reached_proxied import (
+    PluginInstalled,
+    PluginProving,
+    PluginSharing,
+    PluginTaking,
+    PluginVerification,
+    WiringContest,
+)
 from ...shared.lifecycle__plugins__reset__settings__substitution__update import StackMoveTaken
 from ...shared.lifecycle__plugins__settings__substitution__update import Unvetted
+from ...shared.plugin_claims__plugins import PluginEvidence
 from ...shared.plugins__settings__status import Waiting
 from ...shared.plugins__undo import UndoReversal
 from ...shared.plugins__wiring import Wired
@@ -230,35 +237,6 @@ class PluginNonconforming(typing.TypedDict):
     """What was outside the contract."""
 
 
-class PluginProving(typing.TypedDict):
-    """One proof that has to hold before a plugin is reported installed."""
-
-    asks: str
-    """What it asks, as the method and the path it is asked at."""
-    came_to: typing.NotRequired[PluginVerdict | None]
-    """What asking it came to, or nothing where it was not asked.
-
-    Absent on a rehearsal, which asks nothing. That is a different fact from a
-    proof that was asked and established nothing, and the two must not read alike:
-    one is an account of what would happen, the other is a service that did not
-    answer.
-    """
-    establishes: str
-    """What it establishes, in one line."""
-    of: typing.NotRequired[str | None]
-    """Which of the plugin's services it asks, where the manifest settles that.
-
-    Nothing where it does not, which is a manifest the reader has already refused
-    — carried as an absence rather than as a guess, so that a report built from a
-    manifest nobody held to the reader says *this was not settled* instead of
-    naming whichever service came first.
-    """
-    proof: str
-    """The proof's id, which its verdict is reported against."""
-    why: str
-    """Why it is worth asserting."""
-
-
 class PluginRemoval(typing.TypedDict):
     """What taking a plugin off the machine came to, or would come to."""
 
@@ -343,19 +321,6 @@ class PluginRestored(typing.TypedDict):
     """The version put back, which is the one the record still names."""
 
 
-class PluginSharing(typing.TypedDict):
-    """An adapter that writes the files of the service it fronts, through that service's
-    whole configuration directory mounted into it.
-    """
-
-    adapter: str
-    """The adapter."""
-    at: str
-    """Where that service's configuration directory lands inside the adapter."""
-    upstream: str
-    """The service whose files it writes."""
-
-
 type PluginSourceStanding = (
     PluginSourceStandingReachable | PluginSourceStandingUnreachable | PluginSourceStandingUnasked
 )
@@ -407,23 +372,6 @@ class PluginSubstituted(typing.TypedDict):
     """The service chosen."""
 
 
-class PluginTaking(typing.TypedDict):
-    """One service taking a privileged shape, as the reading states it."""
-
-    approval: str
-    """What approving it is written as, apart from the offer."""
-    devices: list[str]
-    """The devices it is given."""
-    grants: list[str]
-    """The kernel capabilities it is given."""
-    grouped: bool
-    """Whether it is added to the group owning those devices on the engine's host."""
-    service: str
-    """The service taking it."""
-    shape: PluginShape
-    """The shape it takes."""
-
-
 class PluginUnfilled(typing.TypedDict):
     """A capability that would have nothing filling it."""
 
@@ -438,26 +386,6 @@ class PluginUnfilled(typing.TypedDict):
     """
 
 
-class PluginVerification(typing.TypedDict):
-    """What the stack's own checks made of an install."""
-
-    broke: list[PluginChangedCheck]
-    """Every check this install made worse.
-
-    Empty is the answer an install needs, and it is the common one. What is here
-    is what takes the install back.
-    """
-    unsettled: list[PluginChangedCheck]
-    """Every check nothing could be concluded about across the two readings.
-
-    Reported and never acted on. *I could not tell* is not *it is still broken*,
-    and an install reversed because a check could not reach a provider it also
-    could not reach an hour ago would be punishing a plugin for the weather. It is
-    said out loud rather than dropped, because the assurance an operator thought
-    they had is the thing that went.
-    """
-
-
 class PluginsEnvelope(typing.TypedDict):
     """The envelope carrying `plugins`."""
 
@@ -466,19 +394,6 @@ class PluginsEnvelope(typing.TypedDict):
     host: typing.NotRequired[str | None]
     job: typing.NotRequired[str | None]
     kind: typing.Literal["plugins"]
-
-
-class WiringContest(typing.TypedDict):
-    """An ask several services claim and nothing has chosen between, so it reaches
-    nothing.
-    """
-
-    by: str
-    """The service that asked."""
-    capability: str
-    """What it asked for."""
-    claimants: list[str]
-    """Every claimant, named — a plugin's with the plugin beside it."""
 
 
 PluginSource = typing.TypedDict(
@@ -522,22 +437,17 @@ __all__ = [
     "PluginInstall",
     "PluginInstalls",
     "PluginNonconforming",
-    "PluginProving",
     "PluginRemoval",
     "PluginReproof",
     "PluginReshipped",
     "PluginRestored",
-    "PluginSharing",
     "PluginSource",
     "PluginSourceStanding",
     "PluginSourceStandingReachable",
     "PluginSourceStandingUnasked",
     "PluginSourceStandingUnreachable",
     "PluginSubstituted",
-    "PluginTaking",
     "PluginUnfilled",
     "PluginUpdate",
-    "PluginVerification",
     "PluginsEnvelope",
-    "WiringContest",
 ]

@@ -190,6 +190,11 @@ PLUGIN: typing.Final[typing.Mapping[RefusalCode, ListedRefusal]] = {
         400,
         "Raised when a case of a contract a plugin's adapter speaks fails, or no recording the plugin ships answers it.",
     ),
+    "PLUGIN-51": ListedRefusal(
+        "KEY_UNREADABLE",
+        400,
+        "Raised when a key an author names to verify a plugin's images against cannot be read, or is not a PEM public key on the P-256 curve.",
+    ),
     "PLUGIN-6": ListedRefusal(
         "NOWHERE", 500, "There is no stack on this machine to put a plugin's container in."
     ),
