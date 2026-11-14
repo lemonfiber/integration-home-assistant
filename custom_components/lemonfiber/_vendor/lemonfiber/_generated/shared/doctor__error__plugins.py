@@ -74,6 +74,7 @@ type StepCame = typing.Literal[
     "unreachable",
     "refused",
     "withheld",
+    "declined",
     "unexpected",
     "uncaptured",
     "oversized",

@@ -77,11 +77,19 @@ class FrontDoorBeside(typing.TypedDict):
     with a refusal, and the manifest is where a port is declared.
     """
     because: str
-    """Why it is not somewhere to begin."""
+    """Why it is not somewhere to begin, or for a household member what it is to them."""
     facing: Facing
     """What it is to the household."""
+    reaches: FrontDoorReaches
+    """Whether the address answers from where the asking came from."""
     service: str
     """The service, by the name it shows itself under."""
+    unaddressed: typing.NotRequired[str | None]
+    """Why there is no address, where there is none."""
+
+
+type FrontDoorReaches = typing.Literal["here", "not-here", "unknown"]
+"""Whether an address answers from the network a request came from."""
 
 
 class FrontDoorReport(typing.TypedDict):
@@ -96,26 +104,32 @@ class FrontDoorReport(typing.TypedDict):
     """
     beside: list[FrontDoorBeside]
     """Everything else the household can reach, and why none of it is the door."""
-    chosen: Chosen
+    chosen: typing.NotRequired[Chosen | None]
     """How this came to be the door: worked out from what the stack declares, named
     by the operator, or named by them and refused.
 
     Carried as a state rather than left to the sentence beneath it, for the reason
     the standing is: an operator whose setting was refused reads the sentence, and
     a browser, a script or a dashboard reads this.
+
+    Absent for a household member.
     """
     facing: typing.NotRequired[Facing | None]
     """What that service is to them. Absent for the same reason."""
     meaning: str
-    """What this comes to, in the words an operator would say it in — including,
-    where there is no door, that there is none.
+    """What this comes to, in the words an operator would say it in, or a household
+    member's for one — including, where there is no door, that there is none.
     """
+    reaches: FrontDoorReaches
+    """Whether the address answers from where the asking came from."""
     service: typing.NotRequired[str | None]
     """The service the household begins at, by the name it shows itself under.
     Absent where this stack publishes nothing they could begin at.
     """
     standing: FrontDoorStanding
     """Where the front door stands."""
+    unaddressed: typing.NotRequired[str | None]
+    """Why there is no address, where there is a door and none."""
 
 
 type FrontDoorStanding = typing.Literal["established", "library-only", "unreachable", "stranded", "none"]
@@ -139,6 +153,7 @@ __all__ = [
     "ChosenRefused",
     "Facing",
     "FrontDoorBeside",
+    "FrontDoorReaches",
     "FrontDoorReport",
     "FrontDoorStanding",
     "Refusal",
