@@ -53,6 +53,8 @@ class Read(enum.StrEnum):
     """Answers with `front-door`."""
     STACK = "stack"
     """Answers with `stack`."""
+    SETTLED = "settled"
+    """Answers with `settled`."""
     NOTIFY = "notify"
     """Answers with `notify`."""
     NOTIFY_MINE = "notify/mine"
@@ -191,6 +193,7 @@ READS: typing.Final[typing.Mapping[Read, Readable]] = types.MappingProxyType(
         Read.HOSTING: Readable(("hosting",), ()),
         Read.FRONT_DOOR: Readable(("front-door",), ()),
         Read.STACK: Readable(("stack",), ()),
+        Read.SETTLED: Readable(("settled",), ()),
         Read.NOTIFY: Readable(("notify",), ()),
         Read.NOTIFY_MINE: Readable(("notify-mine",), (ReadParameter("member", False),)),
         Read.NEWS: Readable(("news-items",), ()),

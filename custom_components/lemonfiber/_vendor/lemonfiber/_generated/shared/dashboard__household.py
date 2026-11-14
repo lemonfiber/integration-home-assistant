@@ -7,6 +7,7 @@ and CI fails on any difference.
 
 import typing
 
+from .askable__askable_kinds__asked__dashboard__household__news_items import TitleKind, TitleUnit
 from .askable__dashboard__household import MemberAsking, Policy
 from .dashboard__household__invitation import Unrated
 
@@ -169,6 +170,10 @@ class MemberRequest(typing.TypedDict):
     request service files it under (`42`), or `music-<n>` or `books-<n>` for an ask
     for music or books the core keeps itself.
     """
+    kind: typing.NotRequired[TitleKind | None]
+    """The kind of title it asks for: a series, a film, music or books. Absent, not
+    null, where the request service names a kind this build does not know.
+    """
     media: typing.NotRequired[str | None]
     """What kind of thing it is — a series, a film — in the household's own words.
     Absent where the request service names a kind this build does not know.
@@ -199,6 +204,10 @@ class MemberRequest(typing.TypedDict):
     """What it is called: from the library of the service filing it, where it has been
     told about it and that library could be read, and otherwise from the request
     service's own record of the title. Absent where neither names it.
+    """
+    unit: typing.NotRequired[TitleUnit | None]
+    """What an ask for music or books asks for: one album or book, or a whole artist,
+    author or series. Absent, not null, on a series or a film.
     """
     waiting_days: typing.NotRequired[int | None]
     """How many whole days it has been waiting on somebody, where it is waiting at all
