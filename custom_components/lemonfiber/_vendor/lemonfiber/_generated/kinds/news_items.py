@@ -7,6 +7,7 @@ and CI fails on any difference.
 
 import typing
 
+from ..shared.askable__askable_kinds__asked__dashboard__household__news_items import TitleKind, TitleUnit
 from ..shared.news__news_items import NewsKind
 
 
@@ -58,12 +59,16 @@ class NewsRequest(typing.TypedDict):
     """When it was asked for, where that is known."""
     by: str
     """Who asked for it, by the name the media server holds them under."""
+    kind: typing.NotRequired[TitleKind | None]
+    """The kind of title it asks for, as the household list names it."""
     request: str
     """The reference the household list names it with: the request service's number
     (`42`), or `music-<n>` or `books-<n>` for an ask the core keeps.
     """
     title: typing.NotRequired[str | None]
     """What it is called, where a service has been told about it."""
+    unit: typing.NotRequired[TitleUnit | None]
+    """What an ask for music or books asks for, as the household list names it."""
 
 
 class NewsUpdate(typing.TypedDict):

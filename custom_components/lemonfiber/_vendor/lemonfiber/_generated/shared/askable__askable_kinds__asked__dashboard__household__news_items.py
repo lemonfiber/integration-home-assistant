@@ -1,5 +1,5 @@
 # Copyright (c) 2026 NightWorksIO
-"""The shapes `askable`, `askable-kinds` and `asked` all carry.
+"""The shapes `askable`, `askable-kinds`, `asked`, `dashboard`, `household` and `news-items` all carry.
 
 Generated from the contract vendored in `contract/`. Do not edit: `just generate` rewrites it,
 and CI fails on any difference.

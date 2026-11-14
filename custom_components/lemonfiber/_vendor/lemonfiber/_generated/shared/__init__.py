@@ -12,7 +12,9 @@ from . import adoption__migration as _adoption__migration
 from . import alert__dashboard as _alert__dashboard
 from . import alert__dashboard__doctor__error__plugins as _alert__dashboard__doctor__error__plugins
 from . import alerts__notify as _alerts__notify
-from . import askable__askable_kinds__asked as _askable__askable_kinds__asked
+from . import (
+    askable__askable_kinds__asked__dashboard__household__news_items as _askable__askable_kinds__asked__dashboard__household__news_items,
+)
 from . import askable__dashboard__household as _askable__dashboard__household
 from . import backup__restore as _backup__restore
 from . import bandwidth__pausing as _bandwidth__pausing
@@ -56,6 +58,7 @@ from . import plugins__substitution__wiring as _plugins__substitution__wiring
 from . import plugins__undo as _plugins__undo
 from . import plugins__wiring as _plugins__wiring
 from . import settings__wizard as _settings__wizard
+from . import settled__setup as _settled__setup
 from . import space__stop_seeding as _space__stop_seeding
 from . import step__walkthrough as _step__walkthrough
 from . import stuck__trace as _stuck__trace
@@ -67,7 +70,7 @@ from .adoption__migration import *
 from .alert__dashboard import *
 from .alert__dashboard__doctor__error__plugins import *
 from .alerts__notify import *
-from .askable__askable_kinds__asked import *
+from .askable__askable_kinds__asked__dashboard__household__news_items import *
 from .askable__dashboard__household import *
 from .backup__restore import *
 from .bandwidth__pausing import *
@@ -105,6 +108,7 @@ from .plugins__substitution__wiring import *
 from .plugins__undo import *
 from .plugins__wiring import *
 from .settings__wizard import *
+from .settled__setup import *
 from .space__stop_seeding import *
 from .step__walkthrough import *
 from .stuck__trace import *
@@ -117,7 +121,7 @@ __all__ += _adoption__migration.__all__
 __all__ += _alert__dashboard.__all__
 __all__ += _alert__dashboard__doctor__error__plugins.__all__
 __all__ += _alerts__notify.__all__
-__all__ += _askable__askable_kinds__asked.__all__
+__all__ += _askable__askable_kinds__asked__dashboard__household__news_items.__all__
 __all__ += _askable__dashboard__household.__all__
 __all__ += _backup__restore.__all__
 __all__ += _bandwidth__pausing.__all__
@@ -155,6 +159,7 @@ __all__ += _plugins__substitution__wiring.__all__
 __all__ += _plugins__undo.__all__
 __all__ += _plugins__wiring.__all__
 __all__ += _settings__wizard.__all__
+__all__ += _settled__setup.__all__
 __all__ += _space__stop_seeding.__all__
 __all__ += _step__walkthrough.__all__
 __all__ += _stuck__trace.__all__

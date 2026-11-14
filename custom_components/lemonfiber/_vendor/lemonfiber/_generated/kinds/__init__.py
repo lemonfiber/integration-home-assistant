@@ -29,6 +29,7 @@ from . import device_challenge as _device_challenge
 from . import device_key as _device_key
 from . import device_keys as _device_keys
 from . import doctor as _doctor
+from . import ended as _ended
 from . import error as _error
 from . import forms as _forms
 from . import front_door as _front_door
@@ -74,6 +75,7 @@ from . import restore as _restore
 from . import seed as _seed
 from . import self_update as _self_update
 from . import settings as _settings
+from . import settled as _settled
 from . import setup as _setup
 from . import space as _space
 from . import stack as _stack
@@ -123,6 +125,7 @@ from .device_challenge import *
 from .device_key import *
 from .device_keys import *
 from .doctor import *
+from .ended import *
 from .error import *
 from .forms import *
 from .front_door import *
@@ -168,6 +171,7 @@ from .restore import *
 from .seed import *
 from .self_update import *
 from .settings import *
+from .settled import *
 from .setup import *
 from .space import *
 from .stack import *
@@ -218,6 +222,7 @@ __all__ += _device_challenge.__all__
 __all__ += _device_key.__all__
 __all__ += _device_keys.__all__
 __all__ += _doctor.__all__
+__all__ += _ended.__all__
 __all__ += _error.__all__
 __all__ += _forms.__all__
 __all__ += _front_door.__all__
@@ -263,6 +268,7 @@ __all__ += _restore.__all__
 __all__ += _seed.__all__
 __all__ += _self_update.__all__
 __all__ += _settings.__all__
+__all__ += _settled.__all__
 __all__ += _setup.__all__
 __all__ += _space.__all__
 __all__ += _stack.__all__

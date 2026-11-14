@@ -32,6 +32,7 @@ from .kinds import (
     DeviceKeyEnvelope,
     DeviceKeysEnvelope,
     DoctorEnvelope,
+    EndedEnvelope,
     ErrorEnvelope,
     FormsEnvelope,
     FrontDoorEnvelope,
@@ -77,6 +78,7 @@ from .kinds import (
     SeedEnvelope,
     SelfUpdateEnvelope,
     SettingsEnvelope,
+    SettledEnvelope,
     SetupEnvelope,
     SpaceEnvelope,
     StackEnvelope,
@@ -131,6 +133,7 @@ type Kind = typing.Literal[
     "device-key",
     "device-keys",
     "doctor",
+    "ended",
     "error",
     "forms",
     "front-door",
@@ -176,6 +179,7 @@ type Kind = typing.Literal[
     "seed",
     "self-update",
     "settings",
+    "settled",
     "setup",
     "space",
     "stack",
@@ -231,6 +235,7 @@ type Envelope = (
     | DeviceKeyEnvelope
     | DeviceKeysEnvelope
     | DoctorEnvelope
+    | EndedEnvelope
     | ErrorEnvelope
     | FormsEnvelope
     | FrontDoorEnvelope
@@ -276,6 +281,7 @@ type Envelope = (
     | SeedEnvelope
     | SelfUpdateEnvelope
     | SettingsEnvelope
+    | SettledEnvelope
     | SetupEnvelope
     | SpaceEnvelope
     | StackEnvelope
