@@ -11,13 +11,28 @@ from .expected import (
     Contribution,
     Expect,
     PluginAsking,
+    PluginConstraint,
     PluginDeclaration,
-    PluginFailingAsDeclared,
     PluginRecipe,
     PluginRequest,
     ServiceConstant,
 )
 from ...shared.plugins__undo import PluginGrant
+
+
+class PluginFailingAsDeclared(typing.TypedDict):
+    """One recording an assertion fails on as its manifest declares."""
+
+    constraint: PluginConstraint
+    """The constraint of the expectation that fails there."""
+    fixture: str
+    """The recording."""
+    held: str
+    """What the recording held there."""
+    place: typing.NotRequired[str | None]
+    """Where within that constraint, for one that looks at places."""
+    reason: str
+    """Why the manifest says this recording is one the assertion fails on."""
 
 
 class PluginPlaced(typing.TypedDict):
@@ -104,35 +119,6 @@ class PluginPlaced(typing.TypedDict):
     """Each field of the `upstream.json` lemonfiber writes for it as an adapter, to the
     id of the plugin's secret that field holds.
     """
-
-
-class PluginProving(typing.TypedDict):
-    """One proof that has to hold before a plugin is reported installed."""
-
-    asks: str
-    """What it asks, as the method and the path it is asked at."""
-    came_to: typing.NotRequired[PluginVerdict | None]
-    """What asking it came to, or nothing where it was not asked.
-
-    Absent on a rehearsal, which asks nothing. That is a different fact from a
-    proof that was asked and established nothing, and the two must not read alike:
-    one is an account of what would happen, the other is a service that did not
-    answer.
-    """
-    establishes: str
-    """What it establishes, in one line."""
-    of: typing.NotRequired[str | None]
-    """Which of the plugin's services it asks, where the manifest settles that.
-
-    Nothing where it does not, which is a manifest the reader has already refused
-    — carried as an absence rather than as a guess, so that a report built from a
-    manifest nobody held to the reader says *this was not settled* instead of
-    naming whichever service came first.
-    """
-    proof: str
-    """The proof's id, which its verdict is reported against."""
-    why: str
-    """Why it is worth asserting."""
 
 
 type PluginReached = PluginReachedLoopback | PluginReachedProxied | PluginReachedHousehold
@@ -244,19 +230,6 @@ class PluginRunProof(typing.TypedDict):
 
 type PluginShape = typing.Literal["egress-guard", "render"]
 """A privileged shape lemonfiber writes for a service."""
-
-
-class PluginSharing(typing.TypedDict):
-    """An adapter that writes the files of the service it fronts, through that service's
-    whole configuration directory mounted into it.
-    """
-
-    adapter: str
-    """The adapter."""
-    at: str
-    """Where that service's configuration directory lands inside the adapter."""
-    upstream: str
-    """The service whose files it writes."""
 
 
 type PluginVerdict = (
@@ -473,6 +446,18 @@ class SettingChoiceNeeding(typing.TypedDict):
     """The values."""
 
 
+PluginGranting = typing.TypedDict(
+    "PluginGranting",
+    {
+        "approval": str,
+        "credential": str,
+        "for": str,
+        "of": str,
+    },
+)
+"""One credential that would cross to a plugin, as the reading states it."""
+
+
 PluginInstalled = typing.TypedDict(
     "PluginInstalled",
     {
@@ -511,9 +496,10 @@ ServiceMount = typing.TypedDict(
 
 
 __all__ = [
+    "PluginFailingAsDeclared",
+    "PluginGranting",
     "PluginInstalled",
     "PluginPlaced",
-    "PluginProving",
     "PluginReached",
     "PluginReachedHousehold",
     "PluginReachedLoopback",
@@ -522,7 +508,6 @@ __all__ = [
     "PluginRun",
     "PluginRunProof",
     "PluginShape",
-    "PluginSharing",
     "PluginVerdict",
     "PluginVerdictFailed",
     "PluginVerdictFailingAsDeclared",

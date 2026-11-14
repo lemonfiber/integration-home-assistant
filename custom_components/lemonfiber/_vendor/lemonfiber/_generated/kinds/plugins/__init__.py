@@ -6,14 +6,14 @@ and CI fails on any difference.
 """
 
 from . import expected as _expected
-from . import plugin_reached_household as _plugin_reached_household
-from . import plugin_taking as _plugin_taking
+from . import plugin_failing_as_declared as _plugin_failing_as_declared
+from . import plugin_proving as _plugin_proving
 
 from .expected import *
-from .plugin_reached_household import *
-from .plugin_taking import *
+from .plugin_failing_as_declared import *
+from .plugin_proving import *
 
 __all__: list[str] = []
 __all__ += _expected.__all__
-__all__ += _plugin_reached_household.__all__
-__all__ += _plugin_taking.__all__
+__all__ += _plugin_failing_as_declared.__all__
+__all__ += _plugin_proving.__all__

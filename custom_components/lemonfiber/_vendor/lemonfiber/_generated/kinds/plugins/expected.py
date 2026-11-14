@@ -202,6 +202,8 @@ class PluginDeclaration(typing.TypedDict):
     """
     secrets: typing.NotRequired[list[PluginSecret]]
     """Every credential it says it will hold."""
+    stops: typing.NotRequired[list[PluginStopping]]
+    """What refusing each of [`Self::reaches`] stops, in the same order."""
     upstream: typing.NotRequired[str]
     """Where its source is published, as the plugin names it."""
 
@@ -269,21 +271,6 @@ class PluginExpectedFailure(typing.TypedDict):
     """`fails`, and nothing else: passing is what the expectation already says, and
     could-not-run is never excused.
     """
-
-
-class PluginFailingAsDeclared(typing.TypedDict):
-    """One recording an assertion fails on as its manifest declares."""
-
-    constraint: PluginConstraint
-    """The constraint of the expectation that fails there."""
-    fixture: str
-    """The recording."""
-    held: str
-    """What the recording held there."""
-    place: typing.NotRequired[str | None]
-    """Where within that constraint, for one that looks at places."""
-    reason: str
-    """Why the manifest says this recording is one the assertion fails on."""
 
 
 class PluginOverriding(typing.TypedDict):
@@ -437,6 +424,28 @@ class PluginStepRan(typing.TypedDict):
     """Why it came to what it did, where that wants saying."""
 
 
+class PluginStopped(typing.TypedDict):
+    """One recipe step refusing a host stops."""
+
+    recipe: str
+    """The recipe's id."""
+    step: str
+    """The step's id."""
+    title: str
+    """What the recipe accomplishes, in its author's words."""
+
+
+class PluginStopping(typing.TypedDict):
+    """What refusing one host a plugin's recipes reach stops."""
+
+    host: str
+    """The host, as the recipes name it."""
+    said: typing.NotRequired[str | None]
+    """What stops, in its author's words, where the manifest says."""
+    steps: typing.NotRequired[list[PluginStopped]]
+    """Every recipe step refusing it stops: each calling it, and each depending on one."""
+
+
 type ServiceConstant = str | int | bool
 """A value written exactly as declared."""
 
@@ -468,18 +477,6 @@ are read from `extension-points.json` rather than restated here. What this type
 fixes is that a contribution is declared in this block and nowhere else, and that
 it carries nothing outside the union of the rows the published points take.
 """
-
-
-PluginGranting = typing.TypedDict(
-    "PluginGranting",
-    {
-        "approval": str,
-        "credential": str,
-        "for": str,
-        "of": str,
-    },
-)
-"""One credential that would cross to a plugin, as the reading states it."""
 
 
 PluginPair = typing.TypedDict(
@@ -528,8 +525,6 @@ __all__ = [
     "PluginDemand",
     "PluginEvidence",
     "PluginExpectedFailure",
-    "PluginFailingAsDeclared",
-    "PluginGranting",
     "PluginOverriding",
     "PluginPair",
     "PluginPlaceholder",
@@ -543,5 +538,7 @@ __all__ = [
     "PluginSecret",
     "PluginStep",
     "PluginStepRan",
+    "PluginStopped",
+    "PluginStopping",
     "ServiceConstant",
 ]

@@ -12,12 +12,11 @@ from .expected import (
     PluginChangedCheck,
     PluginDemand,
     PluginEvidence,
-    PluginGranting,
     PluginOverriding,
     PluginPlaceholder,
     PluginRecipeRan,
 )
-from .plugin_reached_household import PluginInstalled, PluginProving, PluginShape, PluginSharing
+from .plugin_failing_as_declared import PluginGranting, PluginInstalled, PluginShape, PluginVerdict
 from ...shared.lifecycle__plugins__reset__settings__substitution__update import StackMoveTaken
 from ...shared.lifecycle__plugins__settings__substitution__update import Unvetted
 from ...shared.plugins__settings__status import Waiting
@@ -231,6 +230,35 @@ class PluginNonconforming(typing.TypedDict):
     """What was outside the contract."""
 
 
+class PluginProving(typing.TypedDict):
+    """One proof that has to hold before a plugin is reported installed."""
+
+    asks: str
+    """What it asks, as the method and the path it is asked at."""
+    came_to: typing.NotRequired[PluginVerdict | None]
+    """What asking it came to, or nothing where it was not asked.
+
+    Absent on a rehearsal, which asks nothing. That is a different fact from a
+    proof that was asked and established nothing, and the two must not read alike:
+    one is an account of what would happen, the other is a service that did not
+    answer.
+    """
+    establishes: str
+    """What it establishes, in one line."""
+    of: typing.NotRequired[str | None]
+    """Which of the plugin's services it asks, where the manifest settles that.
+
+    Nothing where it does not, which is a manifest the reader has already refused
+    — carried as an absence rather than as a guess, so that a report built from a
+    manifest nobody held to the reader says *this was not settled* instead of
+    naming whichever service came first.
+    """
+    proof: str
+    """The proof's id, which its verdict is reported against."""
+    why: str
+    """Why it is worth asserting."""
+
+
 class PluginRemoval(typing.TypedDict):
     """What taking a plugin off the machine came to, or would come to."""
 
@@ -313,6 +341,19 @@ class PluginRestored(typing.TypedDict):
     """
     version: str
     """The version put back, which is the one the record still names."""
+
+
+class PluginSharing(typing.TypedDict):
+    """An adapter that writes the files of the service it fronts, through that service's
+    whole configuration directory mounted into it.
+    """
+
+    adapter: str
+    """The adapter."""
+    at: str
+    """Where that service's configuration directory lands inside the adapter."""
+    upstream: str
+    """The service whose files it writes."""
 
 
 type PluginSourceStanding = (
@@ -481,10 +522,12 @@ __all__ = [
     "PluginInstall",
     "PluginInstalls",
     "PluginNonconforming",
+    "PluginProving",
     "PluginRemoval",
     "PluginReproof",
     "PluginReshipped",
     "PluginRestored",
+    "PluginSharing",
     "PluginSource",
     "PluginSourceStanding",
     "PluginSourceStandingReachable",
