@@ -11,28 +11,16 @@ from .expected import (
     Contribution,
     Expect,
     PluginAsking,
-    PluginConstraint,
+    PluginChangedCheck,
     PluginDeclaration,
+    PluginReachedHousehold,
+    PluginReachedLoopback,
     PluginRecipe,
     PluginRequest,
     ServiceConstant,
 )
+from ...shared.plugin_claims__plugins import PluginVerdict
 from ...shared.plugins__undo import PluginGrant
-
-
-class PluginFailingAsDeclared(typing.TypedDict):
-    """One recording an assertion fails on as its manifest declares."""
-
-    constraint: PluginConstraint
-    """The constraint of the expectation that fails there."""
-    fixture: str
-    """The recording."""
-    held: str
-    """What the recording held there."""
-    place: typing.NotRequired[str | None]
-    """Where within that constraint, for one that looks at places."""
-    reason: str
-    """Why the manifest says this recording is one the assertion fails on."""
 
 
 class PluginPlaced(typing.TypedDict):
@@ -121,6 +109,35 @@ class PluginPlaced(typing.TypedDict):
     """
 
 
+class PluginProving(typing.TypedDict):
+    """One proof that has to hold before a plugin is reported installed."""
+
+    asks: str
+    """What it asks, as the method and the path it is asked at."""
+    came_to: typing.NotRequired[PluginVerdict | None]
+    """What asking it came to, or nothing where it was not asked.
+
+    Absent on a rehearsal, which asks nothing. That is a different fact from a
+    proof that was asked and established nothing, and the two must not read alike:
+    one is an account of what would happen, the other is a service that did not
+    answer.
+    """
+    establishes: str
+    """What it establishes, in one line."""
+    of: typing.NotRequired[str | None]
+    """Which of the plugin's services it asks, where the manifest settles that.
+
+    Nothing where it does not, which is a manifest the reader has already refused
+    — carried as an absence rather than as a guess, so that a report built from a
+    manifest nobody held to the reader says *this was not settled* instead of
+    naming whichever service came first.
+    """
+    proof: str
+    """The proof's id, which its verdict is reported against."""
+    why: str
+    """Why it is worth asserting."""
+
+
 type PluginReached = PluginReachedLoopback | PluginReachedProxied | PluginReachedHousehold
 """How an installed service is reached, where it is reached at all.
 
@@ -141,28 +158,6 @@ A tier and never an address, either way: lemonfiber renders one from the other
 exactly as it does for a bundled service, so the two-tier policy stays a property
 of the system rather than a request a plugin made.
 """
-
-
-class PluginReachedHousehold(typing.TypedDict):
-    """From the household, through the stack's own proxy, at this label."""
-
-    group: typing.NotRequired[str | None]
-    """The group on the bundled dashboard, where the manifest named one."""
-    hostname: str
-    """The single label in front of the operator's domain."""
-    port: int
-    """The port the service listens on."""
-    tier: typing.Literal["household"]
-
-
-class PluginReachedLoopback(typing.TypedDict):
-    """From this machine and nowhere else. No route, and no label to route to."""
-
-    group: typing.NotRequired[str | None]
-    """The group on the bundled dashboard, where the manifest named one."""
-    port: int
-    """The port the service listens on."""
-    tier: typing.Literal["loopback"]
 
 
 class PluginReachedProxied(typing.TypedDict):
@@ -232,67 +227,54 @@ type PluginShape = typing.Literal["egress-guard", "render"]
 """A privileged shape lemonfiber writes for a service."""
 
 
-type PluginVerdict = (
-    PluginVerdictPassed
-    | PluginVerdictFailed
-    | PluginVerdictUnproven
-    | PluginVerdictFailingAsDeclared
-    | PluginVerdictOpen
-)
-"""What one assertion came to, whatever answered it."""
-
-
-class PluginVerdictFailed(typing.TypedDict):
-    """It does not, in every way it does not."""
-
-    faults: list[str]
-    """Every way the recorded answer is not the declared one."""
-    outcome: typing.Literal["failed"]
-
-
-class PluginVerdictFailingAsDeclared(typing.TypedDict):
-    """It fails on the recordings its manifest declares it fails on, on the constraint
-    each declaration names and on nothing else, and holds on every other recording it
-    was run against.
-
-    Apart from passed and from failed, and counted as neither. The assertion does not
-    hold there, so a pass would say the opposite of what the recording shows; and the
-    failure is the one its author described and gave a reason for, so it does not
-    fail the run. Only ever reached against recordings: the live service is held to
-    the expectation as it is written.
+class PluginSharing(typing.TypedDict):
+    """An adapter that writes the files of the service it fronts, through that service's
+    whole configuration directory mounted into it.
     """
 
-    declared: list[PluginFailingAsDeclared]
-    """Each declared recording, what it held, and why it is one the assertion fails on."""
-    outcome: typing.Literal["failing-as-declared"]
+    adapter: str
+    """The adapter."""
+    at: str
+    """Where that service's configuration directory lands inside the adapter."""
+    upstream: str
+    """The service whose files it writes."""
 
 
-class PluginVerdictOpen(typing.TypedDict):
-    """The part an adapter claims is left open, because nobody entered the code its claim
-    takes: whoever reaches it first can claim it.
+class PluginTaking(typing.TypedDict):
+    """One service taking a privileged shape, as the reading states it."""
 
-    Apart from passed and from failed, and counted as neither: the adapter holds to its
-    contract, and the part is not yet the household's. Only ever reached against the
-    live service, by an install's or a re-proof's claim.
+    approval: str
+    """What approving it is written as, apart from the offer."""
+    devices: list[str]
+    """The devices it is given."""
+    grants: list[str]
+    """The kernel capabilities it is given."""
+    grouped: bool
+    """Whether it is added to the group owning those devices on the engine's host."""
+    service: str
+    """The service taking it."""
+    shape: PluginShape
+    """The shape it takes."""
+
+
+class PluginVerification(typing.TypedDict):
+    """What the stack's own checks made of an install."""
+
+    broke: list[PluginChangedCheck]
+    """Every check this install made worse.
+
+    Empty is the answer an install needs, and it is the common one. What is here
+    is what takes the install back.
     """
+    unsettled: list[PluginChangedCheck]
+    """Every check nothing could be concluded about across the two readings.
 
-    outcome: typing.Literal["open"]
-    why: str
-    """The part, and the code its claim takes."""
-
-
-class PluginVerdictPassed(typing.TypedDict):
-    """The recording answers what the binding declares."""
-
-    outcome: typing.Literal["passed"]
-
-
-class PluginVerdictUnproven(typing.TypedDict):
-    """It could not be run, and so established nothing either way."""
-
-    outcome: typing.Literal["unproven"]
-    why: str
-    """What stopped it being run."""
+    Reported and never acted on. *I could not tell* is not *it is still broken*,
+    and an install reversed because a check could not reach a provider it also
+    could not reach an hour ago would be punishing a plugin for the weather. It is
+    said out loud rather than dropped, because the assurance an operator thought
+    they had is the thing that went.
+    """
 
 
 type RecordedWith = str | int | bool
@@ -446,16 +428,17 @@ class SettingChoiceNeeding(typing.TypedDict):
     """The values."""
 
 
-PluginGranting = typing.TypedDict(
-    "PluginGranting",
-    {
-        "approval": str,
-        "credential": str,
-        "for": str,
-        "of": str,
-    },
-)
-"""One credential that would cross to a plugin, as the reading states it."""
+class WiringContest(typing.TypedDict):
+    """An ask several services claim and nothing has chosen between, so it reaches
+    nothing.
+    """
+
+    by: str
+    """The service that asked."""
+    capability: str
+    """What it asked for."""
+    claimants: list[str]
+    """Every claimant, named — a plugin's with the plugin beside it."""
 
 
 PluginInstalled = typing.TypedDict(
@@ -496,24 +479,18 @@ ServiceMount = typing.TypedDict(
 
 
 __all__ = [
-    "PluginFailingAsDeclared",
-    "PluginGranting",
     "PluginInstalled",
     "PluginPlaced",
+    "PluginProving",
     "PluginReached",
-    "PluginReachedHousehold",
-    "PluginReachedLoopback",
     "PluginReachedProxied",
     "PluginRequestProof",
     "PluginRun",
     "PluginRunProof",
     "PluginShape",
-    "PluginVerdict",
-    "PluginVerdictFailed",
-    "PluginVerdictFailingAsDeclared",
-    "PluginVerdictOpen",
-    "PluginVerdictPassed",
-    "PluginVerdictUnproven",
+    "PluginSharing",
+    "PluginTaking",
+    "PluginVerification",
     "RecordedWith",
     "ServiceCertificate",
     "ServiceFields",
@@ -530,4 +507,5 @@ __all__ = [
     "ServiceValue",
     "SettingChoice",
     "SettingChoiceNeeding",
+    "WiringContest",
 ]

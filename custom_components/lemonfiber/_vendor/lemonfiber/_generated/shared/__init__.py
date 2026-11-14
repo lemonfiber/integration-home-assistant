@@ -53,6 +53,10 @@ from . import lifecycle__update as _lifecycle__update
 from . import music__quality as _music__quality
 from . import music__upgrade as _music__upgrade
 from . import news__news_items as _news__news_items
+from . import (
+    plugin_claims__plugin_conformance__plugin_recording as _plugin_claims__plugin_conformance__plugin_recording,
+)
+from . import plugin_claims__plugins as _plugin_claims__plugins
 from . import plugins__settings__status as _plugins__settings__status
 from . import plugins__substitution__wiring as _plugins__substitution__wiring
 from . import plugins__undo as _plugins__undo
@@ -103,6 +107,8 @@ from .lifecycle__update import *
 from .music__quality import *
 from .music__upgrade import *
 from .news__news_items import *
+from .plugin_claims__plugin_conformance__plugin_recording import *
+from .plugin_claims__plugins import *
 from .plugins__settings__status import *
 from .plugins__substitution__wiring import *
 from .plugins__undo import *
@@ -154,6 +160,8 @@ __all__ += _lifecycle__update.__all__
 __all__ += _music__quality.__all__
 __all__ += _music__upgrade.__all__
 __all__ += _news__news_items.__all__
+__all__ += _plugin_claims__plugin_conformance__plugin_recording.__all__
+__all__ += _plugin_claims__plugins.__all__
 __all__ += _plugins__settings__status.__all__
 __all__ += _plugins__substitution__wiring.__all__
 __all__ += _plugins__undo.__all__

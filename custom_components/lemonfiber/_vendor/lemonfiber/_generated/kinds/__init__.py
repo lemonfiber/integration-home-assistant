@@ -59,6 +59,10 @@ from . import pairing as _pairing
 from . import part_way as _part_way
 from . import pausing as _pausing
 from . import playing as _playing
+from . import plugin_claims as _plugin_claims
+from . import plugin_conformance as _plugin_conformance
+from . import plugin_provenance as _plugin_provenance
+from . import plugin_recording as _plugin_recording
 from . import plugins as _plugins
 from . import preview as _preview
 from . import provenance as _provenance
@@ -155,6 +159,10 @@ from .pairing import *
 from .part_way import *
 from .pausing import *
 from .playing import *
+from .plugin_claims import *
+from .plugin_conformance import *
+from .plugin_provenance import *
+from .plugin_recording import *
 from .plugins import *
 from .preview import *
 from .provenance import *
@@ -252,6 +260,10 @@ __all__ += _pairing.__all__
 __all__ += _part_way.__all__
 __all__ += _pausing.__all__
 __all__ += _playing.__all__
+__all__ += _plugin_claims.__all__
+__all__ += _plugin_conformance.__all__
+__all__ += _plugin_provenance.__all__
+__all__ += _plugin_recording.__all__
 __all__ += _plugins.__all__
 __all__ += _preview.__all__
 __all__ += _provenance.__all__

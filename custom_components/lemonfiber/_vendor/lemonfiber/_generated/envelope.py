@@ -62,6 +62,10 @@ from .kinds import (
     PartWayEnvelope,
     PausingEnvelope,
     PlayingEnvelope,
+    PluginClaimsEnvelope,
+    PluginConformanceEnvelope,
+    PluginProvenanceEnvelope,
+    PluginRecordingEnvelope,
     PluginsEnvelope,
     PreviewEnvelope,
     ProvenanceEnvelope,
@@ -163,6 +167,10 @@ type Kind = typing.Literal[
     "part-way",
     "pausing",
     "playing",
+    "plugin-claims",
+    "plugin-conformance",
+    "plugin-provenance",
+    "plugin-recording",
     "plugins",
     "preview",
     "provenance",
@@ -265,6 +273,10 @@ type Envelope = (
     | PartWayEnvelope
     | PausingEnvelope
     | PlayingEnvelope
+    | PluginClaimsEnvelope
+    | PluginConformanceEnvelope
+    | PluginProvenanceEnvelope
+    | PluginRecordingEnvelope
     | PluginsEnvelope
     | PreviewEnvelope
     | ProvenanceEnvelope
