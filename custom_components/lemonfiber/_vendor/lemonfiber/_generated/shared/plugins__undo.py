@@ -27,6 +27,7 @@ type Action = (
     | ActionPushEndpoint
     | ActionResettle
     | ActionRegrab
+    | ActionUnask
     | ActionRegrant
     | ActionRehold
     | ActionUnreplaced
@@ -294,6 +295,23 @@ class ActionRun(typing.TypedDict):
     """The service."""
 
 
+class ActionUnask(typing.TypedDict):
+    """Ask a curator to remove what a member asked it for, and take the ask the core
+    keeps for it off the household list; nothing where the curator held some of it
+    before.
+    """
+
+    does: typing.Literal["unask"]
+    kept: str
+    """The ask the core keeps for it, by its reference."""
+    reference: str
+    """The curator's reference for it."""
+    unit: Unit
+    """What was asked for."""
+    whole: bool
+    """Whether the curator held none of it before."""
+
+
 class ActionUnmoved(typing.TypedDict):
     """Leave one of lemonfiber's own guards on its plugin.
 
@@ -338,6 +356,14 @@ class ActionWithdraw(typing.TypedDict):
     """The checksum of what was written between the markers, which has to still be
     what is there for taking it out to be taking out lemonfiber's own work.
     """
+
+
+type BookUnit = typing.Literal["book", "author", "series"]
+"""What a member asks a curator of books for."""
+
+
+type MusicUnit = typing.Literal["album", "artist"]
+"""What a member asks a curator of music for."""
 
 
 class Undo(typing.TypedDict):
@@ -412,6 +438,24 @@ class UndoReversal(typing.TypedDict):
     """
 
 
+type Unit = UnitMusic | UnitBooks
+"""What one ask is for, within its medium."""
+
+
+class UnitBooks(typing.TypedDict):
+    """A book, a whole author or a series."""
+
+    medium: typing.Literal["books"]
+    unit: BookUnit
+
+
+class UnitMusic(typing.TypedDict):
+    """An album or a whole artist."""
+
+    medium: typing.Literal["music"]
+    unit: MusicUnit
+
+
 type VideoKind = typing.Literal["tv", "movies"]
 """Whether a title a curator of video files is a series or a film, as a document that
 names one of those two alone publishes it.
@@ -484,13 +528,19 @@ __all__ = [
     "ActionRevokeDevice",
     "ActionRewind",
     "ActionRun",
+    "ActionUnask",
     "ActionUnmoved",
     "ActionUnreplaced",
     "ActionWithdraw",
+    "BookUnit",
+    "MusicUnit",
     "PluginGrant",
     "Undo",
     "UndoLeft",
     "UndoNoted",
     "UndoReversal",
+    "Unit",
+    "UnitBooks",
+    "UnitMusic",
     "VideoKind",
 ]
