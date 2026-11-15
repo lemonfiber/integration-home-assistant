@@ -23,12 +23,12 @@ from .plugin_reached_proxied import (
     PluginVerification,
     WiringContest,
 )
-from ...shared.lifecycle__plugins__reset__settings__substitution__update import StackMoveTaken
-from ...shared.lifecycle__plugins__settings__substitution__update import Unvetted
-from ...shared.plugin_claims__plugins import PluginEvidence
-from ...shared.plugins__settings__status import Waiting
-from ...shared.plugins__undo import UndoReversal
-from ...shared.plugins__wiring import Wired
+from ...shared.action import UndoReversal
+from ...shared.plugin_constraint import PluginEvidence
+from ...shared.reaches import Wired
+from ...shared.stack_move_taken import StackMoveTaken
+from ...shared.unvetted import Unvetted
+from ...shared.waiting import Waiting
 
 
 class PluginInstall(typing.TypedDict):

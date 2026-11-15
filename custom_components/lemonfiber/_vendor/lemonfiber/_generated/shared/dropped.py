@@ -7,7 +7,7 @@ and CI fails on any difference.
 
 import typing
 
-from .lifecycle__preview__status import Filtered, StackProtocol
+from .filtered import Filtered, StackProtocol
 
 
 class Dropped(typing.TypedDict):

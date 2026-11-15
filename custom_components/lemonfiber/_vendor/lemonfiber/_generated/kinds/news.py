@@ -7,7 +7,7 @@ and CI fails on any difference.
 
 import typing
 
-from ..shared.news__news_items import NewsKind
+from ..shared.news_kind import NewsKind
 
 
 class Newest(typing.TypedDict):

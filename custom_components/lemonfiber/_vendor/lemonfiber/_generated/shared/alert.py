@@ -7,7 +7,7 @@ and CI fails on any difference.
 
 import typing
 
-from .alert__dashboard__doctor__error__plugins import ProblemSeverity
+from .problem_severity import ProblemSeverity
 
 
 class Alert(typing.TypedDict):

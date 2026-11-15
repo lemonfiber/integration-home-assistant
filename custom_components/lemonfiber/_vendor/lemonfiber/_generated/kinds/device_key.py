@@ -7,7 +7,7 @@ and CI fails on any difference.
 
 import typing
 
-from ..shared.device_key__device_keys import DeviceKeyBacking
+from ..shared.device_key_backing import DeviceKeyBacking
 
 
 class DeviceKeyEnvelope(typing.TypedDict):

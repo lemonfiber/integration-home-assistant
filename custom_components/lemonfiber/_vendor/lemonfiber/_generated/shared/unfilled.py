@@ -7,7 +7,7 @@ and CI fails on any difference.
 
 import typing
 
-from .plugins__substitution__wiring import Apis
+from .apis import Apis
 
 
 class Unfilled(typing.TypedDict):

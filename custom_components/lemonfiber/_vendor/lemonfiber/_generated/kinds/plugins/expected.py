@@ -7,10 +7,10 @@ and CI fails on any difference.
 
 import typing
 
-from ...shared.doctor__error__plugins import StepCame
-from ...shared.doctor__plugins import DoctorVerdict, Finding
-from ...shared.plugin_claims__plugins import PluginConstraint
-from ...shared.plugins__substitution__wiring import Apis
+from ...shared.apis import Apis
+from ...shared.code import StepCame
+from ...shared.disruptive import DoctorVerdict, Finding
+from ...shared.plugin_constraint import PluginConstraint
 
 
 class Expect(typing.TypedDict):

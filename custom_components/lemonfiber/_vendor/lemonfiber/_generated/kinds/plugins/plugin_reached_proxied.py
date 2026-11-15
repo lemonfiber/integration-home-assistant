@@ -19,8 +19,8 @@ from .expected import (
     PluginRequest,
     ServiceConstant,
 )
-from ...shared.plugin_claims__plugins import PluginVerdict
-from ...shared.plugins__undo import PluginGrant
+from ...shared.action import PluginGrant
+from ...shared.plugin_constraint import PluginVerdict
 
 
 class PluginPlaced(typing.TypedDict):

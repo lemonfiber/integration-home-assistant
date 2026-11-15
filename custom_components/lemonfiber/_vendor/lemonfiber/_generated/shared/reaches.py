@@ -7,8 +7,8 @@ and CI fails on any difference.
 
 import typing
 
-from .config__credentials__doctor__outbound__plugins__wiring__wizard import ValueOrigin
-from .plugins__substitution__wiring import Apis
+from .apis import Apis
+from .value_origin import ValueOrigin
 
 
 type Reaches = ReachesAsked | ReachesByName

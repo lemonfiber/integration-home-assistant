@@ -7,7 +7,7 @@ and CI fails on any difference.
 
 import typing
 
-from .catalogue__dashboard__lifecycle__status import Criticality
+from .criticality import Criticality
 
 
 class Service(typing.TypedDict):

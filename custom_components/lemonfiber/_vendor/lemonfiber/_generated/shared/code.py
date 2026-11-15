@@ -7,8 +7,8 @@ and CI fails on any difference.
 
 import typing
 
-from .alert__dashboard__doctor__error__plugins import ProblemSeverity
-from .doctor__error__plugins__repair import Remedy
+from .problem_severity import ProblemSeverity
+from .remedy import Remedy
 
 
 type Code = str

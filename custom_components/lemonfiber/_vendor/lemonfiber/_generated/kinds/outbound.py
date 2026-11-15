@@ -7,7 +7,7 @@ and CI fails on any difference.
 
 import typing
 
-from ..shared.config__credentials__doctor__outbound__plugins__wiring__wizard import ValueOrigin
+from ..shared.value_origin import ValueOrigin
 
 
 class Elsewhere(typing.TypedDict):
