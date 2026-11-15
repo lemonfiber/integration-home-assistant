@@ -46,9 +46,9 @@ class HouseholdMember(typing.TypedDict):
     """Whether somebody has set a password on the account. False is an invitation
     nobody has taken up rather than a member who is not here.
     """
-    last_seen: typing.NotRequired[str | None]
-    """When the media server last saw them, as it timestamps it. Absent where nobody
-    has ever signed in, which is exactly the unclaimed invitations.
+    last_seen: typing.NotRequired[int | None]
+    """When the media server last saw them. Absent where nobody has ever signed in,
+    which is exactly the unclaimed invitations.
     """
     name: str
     """The member, by the name their account is held under."""
@@ -152,11 +152,11 @@ class MemberAccess(typing.TypedDict):
 class MemberRequest(typing.TypedDict):
     """One thing a household member asked for, and where it stands in their words."""
 
-    arrived: typing.NotRequired[str | None]
-    """When the title arrived on the media server, as the request service timestamps it.
-    Absent, not null, until it is there.
+    arrived: typing.NotRequired[int | None]
+    """When the title arrived on the media server, as the request service says. Absent,
+    not null, until it is there.
     """
-    asked: typing.NotRequired[str | None]
+    asked: typing.NotRequired[int | None]
     """When it was asked for, where the request service or the core says."""
     estimate: typing.NotRequired[Estimate | None]
     """About how much room it will want, at the quality in force.
@@ -237,8 +237,8 @@ operator is the one who has to be able to see it.
 class Passed(typing.TypedDict):
     """Where a refusal's words were carried, and when."""
 
-    at: typing.NotRequired[str | None]
-    """When the attempt was made, absent where the clock could not be written down."""
+    at: typing.NotRequired[int | None]
+    """When the attempt was made, absent on a record kept without one."""
     to: list[str]
     """The services they reached, by the names the member knows them by. Empty where
     there was nowhere this could send.
@@ -277,12 +277,9 @@ class Rated(typing.TypedDict):
 class Refused(typing.TypedDict):
     """What was said when one request was turned down."""
 
-    at: typing.NotRequired[str | None]
+    at: typing.NotRequired[int | None]
     """When it was turned down, so somebody reading it later knows which answer this
-    was rather than assuming it is the newest.
-
-    Absent where the machine's clock could not be written as a date, which is a
-    refusal worth keeping the words of and not worth losing them over.
+    was rather than assuming it is the newest. Absent on a record kept without one.
     """
     expired: typing.NotRequired[bool]
     """Whether nobody ruled on it and the period the household agreed to closed it,

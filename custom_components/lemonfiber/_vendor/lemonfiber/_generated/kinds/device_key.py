@@ -31,7 +31,7 @@ class RegisteredDeviceKey(typing.TypedDict):
     """The SHA-256 of its public half's `SubjectPublicKeyInfo`, in lower-case hex."""
     name: str
     """The name it was registered under."""
-    registered: str
+    registered: int
     """When it was registered."""
 
 

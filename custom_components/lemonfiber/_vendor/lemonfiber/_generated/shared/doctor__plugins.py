@@ -148,7 +148,7 @@ class Finding(typing.TypedDict):
     """What checking it disturbs, where the read left it unverified because checking it
     disturbs something, and how a diagnosis is asked to run it.
     """
-    onset: typing.NotRequired[str | None]
+    onset: typing.NotRequired[int | None]
     """When the stack first saw this check wrong since it last saw it right, in whole
     seconds since the epoch.
 

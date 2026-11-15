@@ -305,6 +305,8 @@ class ServiceFields(typing.TypedDict):
     """The certificate lemonfiber makes for it, where it declares one."""
     config_ro: typing.NotRequired[bool]
     """Whether its configuration directory is read-only."""
+    container_hostname: typing.NotRequired[str | None]
+    """The name its container knows itself by, where it declares one."""
     env: typing.NotRequired[dict[str, ServiceValue]]
     """Its environment."""
     mem_limit_mib: typing.NotRequired[int | None]
@@ -337,8 +339,14 @@ class ServiceIdVariables(typing.TypedDict):
 
 
 class ServiceNetwork(typing.TypedDict):
-    """The network a service runs inside instead of its own: its filler's, or a fence's."""
+    """The network a service runs inside instead of its own, its filler's or a fence's, or the
+    sibling it carries out of the machine.
+    """
 
+    egress_for: typing.NotRequired[str | None]
+    """The service of its own plugin it carries out of the machine, holding nothing, where
+    it is that service's egress.
+    """
     fenced: typing.NotRequired[bool]
     """Whether it fetches whatever address it is handed, and so runs inside a fence that
     refuses every private address.
@@ -447,9 +455,10 @@ PluginInstalled = typing.TypedDict(
         "contributions": typing.NotRequired[list[Contribution]],
         "declared": typing.NotRequired[PluginDeclaration],
         "description": typing.NotRequired[str | None],
+        "forms": typing.NotRequired[list[str]],
         "from": typing.NotRequired[str],
         "granted": typing.NotRequired[list[PluginGrant]],
-        "installed_at": typing.NotRequired[str],
+        "installed_at": typing.NotRequired[int | None],
         "manifest": typing.NotRequired[str],
         "name": typing.NotRequired[str | None],
         "plugin": str,

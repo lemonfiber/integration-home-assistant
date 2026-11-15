@@ -63,8 +63,8 @@ class HandoffReport(typing.TypedDict):
     """
     clients: list[HandoffClient]
     """The apps to point a device at the stack with, each with its code."""
-    issued: typing.NotRequired[str | None]
-    """When a code was first issued for them, as an instant. Absent until one is."""
+    issued: typing.NotRequired[int | None]
+    """When a code was first issued for them. Absent until one is."""
     name: str
     """Who it is for, as the media server spells their account where it holds one, and as
     it was asked for otherwise.
@@ -108,7 +108,7 @@ class HandoffSession(typing.TypedDict):
     """The app it signed in with."""
     device: str
     """What the device calls itself."""
-    last_seen: typing.NotRequired[str | None]
+    last_seen: typing.NotRequired[int | None]
     """When the media server last heard from it, where it says."""
 
 

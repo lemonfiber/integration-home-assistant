@@ -32,7 +32,7 @@ class NewsCheck(typing.TypedDict):
 
     check: str
     """The check that raised it."""
-    onset: str
+    onset: int
     """When the stack first saw it wrong since it last saw it right, in whole seconds
     since the epoch.
     """

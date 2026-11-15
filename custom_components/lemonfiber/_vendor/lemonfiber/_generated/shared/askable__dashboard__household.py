@@ -44,7 +44,7 @@ class MemberAsking(typing.TypedDict):
 
     films: Counted
     """Films, counted one to a request."""
-    frees_up: typing.NotRequired[str | None]
+    frees_up: typing.NotRequired[int | None]
     """When the count next lets go of something, so one more becomes possible.
 
     Absent where nothing limits them, and where the request service's own dates

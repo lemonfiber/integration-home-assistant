@@ -42,11 +42,11 @@ class ListedDeviceKey(typing.TypedDict):
     """The SHA-256 of its public half's `SubjectPublicKeyInfo`, in lower-case hex."""
     name: str
     """The name it was registered under."""
-    registered: str
+    registered: int
     """When it was registered."""
-    revoked: typing.NotRequired[str | None]
+    revoked: typing.NotRequired[int | None]
     """When it was revoked, where it has been."""
-    used: typing.NotRequired[str | None]
+    used: typing.NotRequired[int | None]
     """When it last proved a mint, where it has."""
 
 

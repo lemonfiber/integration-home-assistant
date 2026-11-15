@@ -44,7 +44,7 @@ class NewsProblem(typing.TypedDict):
 
     check: str
     """The check that raised it."""
-    onset: str
+    onset: int
     """When the stack first saw it wrong since it last saw it right, in whole seconds
     since the epoch: the same moment the health summary names for it.
     """
@@ -55,7 +55,7 @@ class NewsProblem(typing.TypedDict):
 class NewsRequest(typing.TypedDict):
     """One request, by its reference."""
 
-    asked: typing.NotRequired[str | None]
+    asked: typing.NotRequired[int | None]
     """When it was asked for, where that is known."""
     by: str
     """Who asked for it, by the name the media server holds them under."""

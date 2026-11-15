@@ -13,7 +13,7 @@ class DeviceChallenge(typing.TypedDict):
 
     challenge: str
     """The challenge, in base64url, signed as it is written here."""
-    expires: str
+    expires: int
     """When it stops standing, one minute after it was issued."""
 
 

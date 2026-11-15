@@ -254,8 +254,8 @@ FreshnessAsOf = typing.TypedDict(
     },
 )
 """Read across a network share, which answers with what it was last told —
-carrying the moment it was taken, in seconds since the epoch, so a figure
-nobody can refresh is at least dated.
+carrying the moment it was taken, so a figure nobody can refresh is at least
+dated.
 """
 
 
