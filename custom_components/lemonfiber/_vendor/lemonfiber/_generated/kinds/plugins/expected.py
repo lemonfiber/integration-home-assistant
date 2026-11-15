@@ -8,9 +8,9 @@ and CI fails on any difference.
 import typing
 
 from ...shared.apis import Apis
-from ...shared.code import StepCame
 from ...shared.disruptive import DoctorVerdict, Finding
 from ...shared.plugin_constraint import PluginConstraint
+from ...shared.problem import StepCame
 
 
 class Expect(typing.TypedDict):

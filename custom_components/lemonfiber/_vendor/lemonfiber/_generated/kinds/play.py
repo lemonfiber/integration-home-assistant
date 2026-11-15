@@ -7,6 +7,8 @@ and CI fails on any difference.
 
 import typing
 
+from ..shared.obstacle import Obstacle
+
 
 class PlayEnvelope(typing.TypedDict):
     """The envelope carrying `play`."""
@@ -35,7 +37,7 @@ class PlayReport(typing.TypedDict):
     """Whether this was a rehearsal: what would have happened, with none of it done."""
     stream_from: typing.NotRequired[str | None]
     """The playlist it plays from at the front door, carrying its pass."""
-    unlocated: typing.NotRequired[str | None]
+    unlocated: typing.NotRequired[Obstacle | None]
     """Why nothing is located, where nothing is."""
 
 
