@@ -7,6 +7,7 @@ and CI fails on any difference.
 
 import typing
 
+from ..shared.instant import Instant
 from ..shared.value_origin import ValueOrigin
 
 
@@ -268,7 +269,7 @@ class SettledUnproven(typing.TypedDict):
 CredentialGranted = typing.TypedDict(
     "CredentialGranted",
     {
-        "at": typing.NotRequired[int | None],
+        "at": typing.NotRequired[Instant | None],
         "credential": str,
         "for": str,
         "of": str,

@@ -7,6 +7,8 @@ and CI fails on any difference.
 
 import typing
 
+from .instant import Instant
+
 
 type Action = (
     ActionRemove
@@ -494,7 +496,7 @@ none.
 PluginGrant = typing.TypedDict(
     "PluginGrant",
     {
-        "at": typing.NotRequired[int | None],
+        "at": typing.NotRequired[Instant | None],
         "credential": str,
         "for": str,
         "of": str,

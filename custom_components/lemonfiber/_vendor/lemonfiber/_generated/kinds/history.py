@@ -7,6 +7,8 @@ and CI fails on any difference.
 
 import typing
 
+from ..shared.instant import Instant
+
 
 class ChangeReport(typing.TypedDict):
     """One change lemonfiber made, and whether it could be put back."""
@@ -18,7 +20,7 @@ class ChangeReport(typing.TypedDict):
     machine in a state nobody chose — so what a single line would take with it is on
     the line rather than left to be counted off the list.
     """
-    at: int
+    at: Instant
     """When it was made, in whole seconds since the Unix epoch.
 
     **`0` means the clock was unreadable when the change was written**, not that it

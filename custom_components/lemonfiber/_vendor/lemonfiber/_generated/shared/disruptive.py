@@ -8,6 +8,7 @@ and CI fails on any difference.
 import typing
 
 from .code import Code
+from .instant import Instant
 from .problem import Problem, ProblemState, ProblemStep
 from .problem_severity import ProblemSeverity
 from .remedy import Remedy
@@ -149,7 +150,7 @@ class Finding(typing.TypedDict):
     """What checking it disturbs, where the read left it unverified because checking it
     disturbs something, and how a diagnosis is asked to run it.
     """
-    onset: typing.NotRequired[int | None]
+    onset: typing.NotRequired[Instant | None]
     """When the stack first saw this check wrong since it last saw it right, in whole
     seconds since the epoch.
 

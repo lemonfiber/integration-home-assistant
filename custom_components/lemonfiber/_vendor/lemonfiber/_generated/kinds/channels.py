@@ -7,6 +7,8 @@ and CI fails on any difference.
 
 import typing
 
+from ..shared.instant import Instant
+
 
 class Channel(typing.TypedDict):
     """One live TV channel, as one member's account may watch it."""
@@ -51,7 +53,7 @@ class Programme(typing.TypedDict):
 
     certificate: typing.NotRequired[str | None]
     """Its certificate, as the server holds it, where it has one."""
-    ends: typing.NotRequired[int | None]
+    ends: typing.NotRequired[Instant | None]
     """When it ends, where the server knows."""
     title: str
     """What it is called."""

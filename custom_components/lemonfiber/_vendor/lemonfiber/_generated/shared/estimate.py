@@ -8,6 +8,7 @@ and CI fails on any difference.
 import typing
 
 from .asking_standing import MemberAsking, Policy
+from .instant import Instant
 from .obstacle import Obstacle
 from .title_kind import TitleKind, TitleUnit
 from .unrated import Unrated
@@ -47,7 +48,7 @@ class HouseholdMember(typing.TypedDict):
     """Whether somebody has set a password on the account. False is an invitation
     nobody has taken up rather than a member who is not here.
     """
-    last_seen: typing.NotRequired[int | None]
+    last_seen: typing.NotRequired[Instant | None]
     """When the media server last saw them. Absent where nobody has ever signed in,
     which is exactly the unclaimed invitations.
     """
@@ -158,11 +159,11 @@ class MemberAccess(typing.TypedDict):
 class MemberRequest(typing.TypedDict):
     """One thing a household member asked for, and where it stands in their words."""
 
-    arrived: typing.NotRequired[int | None]
+    arrived: typing.NotRequired[Instant | None]
     """When the title arrived on the media server, as the request service says. Absent,
     not null, until it is there.
     """
-    asked: typing.NotRequired[int | None]
+    asked: typing.NotRequired[Instant | None]
     """When it was asked for, where the request service or the core says."""
     estimate: typing.NotRequired[Estimate | None]
     """About how much room it will want, at the quality in force.
@@ -243,7 +244,7 @@ operator is the one who has to be able to see it.
 class Passed(typing.TypedDict):
     """Where a refusal's words were carried, and when."""
 
-    at: typing.NotRequired[int | None]
+    at: typing.NotRequired[Instant | None]
     """When the attempt was made, absent on a record kept without one."""
     to: list[str]
     """The services they reached, by the names the member knows them by. Empty where
@@ -283,7 +284,7 @@ class Rated(typing.TypedDict):
 class Refused(typing.TypedDict):
     """What was said when one request was turned down."""
 
-    at: typing.NotRequired[int | None]
+    at: typing.NotRequired[Instant | None]
     """When it was turned down, so somebody reading it later knows which answer this
     was rather than assuming it is the newest. Absent on a record kept without one.
     """

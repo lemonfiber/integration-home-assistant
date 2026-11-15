@@ -20,6 +20,7 @@ from .expected import (
     ServiceConstant,
 )
 from ...shared.action import PluginGrant
+from ...shared.instant import Instant
 from ...shared.plugin_constraint import PluginVerdict
 
 
@@ -458,7 +459,7 @@ PluginInstalled = typing.TypedDict(
         "forms": typing.NotRequired[list[str]],
         "from": typing.NotRequired[str],
         "granted": typing.NotRequired[list[PluginGrant]],
-        "installed_at": typing.NotRequired[int | None],
+        "installed_at": typing.NotRequired[Instant | None],
         "manifest": typing.NotRequired[str],
         "name": typing.NotRequired[str | None],
         "plugin": str,

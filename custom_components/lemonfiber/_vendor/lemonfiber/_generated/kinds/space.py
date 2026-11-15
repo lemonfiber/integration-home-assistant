@@ -8,6 +8,7 @@ and CI fails on any difference.
 import typing
 
 from ..shared.candidate import Candidate
+from ..shared.instant import Instant
 
 
 class Consumption(typing.TypedDict):
@@ -250,7 +251,7 @@ FreshnessAsOf = typing.TypedDict(
     "FreshnessAsOf",
     {
         "as": typing.Literal["as_of"],
-        "at": int,
+        "at": Instant,
     },
 )
 """Read across a network share, which answers with what it was last told —

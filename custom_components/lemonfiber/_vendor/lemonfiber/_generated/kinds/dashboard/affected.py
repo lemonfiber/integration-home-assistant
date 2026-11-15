@@ -9,6 +9,7 @@ import typing
 
 from ...shared.address import FrontDoorReport
 from ...shared.estimate import HouseholdReport
+from ...shared.instant import Instant
 from ...shared.problem_severity import ProblemSeverity
 from ...shared.service import Service
 
@@ -35,7 +36,7 @@ class Affected(typing.TypedDict):
     on, and an item that states only the event leaves the judgement it was
     supposed to save them.
     """
-    onset: int
+    onset: Instant
     """When the stack first saw it wrong since it last saw it right, in whole
     seconds since the epoch.
 
