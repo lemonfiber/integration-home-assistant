@@ -7,7 +7,7 @@ and CI fails on any difference.
 
 import typing
 
-from ..shared.plugin_claims__plugin_conformance__plugin_recording import Violation
+from ..shared.violation import Violation
 
 
 class Failed(typing.TypedDict):

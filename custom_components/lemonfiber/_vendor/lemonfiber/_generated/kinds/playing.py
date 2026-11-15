@@ -7,7 +7,7 @@ and CI fails on any difference.
 
 import typing
 
-from ..shared.held__part_way__playing__title import Medium
+from ..shared.medium import Medium
 
 
 class Playback(typing.TypedDict):

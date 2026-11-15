@@ -7,8 +7,8 @@ and CI fails on any difference.
 
 import typing
 
-from ..shared.plugin_claims__plugin_conformance__plugin_recording import Violation
-from ..shared.plugin_claims__plugins import PluginEvidence, PluginVerdict
+from ..shared.plugin_constraint import PluginEvidence, PluginVerdict
+from ..shared.violation import Violation
 
 
 class Asserted(typing.TypedDict):

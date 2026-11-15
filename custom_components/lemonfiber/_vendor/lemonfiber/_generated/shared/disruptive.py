@@ -7,10 +7,10 @@ and CI fails on any difference.
 
 import typing
 
-from .alert__dashboard__doctor__error__plugins import ProblemSeverity
-from .config__credentials__doctor__outbound__plugins__wiring__wizard import ValueOrigin
-from .doctor__error__plugins import Code, Problem, ProblemState, ProblemStep
-from .doctor__error__plugins__repair import Remedy
+from .code import Code, Problem, ProblemState, ProblemStep
+from .problem_severity import ProblemSeverity
+from .remedy import Remedy
+from .value_origin import ValueOrigin
 
 
 class Disruptive(typing.TypedDict):

@@ -7,8 +7,8 @@ and CI fails on any difference.
 
 import typing
 
-from ..shared.held__part_way__playing__title import Medium
-from ..shared.held__part_way__title import Pinned
+from ..shared.medium import Medium
+from ..shared.pinned import Pinned
 
 
 class PartWay(typing.TypedDict):

@@ -7,10 +7,10 @@ and CI fails on any difference.
 
 import typing
 
-from ...shared.alert__dashboard__doctor__error__plugins import ProblemSeverity
-from ...shared.dashboard__front_door import FrontDoorReport
-from ...shared.dashboard__household import HouseholdReport
-from ...shared.dashboard__lifecycle__status import Service
+from ...shared.address import FrontDoorReport
+from ...shared.estimate import HouseholdReport
+from ...shared.problem_severity import ProblemSeverity
+from ...shared.service import Service
 
 
 class Affected(typing.TypedDict):

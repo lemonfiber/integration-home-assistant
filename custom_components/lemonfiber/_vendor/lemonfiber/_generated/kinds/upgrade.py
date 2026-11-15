@@ -7,7 +7,7 @@ and CI fails on any difference.
 
 import typing
 
-from ..shared.music__upgrade import Triggered
+from ..shared.triggered import Triggered
 
 
 type Total = TotalVariant1 | TotalVariant2

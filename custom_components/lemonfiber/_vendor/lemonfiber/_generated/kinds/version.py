@@ -7,7 +7,7 @@ and CI fails on any difference.
 
 import typing
 
-from ..shared.update__version import Notes
+from ..shared.changelog_state import Notes
 
 
 class VersionEnvelope(typing.TypedDict):

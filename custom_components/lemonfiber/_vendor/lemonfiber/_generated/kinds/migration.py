@@ -7,10 +7,10 @@ and CI fails on any difference.
 
 import typing
 
-from ..shared.adoption__migration import CarryingReport
-from ..shared.beside__migration import MovedReport
-from ..shared.import___migration import UnsupportedReport
-from ..shared.lifecycle__migration import ConflictReport
+from ..shared.carrying_report import CarryingReport
+from ..shared.conflict_report import ConflictReport
+from ..shared.moved_report import MovedReport
+from ..shared.unsupported_report import UnsupportedReport
 
 
 class LinkingReport(typing.TypedDict):

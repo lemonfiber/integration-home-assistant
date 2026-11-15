@@ -7,9 +7,9 @@ and CI fails on any difference.
 
 import typing
 
-from .askable__askable_kinds__asked__dashboard__household__news_items import TitleKind, TitleUnit
-from .askable__dashboard__household import MemberAsking, Policy
-from .dashboard__household__invitation import Unrated
+from .asking_standing import MemberAsking, Policy
+from .title_kind import TitleKind, TitleUnit
+from .unrated import Unrated
 
 
 class Estimate(typing.TypedDict):

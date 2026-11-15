@@ -19,7 +19,7 @@ from .affected import (
     PanelVpnPending,
     PanelVpnReady,
 )
-from ...shared.alert__dashboard import Alert
+from ...shared.alert import Alert
 
 
 class DashboardEnvelope(typing.TypedDict):

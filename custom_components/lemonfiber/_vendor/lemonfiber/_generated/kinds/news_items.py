@@ -7,8 +7,8 @@ and CI fails on any difference.
 
 import typing
 
-from ..shared.askable__askable_kinds__asked__dashboard__household__news_items import TitleKind, TitleUnit
-from ..shared.news__news_items import NewsKind
+from ..shared.news_kind import NewsKind
+from ..shared.title_kind import TitleKind, TitleUnit
 
 
 class News(typing.TypedDict):

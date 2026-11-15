@@ -7,7 +7,7 @@ and CI fails on any difference.
 
 import typing
 
-from ..shared.settled__setup import Protocols
+from ..shared.protocols import Protocols
 
 
 type SetUp = typing.Literal["none", "part-way", "done"]
