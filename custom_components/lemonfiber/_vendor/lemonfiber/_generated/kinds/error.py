@@ -7,7 +7,7 @@ and CI fails on any difference.
 
 import typing
 
-from ..shared.code import Problem
+from ..shared.problem import Problem
 
 
 class ErrorEnvelope(typing.TypedDict):

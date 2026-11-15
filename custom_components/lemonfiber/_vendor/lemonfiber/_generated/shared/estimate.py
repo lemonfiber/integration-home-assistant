@@ -8,6 +8,7 @@ and CI fails on any difference.
 import typing
 
 from .asking_standing import MemberAsking, Policy
+from .obstacle import Obstacle
 from .title_kind import TitleKind, TitleUnit
 from .unrated import Unrated
 
@@ -93,12 +94,17 @@ class HouseholdReport(typing.TypedDict):
     about. Present the moment there is one, because a parent who has set a limit is
     exactly the reader who might take it for a lock.
     """
-    findings: list[str]
-    """What could not be read, and anything else worth the operator's attention."""
+    findings: list[Obstacle]
+    """What could not be read, each by the code that names it."""
     members: list[HouseholdMember]
     """Everybody the media server holds an account for, in name order — including
     those who have never asked for anything, and the invitations nobody has taken
     up yet.
+    """
+    noted: list[str]
+    """What else is worth the operator's attention about the household: who has used
+    their limit, what is waiting on them, what nobody has claimed. Written for the
+    operator alone, so a member's own reading carries none.
     """
     policy: typing.NotRequired[Policy | None]
     """What happens to what the household asks for where nobody chose otherwise for

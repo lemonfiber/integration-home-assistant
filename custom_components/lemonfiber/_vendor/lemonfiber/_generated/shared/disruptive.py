@@ -7,7 +7,8 @@ and CI fails on any difference.
 
 import typing
 
-from .code import Code, Problem, ProblemState, ProblemStep
+from .code import Code
+from .problem import Problem, ProblemState, ProblemStep
 from .problem_severity import ProblemSeverity
 from .remedy import Remedy
 from .value_origin import ValueOrigin
