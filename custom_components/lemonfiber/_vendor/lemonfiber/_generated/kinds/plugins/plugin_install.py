@@ -56,6 +56,10 @@ class PluginInstall(typing.TypedDict):
     """Every ask its services would make, each with what it would reach and how that
     would be settled.
     """
+    awaits: typing.NotRequired[list[str]]
+    """The forms it joins, where none of them was running once it was installed: its
+    services were stopped then, and start with the first of these that is started.
+    """
     changes: list[PluginChange]
     """Every change it makes to the machine, in the order it makes them."""
     contests: list[WiringContest]
@@ -225,8 +229,8 @@ class PluginInstalls(typing.TypedDict):
 class PluginNonconforming(typing.TypedDict):
     """One answer a plugin's adapter gave outside a contract it speaks."""
 
-    at: str
-    """When it answered so, as RFC 3339."""
+    at: int
+    """When it answered so."""
     capability: str
     """The capability it was asked as."""
     operation: str

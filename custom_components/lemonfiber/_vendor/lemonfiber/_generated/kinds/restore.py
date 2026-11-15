@@ -19,8 +19,8 @@ class BackupManifest(typing.TypedDict):
     value the capture wrote is the value the restore reads.
     """
 
-    created_at: str
-    """When it was taken. Opaque here; the surface stamps it from the clock."""
+    created_at: int
+    """When it was taken."""
     data_root: str
     """The data root it was taken against, to notice a restore to a different one."""
     members: list[Member]

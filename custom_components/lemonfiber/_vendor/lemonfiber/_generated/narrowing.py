@@ -25,6 +25,7 @@ from .kinds import (
     CapabilitiesEnvelope,
     CatalogueEnvelope,
     CertificateEnvelope,
+    ChannelsEnvelope,
     ClientsEnvelope,
     ConfigEnvelope,
     CredentialsEnvelope,
@@ -62,6 +63,7 @@ from .kinds import (
     PairingEnvelope,
     PartWayEnvelope,
     PausingEnvelope,
+    PlayEnvelope,
     PlayingEnvelope,
     PluginClaimsEnvelope,
     PluginConformanceEnvelope,
@@ -96,6 +98,7 @@ from .kinds import (
     SubstitutionEnvelope,
     TitleEnvelope,
     TraceEnvelope,
+    TunedEnvelope,
     UndoEnvelope,
     UninstallEnvelope,
     UpdateEnvelope,
@@ -150,6 +153,8 @@ class KindNarrowing(typing.Protocol):
     def __call__(self, envelope: Envelope, kind: typing.Literal["catalogue"], /) -> CatalogueEnvelope: ...
     @typing.overload
     def __call__(self, envelope: Envelope, kind: typing.Literal["certificate"], /) -> CertificateEnvelope: ...
+    @typing.overload
+    def __call__(self, envelope: Envelope, kind: typing.Literal["channels"], /) -> ChannelsEnvelope: ...
     @typing.overload
     def __call__(self, envelope: Envelope, kind: typing.Literal["clients"], /) -> ClientsEnvelope: ...
     @typing.overload
@@ -226,6 +231,8 @@ class KindNarrowing(typing.Protocol):
     def __call__(self, envelope: Envelope, kind: typing.Literal["part-way"], /) -> PartWayEnvelope: ...
     @typing.overload
     def __call__(self, envelope: Envelope, kind: typing.Literal["pausing"], /) -> PausingEnvelope: ...
+    @typing.overload
+    def __call__(self, envelope: Envelope, kind: typing.Literal["play"], /) -> PlayEnvelope: ...
     @typing.overload
     def __call__(self, envelope: Envelope, kind: typing.Literal["playing"], /) -> PlayingEnvelope: ...
     @typing.overload
@@ -310,6 +317,8 @@ class KindNarrowing(typing.Protocol):
     def __call__(self, envelope: Envelope, kind: typing.Literal["title"], /) -> TitleEnvelope: ...
     @typing.overload
     def __call__(self, envelope: Envelope, kind: typing.Literal["trace"], /) -> TraceEnvelope: ...
+    @typing.overload
+    def __call__(self, envelope: Envelope, kind: typing.Literal["tuned"], /) -> TunedEnvelope: ...
     @typing.overload
     def __call__(self, envelope: Envelope, kind: typing.Literal["undo"], /) -> UndoEnvelope: ...
     @typing.overload

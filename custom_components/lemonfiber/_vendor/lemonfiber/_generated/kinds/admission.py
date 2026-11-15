@@ -37,8 +37,8 @@ class Admitted(typing.TypedDict):
     """The member's display name as the media server holds it, where it is a member's."""
     token: str
     """The secret this session is carried by, sent in the header the per-run token is."""
-    until: str
-    """When it stops being one, written as every other instant this product writes."""
+    until: int
+    """When it stops being one."""
 
 
 __all__ = [

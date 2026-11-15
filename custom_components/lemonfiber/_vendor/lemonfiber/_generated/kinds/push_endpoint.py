@@ -25,7 +25,7 @@ class RegisteredPushEndpoint(typing.TypedDict):
     """The `https` address its distributor gave."""
     name: str
     """The name it was registered under."""
-    registered: str
+    registered: int
     """When it was registered."""
     rehearsed: bool
     """Whether this was a rehearsal: what registering would come to, with nothing kept."""

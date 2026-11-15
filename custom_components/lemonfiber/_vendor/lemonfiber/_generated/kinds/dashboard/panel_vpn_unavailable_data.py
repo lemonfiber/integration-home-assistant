@@ -16,9 +16,8 @@ from .affected import (
     PanelFrontDoorReport,
     PanelHouseholdReport,
     PanelStorage,
-    PanelVpn,
-    Stuck,
-    Telemetry,
+    PanelVpnPending,
+    PanelVpnReady,
 )
 from ...shared.alert__dashboard import Alert
 
@@ -31,6 +30,30 @@ class DashboardEnvelope(typing.TypedDict):
     host: typing.NotRequired[str | None]
     job: typing.NotRequired[str | None]
     kind: typing.Literal["dashboard"]
+
+
+type PanelVpn = PanelVpnReady | PanelVpnUnavailable | PanelVpnPending
+"""A panel's content, the reason its source could not fill it, or that its source
+is still being read.
+
+The difference between \"this panel is up to date\" and \"this panel's source is
+unreachable\" is the whole of degrading honestly: an unavailable panel says so,
+in its own words, rather than showing stale data as current or blank data as
+zero — and the panels beside it stay live. A pending panel is neither: its source
+has not answered within the first wave of a gather, and the second fills it in.
+"""
+
+
+class PanelVpnUnavailable(typing.TypedDict):
+    """The source could not be reached, for this stated reason."""
+
+    data: PanelVpnUnavailableData
+    panel: typing.Literal["unavailable"]
+
+
+class PanelVpnUnavailableData(typing.TypedDict):
+    reason: str
+    """Why the panel could not be filled, in the operator's terms."""
 
 
 class Snapshot(typing.TypedDict):
@@ -94,7 +117,65 @@ class Snapshot(typing.TypedDict):
     """
 
 
+type Stall = typing.Literal[
+    "redownload-loop",
+    "repeated-import-failure",
+    "completed-not-imported",
+    "orphaned",
+    "stalled-download",
+    "waiting-indefinitely",
+    "slow",
+]
+"""Why an item is not moving.
+
+Ordered by how much of the operator's attention each deserves, worst first, so
+a summary that leads with the worst category needs no second ranking.
+"""
+
+
+class Stuck(typing.TypedDict):
+    """One thing that is wrong, and why."""
+
+    blocking: typing.NotRequired[str | None]
+    """What the service said was blocking it, in its own words, where it said
+    anything. A permission denial from an import log is worth more than any
+    interpretation of it, and it is the difference between \"stuck\" and
+    something an operator can fix.
+    """
+    held_for: int
+    """How long it has been that way, in seconds — what turns \"stuck\" into a
+    sentence an operator can weigh.
+    """
+    items: int
+    """How many items this stands for. One in the ordinary case; more where they
+    share a cause and the cause is what is wrong — twenty downloads stopped by
+    a full disk are one thing to fix, and twenty alerts about it are how an
+    operator learns to mute the queue check.
+    """
+    name: str
+    """Which item — or, where several share one cause, that cause."""
+    stall: Stall
+    """What is wrong with it."""
+
+
+type Telemetry = typing.Literal["live", "degraded", "disconnected", "no-stack", "unconfigured"]
+"""How the screen itself is doing, which is a different question from how the
+stack is doing.
+
+The stack's own verdict is [`crate::health::Standing`]; this is only whether the
+picture can be trusted to be current. Kept apart because they disagree in both
+directions: a healthy stack can be shown through half-failing telemetry, and a
+perfectly refreshing screen can be reporting a stack that is on fire.
+"""
+
+
 __all__ = [
     "DashboardEnvelope",
+    "PanelVpn",
+    "PanelVpnUnavailable",
+    "PanelVpnUnavailableData",
     "Snapshot",
+    "Stall",
+    "Stuck",
+    "Telemetry",
 ]

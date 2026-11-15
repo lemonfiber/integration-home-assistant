@@ -78,10 +78,24 @@ class Plan(typing.TypedDict):
     of a pass over this list: the union is over profiles, and a service
     appearing twice is not a state this can hold.
     """
+    vanished: typing.NotRequired[list[Vanished]]
+    """Each installed plugin naming a form this stack no longer declares, with those
+    forms: a plugin that joins none of the rest does not run.
+    """
+
+
+class Vanished(typing.TypedDict):
+    """A plugin naming forms the stack does not declare."""
+
+    forms: list[str]
+    """The forms it names that the stack does not declare, in the order it names them."""
+    plugin: str
+    """The plugin, by its id."""
 
 
 __all__ = [
     "Dropped",
     "Footprint",
     "Plan",
+    "Vanished",
 ]

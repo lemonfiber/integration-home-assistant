@@ -15,7 +15,7 @@ class ListedPushEndpoint(typing.TypedDict):
     """The `https` address its distributor gave."""
     name: str
     """The name it was registered under."""
-    registered: str
+    registered: int
     """When it was registered."""
 
 

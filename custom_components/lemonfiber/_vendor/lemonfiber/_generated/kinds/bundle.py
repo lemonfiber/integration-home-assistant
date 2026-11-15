@@ -110,8 +110,8 @@ class Taken(typing.TypedDict):
     of those threads goes wrong, and nothing in the contents tells either of them.
     """
 
-    at: str
-    """When, as a service writes a moment."""
+    at: int
+    """When it was written."""
     lemonfiber: str
     """The lemonfiber that wrote it."""
     stack: str

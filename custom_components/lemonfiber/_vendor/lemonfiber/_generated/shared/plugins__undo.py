@@ -494,7 +494,7 @@ none.
 PluginGrant = typing.TypedDict(
     "PluginGrant",
     {
-        "at": str,
+        "at": typing.NotRequired[int | None],
         "credential": str,
         "for": str,
         "of": str,

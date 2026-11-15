@@ -24,6 +24,7 @@ from .kinds import (
     CapabilitiesEnvelope,
     CatalogueEnvelope,
     CertificateEnvelope,
+    ChannelsEnvelope,
     ClientsEnvelope,
     ConfigEnvelope,
     CredentialsEnvelope,
@@ -61,6 +62,7 @@ from .kinds import (
     PairingEnvelope,
     PartWayEnvelope,
     PausingEnvelope,
+    PlayEnvelope,
     PlayingEnvelope,
     PluginClaimsEnvelope,
     PluginConformanceEnvelope,
@@ -95,6 +97,7 @@ from .kinds import (
     SubstitutionEnvelope,
     TitleEnvelope,
     TraceEnvelope,
+    TunedEnvelope,
     UndoEnvelope,
     UninstallEnvelope,
     UpdateEnvelope,
@@ -129,6 +132,7 @@ type Kind = typing.Literal[
     "capabilities",
     "catalogue",
     "certificate",
+    "channels",
     "clients",
     "config",
     "credentials",
@@ -166,6 +170,7 @@ type Kind = typing.Literal[
     "pairing",
     "part-way",
     "pausing",
+    "play",
     "playing",
     "plugin-claims",
     "plugin-conformance",
@@ -200,6 +205,7 @@ type Kind = typing.Literal[
     "substitution",
     "title",
     "trace",
+    "tuned",
     "undo",
     "uninstall",
     "update",
@@ -235,6 +241,7 @@ type Envelope = (
     | CapabilitiesEnvelope
     | CatalogueEnvelope
     | CertificateEnvelope
+    | ChannelsEnvelope
     | ClientsEnvelope
     | ConfigEnvelope
     | CredentialsEnvelope
@@ -272,6 +279,7 @@ type Envelope = (
     | PairingEnvelope
     | PartWayEnvelope
     | PausingEnvelope
+    | PlayEnvelope
     | PlayingEnvelope
     | PluginClaimsEnvelope
     | PluginConformanceEnvelope
@@ -306,6 +314,7 @@ type Envelope = (
     | SubstitutionEnvelope
     | TitleEnvelope
     | TraceEnvelope
+    | TunedEnvelope
     | UndoEnvelope
     | UninstallEnvelope
     | UpdateEnvelope

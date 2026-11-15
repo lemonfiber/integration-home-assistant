@@ -268,7 +268,7 @@ class SettledUnproven(typing.TypedDict):
 CredentialGranted = typing.TypedDict(
     "CredentialGranted",
     {
-        "at": str,
+        "at": typing.NotRequired[int | None],
         "credential": str,
         "for": str,
         "of": str,
