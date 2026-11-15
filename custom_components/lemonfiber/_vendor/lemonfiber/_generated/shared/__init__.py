@@ -25,6 +25,7 @@ from . import dropped as _dropped
 from . import estimate as _estimate
 from . import filtered as _filtered
 from . import forwarded as _forwarded
+from . import instant as _instant
 from . import key_purpose as _key_purpose
 from . import line as _line
 from . import medium as _medium
@@ -79,6 +80,7 @@ from .dropped import *
 from .estimate import *
 from .filtered import *
 from .forwarded import *
+from .instant import *
 from .key_purpose import *
 from .line import *
 from .medium import *
@@ -134,6 +136,7 @@ __all__ += _dropped.__all__
 __all__ += _estimate.__all__
 __all__ += _filtered.__all__
 __all__ += _forwarded.__all__
+__all__ += _instant.__all__
 __all__ += _key_purpose.__all__
 __all__ += _line.__all__
 __all__ += _medium.__all__

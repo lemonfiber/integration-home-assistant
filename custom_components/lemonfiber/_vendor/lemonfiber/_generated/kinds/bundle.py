@@ -7,6 +7,8 @@ and CI fails on any difference.
 
 import typing
 
+from ..shared.instant import Instant
+
 
 class Bundle(typing.TypedDict):
     """What a support request said: what a bundle holds, and where it is if it exists.
@@ -110,7 +112,7 @@ class Taken(typing.TypedDict):
     of those threads goes wrong, and nothing in the contents tells either of them.
     """
 
-    at: int
+    at: Instant
     """When it was written."""
     lemonfiber: str
     """The lemonfiber that wrote it."""

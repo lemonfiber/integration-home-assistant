@@ -7,6 +7,8 @@ and CI fails on any difference.
 
 import typing
 
+from ..shared.instant import Instant
+
 
 class AdmissionEnvelope(typing.TypedDict):
     """The envelope carrying `admission`."""
@@ -37,7 +39,7 @@ class Admitted(typing.TypedDict):
     """The member's display name as the media server holds it, where it is a member's."""
     token: str
     """The secret this session is carried by, sent in the header the per-run token is."""
-    until: int
+    until: Instant
     """When it stops being one."""
 
 

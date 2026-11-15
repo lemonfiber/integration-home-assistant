@@ -24,6 +24,7 @@ from .plugin_reached_proxied import (
     WiringContest,
 )
 from ...shared.action import UndoReversal
+from ...shared.instant import Instant
 from ...shared.plugin_constraint import PluginEvidence
 from ...shared.reaches import Wired
 from ...shared.stack_move_taken import StackMoveTaken
@@ -229,7 +230,7 @@ class PluginInstalls(typing.TypedDict):
 class PluginNonconforming(typing.TypedDict):
     """One answer a plugin's adapter gave outside a contract it speaks."""
 
-    at: int
+    at: Instant
     """When it answered so."""
     capability: str
     """The capability it was asked as."""

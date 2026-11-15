@@ -7,6 +7,7 @@ and CI fails on any difference.
 
 import typing
 
+from ..shared.instant import Instant
 from ..shared.stage import Stage
 
 
@@ -97,7 +98,7 @@ class TraceMoment(typing.TypedDict):
     pattern it is rather than flattened to a single furthest stage.
     """
 
-    at: typing.NotRequired[int | None]
+    at: typing.NotRequired[Instant | None]
     """When it happened, where the service reported it."""
     outcome: TraceOutcome
     """What happened."""
@@ -161,7 +162,7 @@ class TraceStage(typing.TypedDict):
     the service that recorded it, and when.
     """
 
-    at: typing.NotRequired[int | None]
+    at: typing.NotRequired[Instant | None]
     """When it happened, as the service reported it — absent for a stage inferred
     rather than timed, such as being monitored.
     """

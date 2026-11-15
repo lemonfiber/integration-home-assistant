@@ -7,6 +7,7 @@ and CI fails on any difference.
 
 import typing
 
+from ..shared.instant import Instant
 from ..shared.news_kind import NewsKind
 
 
@@ -32,7 +33,7 @@ class NewsCheck(typing.TypedDict):
 
     check: str
     """The check that raised it."""
-    onset: int
+    onset: Instant
     """When the stack first saw it wrong since it last saw it right, in whole seconds
     since the epoch.
     """

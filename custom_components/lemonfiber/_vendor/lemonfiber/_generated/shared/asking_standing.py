@@ -7,6 +7,8 @@ and CI fails on any difference.
 
 import typing
 
+from .instant import Instant
+
 
 type AskingStanding = typing.Literal["unlimited", "within-quota", "near-quota", "quota-exhausted"]
 """Where one member stands against what a period allows them.
@@ -44,7 +46,7 @@ class MemberAsking(typing.TypedDict):
 
     films: Counted
     """Films, counted one to a request."""
-    frees_up: typing.NotRequired[int | None]
+    frees_up: typing.NotRequired[Instant | None]
     """When the count next lets go of something, so one more becomes possible.
 
     Absent where nothing limits them, and where the request service's own dates
