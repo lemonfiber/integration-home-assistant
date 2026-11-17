@@ -88,6 +88,7 @@ from .kinds import (
     SettingsEnvelope,
     SettledEnvelope,
     SetupEnvelope,
+    SignInCodeEnvelope,
     SpaceEnvelope,
     StackEnvelope,
     StartEnvelope,
@@ -198,6 +199,7 @@ type Kind = typing.Literal[
     "settings",
     "settled",
     "setup",
+    "sign-in-code",
     "space",
     "stack",
     "start",
@@ -309,6 +311,7 @@ type Envelope = (
     | SettingsEnvelope
     | SettledEnvelope
     | SetupEnvelope
+    | SignInCodeEnvelope
     | SpaceEnvelope
     | StackEnvelope
     | StartEnvelope

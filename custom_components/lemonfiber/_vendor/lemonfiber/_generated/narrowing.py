@@ -89,6 +89,7 @@ from .kinds import (
     SettingsEnvelope,
     SettledEnvelope,
     SetupEnvelope,
+    SignInCodeEnvelope,
     SpaceEnvelope,
     StackEnvelope,
     StartEnvelope,
@@ -297,6 +298,8 @@ class KindNarrowing(typing.Protocol):
     def __call__(self, envelope: Envelope, kind: typing.Literal["settled"], /) -> SettledEnvelope: ...
     @typing.overload
     def __call__(self, envelope: Envelope, kind: typing.Literal["setup"], /) -> SetupEnvelope: ...
+    @typing.overload
+    def __call__(self, envelope: Envelope, kind: typing.Literal["sign-in-code"], /) -> SignInCodeEnvelope: ...
     @typing.overload
     def __call__(self, envelope: Envelope, kind: typing.Literal["space"], /) -> SpaceEnvelope: ...
     @typing.overload
