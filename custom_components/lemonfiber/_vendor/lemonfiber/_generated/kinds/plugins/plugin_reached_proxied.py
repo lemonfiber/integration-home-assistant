@@ -284,6 +284,19 @@ party, or, written `\"minted\"`, a value made for that run alone.
 """
 
 
+class Schedule(typing.TypedDict):
+    """The setting naming when a run-and-exit service runs, and the times where it holds
+    nothing.
+    """
+
+    default: str
+    """The times where the setting holds nothing: a five-field cron expression or one of
+    `@hourly`, `@daily`, `@weekly` and `@monthly`.
+    """
+    setting: str
+    """The setting, as `<plugin>:<name>`."""
+
+
 class ServiceCertificate(typing.TypedDict):
     """The certificate lemonfiber makes for a service before it first starts."""
 
@@ -322,6 +335,8 @@ class ServiceFields(typing.TypedDict):
     """Its further published ports."""
     rebuilt: typing.NotRequired[list[str]]
     """The paths beneath its configuration directory it rebuilds when they are missing."""
+    schedule: typing.NotRequired[Schedule | None]
+    """When it runs, where it runs to completion on a schedule rather than for good."""
     shares_config: typing.NotRequired[str | None]
     """Where the whole configuration directory of the service it fronts lands in it."""
     tmpfs: typing.NotRequired[list[str]]
@@ -502,6 +517,7 @@ __all__ = [
     "PluginTaking",
     "PluginVerification",
     "RecordedWith",
+    "Schedule",
     "ServiceCertificate",
     "ServiceFields",
     "ServiceIdVariables",

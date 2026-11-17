@@ -20,6 +20,7 @@ from .affected import (
     PanelVpnReady,
 )
 from ...shared.alert import Alert
+from ...shared.run_health import ScheduledService
 
 
 class DashboardEnvelope(typing.TypedDict):
@@ -98,6 +99,8 @@ class Snapshot(typing.TypedDict):
     """
     queue: PanelArray_of_Queue
     """The per-service queues."""
+    scheduled: list[ScheduledService]
+    """Each run-and-exit service, with how its last run ended."""
     services: PanelArray_of_Service
     """Every service and what it is doing."""
     storage: PanelStorage
