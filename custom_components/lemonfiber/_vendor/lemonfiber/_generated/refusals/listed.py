@@ -230,7 +230,6 @@ type RefusalCode = typing.Literal[
     "WISH-11",
     "WISH-12",
     "WISH-13",
-    "WISH-14",
     "WISH-2",
     "WISH-3",
     "WISH-4",
