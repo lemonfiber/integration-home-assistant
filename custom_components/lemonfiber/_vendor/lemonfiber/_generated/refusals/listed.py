@@ -51,6 +51,7 @@ type RefusalCode = typing.Literal[
     "FORM-2",
     "FORM-3",
     "GONE-2",
+    "HOST-7",
     "KEY-1",
     "KEY-10",
     "KEY-11",

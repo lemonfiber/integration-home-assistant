@@ -42,6 +42,8 @@ from . import protocols as _protocols
 from . import pulling as _pulling
 from . import reaches as _reaches
 from . import remedy as _remedy
+from . import run_health as _run_health
+from . import scheduled_run as _scheduled_run
 from . import scope as _scope
 from . import service as _service
 from . import setting_report as _setting_report
@@ -97,6 +99,8 @@ from .protocols import *
 from .pulling import *
 from .reaches import *
 from .remedy import *
+from .run_health import *
+from .scheduled_run import *
 from .scope import *
 from .service import *
 from .setting_report import *
@@ -153,6 +157,8 @@ __all__ += _protocols.__all__
 __all__ += _pulling.__all__
 __all__ += _reaches.__all__
 __all__ += _remedy.__all__
+__all__ += _run_health.__all__
+__all__ += _scheduled_run.__all__
 __all__ += _scope.__all__
 __all__ += _service.__all__
 __all__ += _setting_report.__all__
