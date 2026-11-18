@@ -77,6 +77,16 @@ class LifecycleReport(typing.TypedDict):
     """Each part this release installs as a plugin that the stack still runs as its own
     service: a move in place on offer, named by every start and taken by none.
     """
+    networks_created: typing.NotRequired[list[str]]
+    """Every network of the project the engine held none of, by the engine's name: created
+    before a start, or named and left uncreated by a rehearsal. Empty for every other
+    action.
+    """
+    networks_recreated: typing.NotRequired[list[str]]
+    """Every network of the project the engine held in another shape than the project
+    gives it, by the engine's name: taken away and created again before a start, with
+    every service on it, or named and left by a rehearsal. Empty for every other action.
+    """
     offer: typing.NotRequired[str | None]
     """The offer a restart answers: the services it would restart, named so that a
     restart carrying it back is carried out against those services or refused.
