@@ -27,6 +27,11 @@ WISH: typing.Final[typing.Mapping[RefusalCode, ListedRefusal]] = {
     "WISH-13": ListedRefusal(
         "NO_PICTURE", 404, "Said where a title a member may ask for has no picture to show them."
     ),
+    "WISH-15": ListedRefusal(
+        "NOT_CHECKED",
+        503,
+        "Said where a title the member's own search just found could not be looked up again for their ask, so it was neither asked for nor called unknown.",
+    ),
     "WISH-2": ListedRefusal(
         "NOT_A_PLACE",
         400,
