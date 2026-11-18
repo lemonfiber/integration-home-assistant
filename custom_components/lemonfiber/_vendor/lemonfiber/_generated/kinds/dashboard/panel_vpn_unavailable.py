@@ -18,6 +18,7 @@ from .affected import (
     PanelStorage,
     PanelVpnPending,
     PanelVpnReady,
+    PanelVpnUnavailableData,
 )
 from ...shared.alert import Alert
 from ...shared.run_health import ScheduledService
@@ -50,11 +51,6 @@ class PanelVpnUnavailable(typing.TypedDict):
 
     data: PanelVpnUnavailableData
     panel: typing.Literal["unavailable"]
-
-
-class PanelVpnUnavailableData(typing.TypedDict):
-    reason: str
-    """Why the panel could not be filled, in the operator's terms."""
 
 
 class Snapshot(typing.TypedDict):
@@ -176,7 +172,6 @@ __all__ = [
     "DashboardEnvelope",
     "PanelVpn",
     "PanelVpnUnavailable",
-    "PanelVpnUnavailableData",
     "Snapshot",
     "Stall",
     "Stuck",

@@ -46,12 +46,14 @@ from .kinds import (
     HostingEnvelope,
     HouseholdEnvelope,
     ImportEnvelope,
+    InFlightEnvelope,
     InvitationEnvelope,
     JobEnvelope,
     KeyClaimEnvelope,
     KeysEnvelope,
     LifecycleEnvelope,
     LogEnvelope,
+    LogsEnvelope,
     MigrationEnvelope,
     MintedKeyEnvelope,
     MusicEnvelope,
@@ -62,6 +64,7 @@ from .kinds import (
     OutboundEnvelope,
     PairingEnvelope,
     PartWayEnvelope,
+    PasswordEnvelope,
     PausingEnvelope,
     PlayEnvelope,
     PlayingEnvelope,
@@ -85,6 +88,7 @@ from .kinds import (
     RestoreEnvelope,
     SeedEnvelope,
     SelfUpdateEnvelope,
+    ServedEnvelope,
     SettingsEnvelope,
     SettledEnvelope,
     SetupEnvelope,
@@ -107,6 +111,7 @@ from .kinds import (
     UpgradeEnvelope,
     VersionEnvelope,
     WalkthroughEnvelope,
+    WalkthroughOfferEnvelope,
     WatchEnvelope,
     WatchedEnvelope,
     WatcherEnvelope,
@@ -157,12 +162,14 @@ type Kind = typing.Literal[
     "hosting",
     "household",
     "import",
+    "in-flight",
     "invitation",
     "job",
     "key-claim",
     "keys",
     "lifecycle",
     "log",
+    "logs",
     "migration",
     "minted-key",
     "music",
@@ -173,6 +180,7 @@ type Kind = typing.Literal[
     "outbound",
     "pairing",
     "part-way",
+    "password",
     "pausing",
     "play",
     "playing",
@@ -196,6 +204,7 @@ type Kind = typing.Literal[
     "restore",
     "seed",
     "self-update",
+    "served",
     "settings",
     "settled",
     "setup",
@@ -218,6 +227,7 @@ type Kind = typing.Literal[
     "upgrade",
     "version",
     "walkthrough",
+    "walkthrough-offer",
     "watch",
     "watched",
     "watcher",
@@ -269,12 +279,14 @@ type Envelope = (
     | HostingEnvelope
     | HouseholdEnvelope
     | ImportEnvelope
+    | InFlightEnvelope
     | InvitationEnvelope
     | JobEnvelope
     | KeyClaimEnvelope
     | KeysEnvelope
     | LifecycleEnvelope
     | LogEnvelope
+    | LogsEnvelope
     | MigrationEnvelope
     | MintedKeyEnvelope
     | MusicEnvelope
@@ -285,6 +297,7 @@ type Envelope = (
     | OutboundEnvelope
     | PairingEnvelope
     | PartWayEnvelope
+    | PasswordEnvelope
     | PausingEnvelope
     | PlayEnvelope
     | PlayingEnvelope
@@ -308,6 +321,7 @@ type Envelope = (
     | RestoreEnvelope
     | SeedEnvelope
     | SelfUpdateEnvelope
+    | ServedEnvelope
     | SettingsEnvelope
     | SettledEnvelope
     | SetupEnvelope
@@ -330,6 +344,7 @@ type Envelope = (
     | UpgradeEnvelope
     | VersionEnvelope
     | WalkthroughEnvelope
+    | WalkthroughOfferEnvelope
     | WatchEnvelope
     | WatchedEnvelope
     | WatcherEnvelope
