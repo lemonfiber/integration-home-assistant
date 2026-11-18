@@ -24,7 +24,9 @@ class RunReport(typing.TypedDict):
     """What `lemonfiber run` came to for one service."""
 
     due: bool
-    """Whether a time fell due or a run was owed, so it ran or would have."""
+    """Whether a time fell due, a run was owed or one was asked for at once, so it ran or
+    would have.
+    """
     held: typing.NotRequired[str | None]
     """Why nothing was looked at, where something held it back."""
     ran: typing.NotRequired[ScheduledRun | None]
