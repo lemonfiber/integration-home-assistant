@@ -367,6 +367,10 @@ class ServiceNetwork(typing.TypedDict):
     """Whether it fetches whatever address it is handed, and so runs inside a fence that
     refuses every private address.
     """
+    internal: typing.NotRequired[bool]
+    """Whether it is held inside the stack, behind a fence passing only what is inside its
+    own networks.
+    """
     via: typing.NotRequired[str | None]
     """The capability whose filler's network it runs inside."""
 
