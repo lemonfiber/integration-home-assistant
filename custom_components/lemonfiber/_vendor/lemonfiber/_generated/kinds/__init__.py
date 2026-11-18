@@ -43,12 +43,14 @@ from . import history as _history
 from . import hosting as _hosting
 from . import household as _household
 from . import import_ as _import_
+from . import in_flight as _in_flight
 from . import invitation as _invitation
 from . import job as _job
 from . import key_claim as _key_claim
 from . import keys as _keys
 from . import lifecycle as _lifecycle
 from . import log as _log
+from . import logs as _logs
 from . import migration as _migration
 from . import minted_key as _minted_key
 from . import music as _music
@@ -59,6 +61,7 @@ from . import notify_mine as _notify_mine
 from . import outbound as _outbound
 from . import pairing as _pairing
 from . import part_way as _part_way
+from . import password as _password
 from . import pausing as _pausing
 from . import play as _play
 from . import playing as _playing
@@ -82,6 +85,7 @@ from . import reset as _reset
 from . import restore as _restore
 from . import seed as _seed
 from . import self_update as _self_update
+from . import served as _served
 from . import settings as _settings
 from . import settled as _settled
 from . import setup as _setup
@@ -104,6 +108,7 @@ from . import update as _update
 from . import upgrade as _upgrade
 from . import version as _version
 from . import walkthrough as _walkthrough
+from . import walkthrough_offer as _walkthrough_offer
 from . import watch as _watch
 from . import watched as _watched
 from . import watcher as _watcher
@@ -149,12 +154,14 @@ from .history import *
 from .hosting import *
 from .household import *
 from .import_ import *
+from .in_flight import *
 from .invitation import *
 from .job import *
 from .key_claim import *
 from .keys import *
 from .lifecycle import *
 from .log import *
+from .logs import *
 from .migration import *
 from .minted_key import *
 from .music import *
@@ -165,6 +172,7 @@ from .notify_mine import *
 from .outbound import *
 from .pairing import *
 from .part_way import *
+from .password import *
 from .pausing import *
 from .play import *
 from .playing import *
@@ -188,6 +196,7 @@ from .reset import *
 from .restore import *
 from .seed import *
 from .self_update import *
+from .served import *
 from .settings import *
 from .settled import *
 from .setup import *
@@ -210,6 +219,7 @@ from .update import *
 from .upgrade import *
 from .version import *
 from .walkthrough import *
+from .walkthrough_offer import *
 from .watch import *
 from .watched import *
 from .watcher import *
@@ -256,12 +266,14 @@ __all__ += _history.__all__
 __all__ += _hosting.__all__
 __all__ += _household.__all__
 __all__ += _import_.__all__
+__all__ += _in_flight.__all__
 __all__ += _invitation.__all__
 __all__ += _job.__all__
 __all__ += _key_claim.__all__
 __all__ += _keys.__all__
 __all__ += _lifecycle.__all__
 __all__ += _log.__all__
+__all__ += _logs.__all__
 __all__ += _migration.__all__
 __all__ += _minted_key.__all__
 __all__ += _music.__all__
@@ -272,6 +284,7 @@ __all__ += _notify_mine.__all__
 __all__ += _outbound.__all__
 __all__ += _pairing.__all__
 __all__ += _part_way.__all__
+__all__ += _password.__all__
 __all__ += _pausing.__all__
 __all__ += _play.__all__
 __all__ += _playing.__all__
@@ -295,6 +308,7 @@ __all__ += _reset.__all__
 __all__ += _restore.__all__
 __all__ += _seed.__all__
 __all__ += _self_update.__all__
+__all__ += _served.__all__
 __all__ += _settings.__all__
 __all__ += _settled.__all__
 __all__ += _setup.__all__
@@ -317,6 +331,7 @@ __all__ += _update.__all__
 __all__ += _upgrade.__all__
 __all__ += _version.__all__
 __all__ += _walkthrough.__all__
+__all__ += _walkthrough_offer.__all__
 __all__ += _watch.__all__
 __all__ += _watched.__all__
 __all__ += _watcher.__all__

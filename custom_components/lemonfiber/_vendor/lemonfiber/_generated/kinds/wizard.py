@@ -8,6 +8,7 @@ and CI fails on any difference.
 import typing
 
 from ..shared.choosable import Choosable
+from ..shared.set_up import SetUp
 from ..shared.setting_report import SettingReport, Validation
 
 
@@ -74,6 +75,39 @@ is the same boolean every report carries, so a client reads one shape.
 """
 
 
+type StorageFinding = StorageFindingLinks | StorageFindingCopyOnly | StorageFindingUntested
+"""What testing a data location for hardlinks found.
+
+Tested on the location itself where it exists, and otherwise on the deepest parent
+that does, which is named so that a result read off a parent is never shown as the
+location's own.
+"""
+
+
+class StorageFindingCopyOnly(typing.TypedDict):
+    """It works but cannot hardlink, so every import is a copy."""
+
+    found: typing.Literal["copy-only"]
+    limitation: typing.NotRequired[str | None]
+    """The filesystem's reason, where it has one that can be named."""
+
+
+class StorageFindingLinks(typing.TypedDict):
+    """It hardlinks, so imports are instant and cost no extra disk."""
+
+    found: typing.Literal["links"]
+    inferred_from: typing.NotRequired[str | None]
+    """The parent the test ran on, where the location did not exist yet."""
+
+
+class StorageFindingUntested(typing.TypedDict):
+    """It could not be tested, with the platform's words for why."""
+
+    found: typing.Literal["untested"]
+    reason: str
+    """Why the test could not run."""
+
+
 class WizardEnvelope(typing.TypedDict):
     """The envelope carrying `wizard`."""
 
@@ -136,6 +170,17 @@ class WizardReport(typing.TypedDict):
     Said in a field of its own so that a rehearsal is never told from the real run by
     its wording alone.
     """
+    setup: SetUp
+    """Whether this stack is set up: a previous run left setup part-way, nothing is
+    configured and no setup has begun, or it is configured.
+    """
+    storage: typing.NotRequired[StorageFinding | None]
+    """What testing the data location just given found, where one was given.
+
+    Absent for every other answer. A location that does not hardlink is still kept,
+    because whether to use it anyway is the operator's to decide once they have read
+    this.
+    """
     unanswered: list[WizardStep]
     """Every question that applies on this machine and has no answer yet, in the
     order they are put.
@@ -182,6 +227,10 @@ __all__ = [
     "GuardQuestionValue",
     "Phase",
     "Ran",
+    "StorageFinding",
+    "StorageFindingCopyOnly",
+    "StorageFindingLinks",
+    "StorageFindingUntested",
     "WizardEnvelope",
     "WizardReport",
     "WizardStep",
