@@ -45,6 +45,11 @@ ADMIT: typing.Final[typing.Mapping[RefusalCode, ListedRefusal]] = {
         400,
         "Raised when what was sent to ask for or finish a sign-in by a code cannot be read.",
     ),
+    "ADMIT-19": ListedRefusal(
+        "NO_SESSION",
+        500,
+        "Raised when this machine would not supply the bytes a session's secret is made of.",
+    ),
     "ADMIT-4": ListedRefusal(
         "NOT_ADMITTED", 403, "Raised when a request carried no token, session or key this run admits."
     ),
