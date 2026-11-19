@@ -226,6 +226,7 @@ type RefusalCode = typing.Literal[
     "WIRE-5",
     "WIRE-6",
     "WIRE-7",
+    "WIRE-8",
     "WISH-1",
     "WISH-10",
     "WISH-11",
