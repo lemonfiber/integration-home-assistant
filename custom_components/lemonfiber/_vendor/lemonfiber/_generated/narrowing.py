@@ -22,6 +22,7 @@ from .kinds import (
     BesideEnvelope,
     BootEnvelope,
     BundleEnvelope,
+    CallerEnvelope,
     CapabilitiesEnvelope,
     CatalogueEnvelope,
     CertificateEnvelope,
@@ -96,6 +97,7 @@ from .kinds import (
     SignInCodeEnvelope,
     SpaceEnvelope,
     StackEnvelope,
+    StandingEnvelope,
     StartEnvelope,
     StatusEnvelope,
     StepEnvelope,
@@ -153,6 +155,8 @@ class KindNarrowing(typing.Protocol):
     def __call__(self, envelope: Envelope, kind: typing.Literal["boot"], /) -> BootEnvelope: ...
     @typing.overload
     def __call__(self, envelope: Envelope, kind: typing.Literal["bundle"], /) -> BundleEnvelope: ...
+    @typing.overload
+    def __call__(self, envelope: Envelope, kind: typing.Literal["caller"], /) -> CallerEnvelope: ...
     @typing.overload
     def __call__(
         self, envelope: Envelope, kind: typing.Literal["capabilities"], /
@@ -317,6 +321,8 @@ class KindNarrowing(typing.Protocol):
     def __call__(self, envelope: Envelope, kind: typing.Literal["space"], /) -> SpaceEnvelope: ...
     @typing.overload
     def __call__(self, envelope: Envelope, kind: typing.Literal["stack"], /) -> StackEnvelope: ...
+    @typing.overload
+    def __call__(self, envelope: Envelope, kind: typing.Literal["standing"], /) -> StandingEnvelope: ...
     @typing.overload
     def __call__(self, envelope: Envelope, kind: typing.Literal["start"], /) -> StartEnvelope: ...
     @typing.overload

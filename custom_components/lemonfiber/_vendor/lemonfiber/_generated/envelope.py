@@ -21,6 +21,7 @@ from .kinds import (
     BesideEnvelope,
     BootEnvelope,
     BundleEnvelope,
+    CallerEnvelope,
     CapabilitiesEnvelope,
     CatalogueEnvelope,
     CertificateEnvelope,
@@ -95,6 +96,7 @@ from .kinds import (
     SignInCodeEnvelope,
     SpaceEnvelope,
     StackEnvelope,
+    StandingEnvelope,
     StartEnvelope,
     StatusEnvelope,
     StepEnvelope,
@@ -137,6 +139,7 @@ type Kind = typing.Literal[
     "beside",
     "boot",
     "bundle",
+    "caller",
     "capabilities",
     "catalogue",
     "certificate",
@@ -211,6 +214,7 @@ type Kind = typing.Literal[
     "sign-in-code",
     "space",
     "stack",
+    "standing",
     "start",
     "status",
     "step",
@@ -254,6 +258,7 @@ type Envelope = (
     | BesideEnvelope
     | BootEnvelope
     | BundleEnvelope
+    | CallerEnvelope
     | CapabilitiesEnvelope
     | CatalogueEnvelope
     | CertificateEnvelope
@@ -328,6 +333,7 @@ type Envelope = (
     | SignInCodeEnvelope
     | SpaceEnvelope
     | StackEnvelope
+    | StandingEnvelope
     | StartEnvelope
     | StatusEnvelope
     | StepEnvelope

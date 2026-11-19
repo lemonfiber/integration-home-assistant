@@ -17,6 +17,7 @@ type RefusalCode = typing.Literal[
     "ADMIT-16",
     "ADMIT-17",
     "ADMIT-18",
+    "ADMIT-19",
     "ADMIT-4",
     "ADMIT-5",
     "ADMIT-6",
