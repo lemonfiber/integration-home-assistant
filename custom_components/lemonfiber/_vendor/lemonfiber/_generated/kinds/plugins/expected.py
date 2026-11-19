@@ -105,6 +105,17 @@ class PluginAsking(typing.TypedDict):
     """
 
 
+class PluginBuiltOn(typing.TypedDict):
+    """The upstream image a service's image is built on, and the release of it the build
+    started from.
+    """
+
+    image: str
+    """The upstream image's registry path as the build names it, without tag or digest."""
+    release: str
+    """The upstream's release the build started from, as that image tags it."""
+
+
 class PluginChange(typing.TypedDict):
     """One change installing a plugin makes to the machine.
 
@@ -274,16 +285,6 @@ class PluginReachedHousehold(typing.TypedDict):
     port: int
     """The port the service listens on."""
     tier: typing.Literal["household"]
-
-
-class PluginReachedLoopback(typing.TypedDict):
-    """From this machine and nowhere else. No route, and no label to route to."""
-
-    group: typing.NotRequired[str | None]
-    """The group on the bundled dashboard, where the manifest named one."""
-    port: int
-    """The port the service listens on."""
-    tier: typing.Literal["loopback"]
 
 
 class PluginRecipe(typing.TypedDict):
@@ -520,6 +521,7 @@ __all__ = [
     "Expected",
     "ExpectedKind",
     "PluginAsking",
+    "PluginBuiltOn",
     "PluginChange",
     "PluginChangedCheck",
     "PluginDeclaration",
@@ -533,7 +535,6 @@ __all__ = [
     "PluginPlaceholderForm",
     "PluginPuts",
     "PluginReachedHousehold",
-    "PluginReachedLoopback",
     "PluginRecipe",
     "PluginRecipeInput",
     "PluginRecipeOn",
