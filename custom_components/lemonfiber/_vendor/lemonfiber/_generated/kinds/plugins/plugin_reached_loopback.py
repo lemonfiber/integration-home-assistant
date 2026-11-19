@@ -11,10 +11,10 @@ from .expected import (
     Contribution,
     Expect,
     PluginAsking,
+    PluginBuiltOn,
     PluginChangedCheck,
     PluginDeclaration,
     PluginReachedHousehold,
-    PluginReachedLoopback,
     PluginRecipe,
     PluginRequest,
     ServiceConstant,
@@ -31,6 +31,8 @@ class PluginPlaced(typing.TypedDict):
     """Every capability it asks for."""
     asks_for: typing.NotRequired[str | None]
     """What it asks for there, where it says."""
+    built_on: typing.NotRequired[PluginBuiltOn | None]
+    """The upstream image and release its image is built on, where its manifest says."""
     config_path: str
     """Where inside the container its one configuration directory is mounted.
 
@@ -159,6 +161,16 @@ A tier and never an address, either way: lemonfiber renders one from the other
 exactly as it does for a bundled service, so the two-tier policy stays a property
 of the system rather than a request a plugin made.
 """
+
+
+class PluginReachedLoopback(typing.TypedDict):
+    """From this machine and nowhere else. No route, and no label to route to."""
+
+    group: typing.NotRequired[str | None]
+    """The group on the bundled dashboard, where the manifest named one."""
+    port: int
+    """The port the service listens on."""
+    tier: typing.Literal["loopback"]
 
 
 class PluginReachedProxied(typing.TypedDict):
@@ -456,19 +468,6 @@ class SettingChoiceNeeding(typing.TypedDict):
     """The values."""
 
 
-class WiringContest(typing.TypedDict):
-    """An ask several services claim and nothing has chosen between, so it reaches
-    nothing.
-    """
-
-    by: str
-    """The service that asked."""
-    capability: str
-    """What it asked for."""
-    claimants: list[str]
-    """Every claimant, named — a plugin's with the plugin beside it."""
-
-
 PluginInstalled = typing.TypedDict(
     "PluginInstalled",
     {
@@ -512,6 +511,7 @@ __all__ = [
     "PluginPlaced",
     "PluginProving",
     "PluginReached",
+    "PluginReachedLoopback",
     "PluginReachedProxied",
     "PluginRequestProof",
     "PluginRun",
@@ -537,5 +537,4 @@ __all__ = [
     "ServiceValue",
     "SettingChoice",
     "SettingChoiceNeeding",
-    "WiringContest",
 ]
