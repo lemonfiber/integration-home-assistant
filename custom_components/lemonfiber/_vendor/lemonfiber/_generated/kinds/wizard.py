@@ -54,6 +54,9 @@ class GuardQuestionValue(typing.TypedDict):
     """The setting."""
 
 
+type Locale = str
+
+
 type Phase = typing.Literal["in-progress", "reviewing", "applying", "applied"]
 """Where an in-flight or finished setup stands in its lifecycle.
 
@@ -73,6 +76,15 @@ Two words rather than a fourth switch on a report that already holds three, whic
 is a report somebody reads by remembering which `true` means what. On the wire it
 is the same boolean every report carries, so a client reads one shape.
 """
+
+
+class SetupHouse(typing.TypedDict):
+    """Where the house is: the zone the stack runs in and the house's language and region."""
+
+    locale: Locale
+    """The house's language and region."""
+    zone: Zone
+    """The zone the stack runs in, which it writes as `TZ`."""
 
 
 type StorageFinding = StorageFindingLinks | StorageFindingCopyOnly | StorageFindingUntested
@@ -140,6 +152,10 @@ class WizardReport(typing.TypedDict):
     guard: list[GuardQuestion]
     """What the VPN step asks of the egress guard where one carries the torrents, in the
     order it asks it: empty where nothing fills the guard or it asks nothing.
+    """
+    house: SetupHouse
+    """The house's zone and locale: the ones the operator confirmed or gave, or the ones
+    proposed from the host's where none are yet.
     """
     offered: bool
     """Whether this machine has setup left to do. False once configuration
@@ -220,13 +236,18 @@ the read-only phase that precedes them.
 """
 
 
+type Zone = str
+
+
 __all__ = [
     "GuardQuestion",
     "GuardQuestionChoice",
     "GuardQuestionSecret",
     "GuardQuestionValue",
+    "Locale",
     "Phase",
     "Ran",
+    "SetupHouse",
     "StorageFinding",
     "StorageFindingCopyOnly",
     "StorageFindingLinks",
@@ -234,4 +255,5 @@ __all__ = [
     "WizardEnvelope",
     "WizardReport",
     "WizardStep",
+    "Zone",
 ]
