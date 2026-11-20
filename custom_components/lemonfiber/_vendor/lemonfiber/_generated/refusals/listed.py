@@ -186,6 +186,7 @@ type RefusalCode = typing.Literal[
     "SERVE-6",
     "SERVE-7",
     "SERVE-8",
+    "SERVE-9",
     "SETTING-1",
     "SETTING-2",
     "SETTING-3",

@@ -21,7 +21,7 @@ class InFlightEnvelope(typing.TypedDict):
 
 
 class InFlightReport(typing.TypedDict):
-    """What is still coming down inside the forms a teardown would stop."""
+    """What is still coming down inside what a stop would stop."""
 
     downloads: list[Unfinished]
     """Each download still coming down, with how far it has got."""
