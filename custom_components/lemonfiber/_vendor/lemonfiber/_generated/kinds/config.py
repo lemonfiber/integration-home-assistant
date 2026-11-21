@@ -44,6 +44,10 @@ class ConfigReport(typing.TypedDict):
     landed, since the moment before it happens is the moment it is worth reading.
     Absent for a read, and for a change to a setting nobody catalogued a cost for.
     """
+    decisions: list[DecisionReport]
+    """Every answer setup writes, in the catalogue's order, whether or not anything holds
+    it. Never a value: a value is read where it is held, withheld there as it is.
+    """
     rehearsed: bool
     """Whether this was a rehearsal, so a change that `changed` reports was one
     that *would* be made rather than one that was.
@@ -59,6 +63,48 @@ class ConfigReport(typing.TypedDict):
 
 type Cost = typing.Literal["cheap", "consequential"]
 """What changing a decision costs."""
+
+
+type DecisionKey = typing.Literal[
+    "DATA_ROOT",
+    "MEDIA_SERVER_MODE",
+    "LEMONFIBER_USENET",
+    "LEMONFIBER_TORRENT",
+    "LEMONFIBER_VPN",
+    "PUID",
+    "PGID",
+    "VPN_PROVIDER",
+    "INDEXER_URL",
+    "INDEXER_APIKEY",
+    "USENET_HOST",
+    "USENET_PORT",
+    "USENET_USER",
+    "USENET_PASS",
+    "USENET_TLS",
+    "LEMONFIBER_FRONT_DOOR",
+    "TZ",
+    "LEMONFIBER_LOCALE",
+]
+"""The setting an answer setup writes is held in."""
+
+
+class DecisionReport(typing.TypedDict):
+    """One answer setup writes, as it can be changed afterwards."""
+
+    affects: str
+    """What changing it affects, in the core's words."""
+    cost: Cost
+    """What changing it costs."""
+    credential: bool
+    """Whether its value is withheld as a credential."""
+    held: bool
+    """Whether the answer is held, in the configuration or the settings store."""
+    key: DecisionKey
+    """The setting the answer is kept in."""
+    setting: typing.NotRequired[str | None]
+    """The name `settings set` takes, where the settings store keeps the answer. Absent
+    where `config set` takes it.
+    """
 
 
 class Edited(typing.TypedDict):
@@ -194,6 +240,8 @@ __all__ = [
     "ConfigEnvelope",
     "ConfigReport",
     "Cost",
+    "DecisionKey",
+    "DecisionReport",
     "Edited",
     "Findings",
     "LibraryPath",
