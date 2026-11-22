@@ -66,6 +66,7 @@ from . import password as _password
 from . import pausing as _pausing
 from . import play as _play
 from . import playing as _playing
+from . import plugin_catalogue as _plugin_catalogue
 from . import plugin_claims as _plugin_claims
 from . import plugin_conformance as _plugin_conformance
 from . import plugin_provenance as _plugin_provenance
@@ -179,6 +180,7 @@ from .password import *
 from .pausing import *
 from .play import *
 from .playing import *
+from .plugin_catalogue import *
 from .plugin_claims import *
 from .plugin_conformance import *
 from .plugin_provenance import *
@@ -293,6 +295,7 @@ __all__ += _password.__all__
 __all__ += _pausing.__all__
 __all__ += _play.__all__
 __all__ += _playing.__all__
+__all__ += _plugin_catalogue.__all__
 __all__ += _plugin_claims.__all__
 __all__ += _plugin_conformance.__all__
 __all__ += _plugin_provenance.__all__
