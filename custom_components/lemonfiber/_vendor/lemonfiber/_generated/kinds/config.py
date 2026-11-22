@@ -59,10 +59,36 @@ class ConfigReport(typing.TypedDict):
     """
     settings: list[SettingReport]
     """The settings asked about — one for a lookup, all of them for a listing."""
+    unmanaged: list[UnmanagedReport]
+    """Each area the operator declared unmanaged, in the order written, with what it
+    covers now. Empty where nothing is declared. An area and a reason are the
+    operator's own text, to be shown as plain text.
+    """
+    unmanaged_more: int
+    """How many declared areas `unmanaged` leaves out for being too many."""
 
 
 type Cost = typing.Literal["cheap", "consequential"]
 """What changing a decision costs."""
+
+
+type CoveredKind = typing.Literal["service", "path", "setting"]
+"""What a thing a declaration covers is, read off where it was found.
+
+Never off its name, since a stack may name a service `config`: one area can cover a
+service, a file and a setting at once, each listed as what it is.
+"""
+
+
+class CoveredReport(typing.TypedDict):
+    """One thing a declaration covers."""
+
+    kind: CoveredKind
+    """What it is."""
+    name: str
+    """Its name: a service's id, a file's place in the stack or the project, or a
+    setting's key.
+    """
 
 
 type DecisionKey = typing.Literal[
@@ -216,6 +242,25 @@ class Review(typing.TypedDict):
     """Where the proposal stands."""
 
 
+class UnmanagedReport(typing.TypedDict):
+    """One area the operator declared unmanaged, as it covers things now."""
+
+    area: str
+    """The area as written, a control or layout character written as its bytes in hex."""
+    area_cut: bool
+    """Whether `area` was cut short."""
+    covers: list[CoveredReport]
+    """Each thing the area covers now, in the order the stack holds them. Empty where it
+    covers nothing.
+    """
+    covers_more: int
+    """How many covered things `covers` leaves out for being too many."""
+    why: str
+    """The reason the operator gave, written as `area` is."""
+    why_cut: bool
+    """Whether `why` was cut short."""
+
+
 ConfigChange = typing.TypedDict(
     "ConfigChange",
     {
@@ -240,6 +285,8 @@ __all__ = [
     "ConfigEnvelope",
     "ConfigReport",
     "Cost",
+    "CoveredKind",
+    "CoveredReport",
     "DecisionKey",
     "DecisionReport",
     "Edited",
@@ -247,4 +294,5 @@ __all__ = [
     "LibraryPath",
     "Opening",
     "Review",
+    "UnmanagedReport",
 ]
