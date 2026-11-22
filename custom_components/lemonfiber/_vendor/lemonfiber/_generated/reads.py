@@ -115,6 +115,8 @@ class Read(enum.StrEnum):
     """Answers with `self-update` or `update`; takes `what` and `to`."""
     PLUGINS = "plugins"
     """Answers with `plugins`."""
+    PLUGINS_CATALOGUE = "plugins/catalogue"
+    """Answers with `plugin-catalogue`."""
     WIRING = "wiring"
     """Answers with `wiring`."""
     SETTINGS = "settings"
@@ -236,6 +238,7 @@ READS: typing.Final[typing.Mapping[Read, Readable]] = types.MappingProxyType(
             ("self-update", "update"), (ReadParameter("what", False), ReadParameter("to", False))
         ),
         Read.PLUGINS: Readable(("plugins",), ()),
+        Read.PLUGINS_CATALOGUE: Readable(("plugin-catalogue",), ()),
         Read.WIRING: Readable(("wiring",), ()),
         Read.SETTINGS: Readable(("settings",), ()),
     }

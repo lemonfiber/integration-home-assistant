@@ -70,6 +70,7 @@ from .kinds import (
     PausingEnvelope,
     PlayEnvelope,
     PlayingEnvelope,
+    PluginCatalogueEnvelope,
     PluginClaimsEnvelope,
     PluginConformanceEnvelope,
     PluginProvenanceEnvelope,
@@ -255,6 +256,10 @@ class KindNarrowing(typing.Protocol):
     def __call__(self, envelope: Envelope, kind: typing.Literal["play"], /) -> PlayEnvelope: ...
     @typing.overload
     def __call__(self, envelope: Envelope, kind: typing.Literal["playing"], /) -> PlayingEnvelope: ...
+    @typing.overload
+    def __call__(
+        self, envelope: Envelope, kind: typing.Literal["plugin-catalogue"], /
+    ) -> PluginCatalogueEnvelope: ...
     @typing.overload
     def __call__(
         self, envelope: Envelope, kind: typing.Literal["plugin-claims"], /
