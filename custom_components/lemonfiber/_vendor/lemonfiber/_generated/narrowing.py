@@ -87,6 +87,7 @@ from .kinds import (
     RemovalEnvelope,
     RepairEnvelope,
     ReplacementEnvelope,
+    ReplayEnvelope,
     ResetEnvelope,
     RestoreEnvelope,
     SeedEnvelope,
@@ -304,6 +305,8 @@ class KindNarrowing(typing.Protocol):
     def __call__(self, envelope: Envelope, kind: typing.Literal["repair"], /) -> RepairEnvelope: ...
     @typing.overload
     def __call__(self, envelope: Envelope, kind: typing.Literal["replacement"], /) -> ReplacementEnvelope: ...
+    @typing.overload
+    def __call__(self, envelope: Envelope, kind: typing.Literal["replay"], /) -> ReplayEnvelope: ...
     @typing.overload
     def __call__(self, envelope: Envelope, kind: typing.Literal["reset"], /) -> ResetEnvelope: ...
     @typing.overload
