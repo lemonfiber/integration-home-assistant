@@ -86,6 +86,7 @@ from .kinds import (
     RemovalEnvelope,
     RepairEnvelope,
     ReplacementEnvelope,
+    ReplayEnvelope,
     ResetEnvelope,
     RestoreEnvelope,
     SeedEnvelope,
@@ -205,6 +206,7 @@ type Kind = typing.Literal[
     "removal",
     "repair",
     "replacement",
+    "replay",
     "reset",
     "restore",
     "seed",
@@ -325,6 +327,7 @@ type Envelope = (
     | RemovalEnvelope
     | RepairEnvelope
     | ReplacementEnvelope
+    | ReplayEnvelope
     | ResetEnvelope
     | RestoreEnvelope
     | SeedEnvelope

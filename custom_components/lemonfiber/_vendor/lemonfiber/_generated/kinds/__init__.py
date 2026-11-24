@@ -83,6 +83,7 @@ from . import ran as _ran
 from . import removal as _removal
 from . import repair as _repair
 from . import replacement as _replacement
+from . import replay as _replay
 from . import reset as _reset
 from . import restore as _restore
 from . import seed as _seed
@@ -197,6 +198,7 @@ from .ran import *
 from .removal import *
 from .repair import *
 from .replacement import *
+from .replay import *
 from .reset import *
 from .restore import *
 from .seed import *
@@ -312,6 +314,7 @@ __all__ += _ran.__all__
 __all__ += _removal.__all__
 __all__ += _repair.__all__
 __all__ += _replacement.__all__
+__all__ += _replay.__all__
 __all__ += _reset.__all__
 __all__ += _restore.__all__
 __all__ += _seed.__all__
