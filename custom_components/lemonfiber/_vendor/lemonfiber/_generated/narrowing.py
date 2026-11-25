@@ -57,6 +57,7 @@ from .kinds import (
     LifecycleEnvelope,
     LogEnvelope,
     LogsEnvelope,
+    LogsExportedEnvelope,
     MigrationEnvelope,
     MintedKeyEnvelope,
     MusicEnvelope,
@@ -235,6 +236,10 @@ class KindNarrowing(typing.Protocol):
     def __call__(self, envelope: Envelope, kind: typing.Literal["log"], /) -> LogEnvelope: ...
     @typing.overload
     def __call__(self, envelope: Envelope, kind: typing.Literal["logs"], /) -> LogsEnvelope: ...
+    @typing.overload
+    def __call__(
+        self, envelope: Envelope, kind: typing.Literal["logs-exported"], /
+    ) -> LogsExportedEnvelope: ...
     @typing.overload
     def __call__(self, envelope: Envelope, kind: typing.Literal["migration"], /) -> MigrationEnvelope: ...
     @typing.overload
