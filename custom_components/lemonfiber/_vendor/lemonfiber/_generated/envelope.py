@@ -56,6 +56,7 @@ from .kinds import (
     LifecycleEnvelope,
     LogEnvelope,
     LogsEnvelope,
+    LogsExportedEnvelope,
     MigrationEnvelope,
     MintedKeyEnvelope,
     MusicEnvelope,
@@ -180,6 +181,7 @@ type Kind = typing.Literal[
     "lifecycle",
     "log",
     "logs",
+    "logs-exported",
     "migration",
     "minted-key",
     "music",
@@ -305,6 +307,7 @@ type Envelope = (
     | LifecycleEnvelope
     | LogEnvelope
     | LogsEnvelope
+    | LogsExportedEnvelope
     | MigrationEnvelope
     | MintedKeyEnvelope
     | MusicEnvelope

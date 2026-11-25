@@ -53,6 +53,7 @@ from . import keys as _keys
 from . import lifecycle as _lifecycle
 from . import log as _log
 from . import logs as _logs
+from . import logs_exported as _logs_exported
 from . import migration as _migration
 from . import minted_key as _minted_key
 from . import music as _music
@@ -172,6 +173,7 @@ from .keys import *
 from .lifecycle import *
 from .log import *
 from .logs import *
+from .logs_exported import *
 from .migration import *
 from .minted_key import *
 from .music import *
@@ -292,6 +294,7 @@ __all__ += _keys.__all__
 __all__ += _lifecycle.__all__
 __all__ += _log.__all__
 __all__ += _logs.__all__
+__all__ += _logs_exported.__all__
 __all__ += _migration.__all__
 __all__ += _minted_key.__all__
 __all__ += _music.__all__
