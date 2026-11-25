@@ -62,6 +62,7 @@ from .kinds import (
     NewsEnvelope,
     NewsItemsEnvelope,
     NotifyEnvelope,
+    NotifyHeardEnvelope,
     NotifyMineEnvelope,
     OutboundEnvelope,
     PairingEnvelope,
@@ -85,6 +86,7 @@ from .kinds import (
     QueueEnvelope,
     RanEnvelope,
     RemovalEnvelope,
+    RenewedEnvelope,
     RepairEnvelope,
     ReplacementEnvelope,
     ReplayEnvelope,
@@ -112,6 +114,7 @@ from .kinds import (
     TunedEnvelope,
     UndoEnvelope,
     UninstallEnvelope,
+    UntunedEnvelope,
     UpdateEnvelope,
     UpgradeEnvelope,
     VersionEnvelope,
@@ -183,6 +186,7 @@ type Kind = typing.Literal[
     "news",
     "news-items",
     "notify",
+    "notify-heard",
     "notify-mine",
     "outbound",
     "pairing",
@@ -206,6 +210,7 @@ type Kind = typing.Literal[
     "queue",
     "ran",
     "removal",
+    "renewed",
     "repair",
     "replacement",
     "replay",
@@ -233,6 +238,7 @@ type Kind = typing.Literal[
     "tuned",
     "undo",
     "uninstall",
+    "untuned",
     "update",
     "upgrade",
     "version",
@@ -305,6 +311,7 @@ type Envelope = (
     | NewsEnvelope
     | NewsItemsEnvelope
     | NotifyEnvelope
+    | NotifyHeardEnvelope
     | NotifyMineEnvelope
     | OutboundEnvelope
     | PairingEnvelope
@@ -328,6 +335,7 @@ type Envelope = (
     | QueueEnvelope
     | RanEnvelope
     | RemovalEnvelope
+    | RenewedEnvelope
     | RepairEnvelope
     | ReplacementEnvelope
     | ReplayEnvelope
@@ -355,6 +363,7 @@ type Envelope = (
     | TunedEnvelope
     | UndoEnvelope
     | UninstallEnvelope
+    | UntunedEnvelope
     | UpdateEnvelope
     | UpgradeEnvelope
     | VersionEnvelope

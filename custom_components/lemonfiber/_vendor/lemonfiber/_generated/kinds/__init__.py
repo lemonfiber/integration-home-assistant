@@ -59,6 +59,7 @@ from . import music as _music
 from . import news as _news
 from . import news_items as _news_items
 from . import notify as _notify
+from . import notify_heard as _notify_heard
 from . import notify_mine as _notify_mine
 from . import outbound as _outbound
 from . import pairing as _pairing
@@ -82,6 +83,7 @@ from . import quality as _quality
 from . import queue as _queue
 from . import ran as _ran
 from . import removal as _removal
+from . import renewed as _renewed
 from . import repair as _repair
 from . import replacement as _replacement
 from . import replay as _replay
@@ -109,6 +111,7 @@ from . import trace as _trace
 from . import tuned as _tuned
 from . import undo as _undo
 from . import uninstall as _uninstall
+from . import untuned as _untuned
 from . import update as _update
 from . import upgrade as _upgrade
 from . import version as _version
@@ -175,6 +178,7 @@ from .music import *
 from .news import *
 from .news_items import *
 from .notify import *
+from .notify_heard import *
 from .notify_mine import *
 from .outbound import *
 from .pairing import *
@@ -198,6 +202,7 @@ from .quality import *
 from .queue import *
 from .ran import *
 from .removal import *
+from .renewed import *
 from .repair import *
 from .replacement import *
 from .replay import *
@@ -225,6 +230,7 @@ from .trace import *
 from .tuned import *
 from .undo import *
 from .uninstall import *
+from .untuned import *
 from .update import *
 from .upgrade import *
 from .version import *
@@ -292,6 +298,7 @@ __all__ += _music.__all__
 __all__ += _news.__all__
 __all__ += _news_items.__all__
 __all__ += _notify.__all__
+__all__ += _notify_heard.__all__
 __all__ += _notify_mine.__all__
 __all__ += _outbound.__all__
 __all__ += _pairing.__all__
@@ -315,6 +322,7 @@ __all__ += _quality.__all__
 __all__ += _queue.__all__
 __all__ += _ran.__all__
 __all__ += _removal.__all__
+__all__ += _renewed.__all__
 __all__ += _repair.__all__
 __all__ += _replacement.__all__
 __all__ += _replay.__all__
@@ -342,6 +350,7 @@ __all__ += _trace.__all__
 __all__ += _tuned.__all__
 __all__ += _undo.__all__
 __all__ += _uninstall.__all__
+__all__ += _untuned.__all__
 __all__ += _update.__all__
 __all__ += _upgrade.__all__
 __all__ += _version.__all__
