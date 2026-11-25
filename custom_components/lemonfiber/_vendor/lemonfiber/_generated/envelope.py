@@ -28,6 +28,7 @@ from .kinds import (
     ChannelsEnvelope,
     ClientsEnvelope,
     ConfigEnvelope,
+    CopyingEnvelope,
     CredentialsEnvelope,
     DashboardEnvelope,
     DeviceChallengeEnvelope,
@@ -148,6 +149,7 @@ type Kind = typing.Literal[
     "channels",
     "clients",
     "config",
+    "copying",
     "credentials",
     "dashboard",
     "device-challenge",
@@ -269,6 +271,7 @@ type Envelope = (
     | ChannelsEnvelope
     | ClientsEnvelope
     | ConfigEnvelope
+    | CopyingEnvelope
     | CredentialsEnvelope
     | DashboardEnvelope
     | DeviceChallengeEnvelope

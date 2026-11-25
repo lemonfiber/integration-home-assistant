@@ -25,6 +25,7 @@ from . import certificate as _certificate
 from . import channels as _channels
 from . import clients as _clients
 from . import config as _config
+from . import copying as _copying
 from . import credentials as _credentials
 from . import dashboard as _dashboard
 from . import device_challenge as _device_challenge
@@ -140,6 +141,7 @@ from .certificate import *
 from .channels import *
 from .clients import *
 from .config import *
+from .copying import *
 from .credentials import *
 from .dashboard import *
 from .device_challenge import *
@@ -256,6 +258,7 @@ __all__ += _certificate.__all__
 __all__ += _channels.__all__
 __all__ += _clients.__all__
 __all__ += _config.__all__
+__all__ += _copying.__all__
 __all__ += _credentials.__all__
 __all__ += _dashboard.__all__
 __all__ += _device_challenge.__all__

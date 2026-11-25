@@ -29,6 +29,7 @@ from .kinds import (
     ChannelsEnvelope,
     ClientsEnvelope,
     ConfigEnvelope,
+    CopyingEnvelope,
     CredentialsEnvelope,
     DashboardEnvelope,
     DeviceChallengeEnvelope,
@@ -173,6 +174,8 @@ class KindNarrowing(typing.Protocol):
     def __call__(self, envelope: Envelope, kind: typing.Literal["clients"], /) -> ClientsEnvelope: ...
     @typing.overload
     def __call__(self, envelope: Envelope, kind: typing.Literal["config"], /) -> ConfigEnvelope: ...
+    @typing.overload
+    def __call__(self, envelope: Envelope, kind: typing.Literal["copying"], /) -> CopyingEnvelope: ...
     @typing.overload
     def __call__(self, envelope: Envelope, kind: typing.Literal["credentials"], /) -> CredentialsEnvelope: ...
     @typing.overload
