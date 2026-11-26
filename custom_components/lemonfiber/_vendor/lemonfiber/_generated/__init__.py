@@ -5,6 +5,7 @@ Generated from the contract vendored in `contract/`. Do not edit: `just generate
 and CI fails on any difference.
 """
 
+from . import actions as _actions
 from . import envelope as _envelope
 from . import key_callable as _key_callable
 from . import kinds as _kinds
@@ -13,6 +14,7 @@ from . import reads as _reads
 from . import refusals as _refusals
 from . import shared as _shared
 
+from .actions import *
 from .envelope import *
 from .key_callable import *
 from .kinds import *
@@ -22,6 +24,7 @@ from .refusals import *
 from .shared import *
 
 __all__: list[str] = []
+__all__ += _actions.__all__
 __all__ += _envelope.__all__
 __all__ += _key_callable.__all__
 __all__ += _kinds.__all__
