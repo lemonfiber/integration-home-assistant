@@ -11,15 +11,19 @@ its kind (`lemonfiber.contract` holds each shape), and every failure is a
 
 from lemonfiber._aio import AsyncClient, AsyncStream, admit_async, collect_async
 from lemonfiber._generated import (
+    ACTIONS,
     KEY_CALLABLE,
     KINDS,
     REFUSAL_CODES,
+    ActionDescribed,
+    ActionName,
     Envelope,
     KeyCallable,
     KeyCallableAction,
     Kind,
     ListedRefusal,
     RefusalCode,
+    is_action_name,
     is_key_callable,
     is_refusal_code,
 )
@@ -64,6 +68,7 @@ from lemonfiber.reads import Read
 from lemonfiber.stream import HEARTBEAT, SILENCE_ALLOWED, Arrival, Break, Gap, Live, Stale, Unrecognised
 
 __all__ = [
+    "ACTIONS",
     "CREDENTIAL_HEADER",
     "HEARTBEAT",
     "KEY_CALLABLE",
@@ -73,6 +78,8 @@ __all__ = [
     "REFUSAL_CODES",
     "SILENCE_ALLOWED",
     "SPOKEN_API_VERSION",
+    "ActionDescribed",
+    "ActionName",
     "Address",
     "AddressRefusedError",
     "AndroidAttestation",
@@ -140,6 +147,7 @@ __all__ = [
     "collect",
     "collect_async",
     "expect",
+    "is_action_name",
     "is_key_callable",
     "is_refusal_code",
     "parse_envelope",
