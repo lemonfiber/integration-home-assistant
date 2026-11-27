@@ -24,6 +24,7 @@ from lemonfiber._protocol.calls import (
     collect_call,
     device_key_challenge_call,
     device_keys_call,
+    forget_call,
     job_call,
     keys_call,
     logs_call,
@@ -116,6 +117,11 @@ def job(name: str) -> Operation[JobStanding]:
 def release(name: str) -> Operation[JobStanding]:
     """Let a name go, ending the work it stands for, and say where it now stands."""
     return Operation(job_call(name, HTTPMethod.DELETE), lambda answer: standing_of(name, answer))
+
+
+def forget(name: str) -> Operation[JobStanding]:
+    """Let a name go, leaving the work it stands for running, and say where that work stood."""
+    return Operation(forget_call(name), lambda answer: standing_of(name, answer))
 
 
 def admission(password: str, name: str | None) -> Operation[Session]:

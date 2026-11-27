@@ -105,6 +105,17 @@ def segment(name: str) -> str:
     return urllib.parse.quote(name, safe=NOTHING_SAFE)
 
 
+def held(name: str, sentence: str) -> str:
+    """Write a name as one path segment, refusing with `sentence` one a URL would resolve away."""
+    if name in UNKEPT_SEGMENTS:
+        raise MisaskedError(sentence, status=HTTPStatus.BAD_REQUEST)
+    return segment(name)
+
+
+A_JOB: Final = "Work is named by the name its accepting reply gave it, and what was given is not a name that can be sent."
+"""What a job's name a URL would resolve away is refused with."""
+
+
 def search(query: Query | None) -> str:
     """Return a query string, or nothing where there is nothing to ask for. The credential is never in it."""
     pairs: list[tuple[str, str]] = []
@@ -184,7 +195,8 @@ def logs_call(services: Sequence[str], forms: Sequence[str], tail: int | None) -
 
 def bundle_call(name: str) -> Call:
     """Ask for one support bundle, by the name it was written under."""
-    return Call(HTTPMethod.GET, f"{BUNDLE}/{segment(name)}", {"Accept": ANY_TYPE})
+    sentence = "A support bundle is named by the name it was written under, and what was given is not a name that can be sent."
+    return Call(HTTPMethod.GET, f"{BUNDLE}/{held(name, sentence)}", {"Accept": ANY_TYPE})
 
 
 def picture_call(template: str, name: str, value: str, query: Query | None) -> Call:
@@ -196,7 +208,8 @@ def picture_call(template: str, name: str, value: str, query: Query | None) -> C
 def action_call(action: ActionRequest | str, arguments: Mapping[str, Json] | None) -> Call:
     """Tell lemonfiber to do something the command line could also do: a request, or an action by name."""
     if isinstance(action, str):
-        return posted(f"{ACTIONS}/{segment(action)}", arguments or {})
+        sentence = "An action is named by its name, and what was given is not a name that can be sent."
+        return posted(f"{ACTIONS}/{held(action, sentence)}", arguments or {})
     if arguments is not None:
         sentence = "An action's request carries its own arguments, and was given more beside it."
         raise MisaskedError(sentence, status=HTTPStatus.BAD_REQUEST)
@@ -205,7 +218,16 @@ def action_call(action: ActionRequest | str, arguments: Mapping[str, Json] | Non
 
 def job_call(job: str, method: HTTPMethod) -> Call:
     """Ask where work stands with `GET`, or let its name go with `DELETE`."""
-    return Call(method, f"{JOBS}/{segment(job)}", {"Accept": JSON_TYPE})
+    return Call(method, f"{JOBS}/{held(job, A_JOB)}", {"Accept": JSON_TYPE})
+
+
+FORGET: Final = "forget"
+"""What a job's path is followed by where its name is let go and its work left running."""
+
+
+def forget_call(job: str) -> Call:
+    """Let a name go and leave the work it stands for running."""
+    return Call(HTTPMethod.POST, f"{JOBS}/{held(job, A_JOB)}/{FORGET}", {"Accept": JSON_TYPE})
 
 
 def session_call(password: str, name: str | None) -> Call:
@@ -281,18 +303,14 @@ def push_endpoints_call() -> Call:
 
 def remove_push_endpoint_call(name: str) -> Call:
     """Remove one push endpoint, by its name as one path segment, refusing a name a URL would resolve away."""
-    if name in UNKEPT_SEGMENTS:
-        sentence = "A push endpoint is named by its name, and what was given is not a name that can be sent."
-        raise MisaskedError(sentence, status=HTTPStatus.BAD_REQUEST)
-    return Call(HTTPMethod.DELETE, f"{PUSH_ENDPOINTS}/{segment(name)}", {"Accept": JSON_TYPE})
+    sentence = "A push endpoint is named by its name, and what was given is not a name that can be sent."
+    return Call(HTTPMethod.DELETE, f"{PUSH_ENDPOINTS}/{held(name, sentence)}", {"Accept": JSON_TYPE})
 
 
 def device_key_path(name: str) -> str:
     """Return the door of one device key, refusing a name a URL would resolve away."""
-    if name in UNKEPT_SEGMENTS:
-        sentence = "A device key is named by its name, and what was given is not a name that can be sent."
-        raise MisaskedError(sentence, status=HTTPStatus.BAD_REQUEST)
-    return f"{DEVICE_KEYS}/{segment(name)}"
+    sentence = "A device key is named by its name, and what was given is not a name that can be sent."
+    return f"{DEVICE_KEYS}/{held(name, sentence)}"
 
 
 def base64url(raw: bytes) -> str:
@@ -302,10 +320,8 @@ def base64url(raw: bytes) -> str:
 
 def revoke_call(name: str) -> Call:
     """Revoke one integration key, by its name as one path segment, refusing a name a URL would resolve away."""
-    if name in UNKEPT_SEGMENTS:
-        sentence = "A key is revoked by its name, and what was given is not a name that can be sent."
-        raise MisaskedError(sentence, status=HTTPStatus.BAD_REQUEST)
-    return Call(HTTPMethod.DELETE, f"{KEYS}/{segment(name)}", {"Accept": JSON_TYPE})
+    sentence = "A key is revoked by its name, and what was given is not a name that can be sent."
+    return Call(HTTPMethod.DELETE, f"{KEYS}/{held(name, sentence)}", {"Accept": JSON_TYPE})
 
 
 def collect_call(claim: str) -> Call:

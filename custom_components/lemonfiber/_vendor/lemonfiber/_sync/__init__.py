@@ -221,6 +221,10 @@ class SyncClient:
         """Let a name go, ending the work it stands for, and say where it now stands."""
         return self._run(operation.release(job))
 
+    def forget(self, job: str) -> JobStanding:
+        """Let a name go, leaving the work it stands for running, and say where that work stood. Sent once."""
+        return self._run(operation.forget(job))
+
     def follow(
         self,
         job: str | JobEnvelope,
