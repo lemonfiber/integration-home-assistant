@@ -37,6 +37,7 @@ from . import notification_kind as _notification_kind
 from . import obstacle as _obstacle
 from . import pinned as _pinned
 from . import plugin_constraint as _plugin_constraint
+from . import policy as _policy
 from . import problem as _problem
 from . import problem_severity as _problem_severity
 from . import protocols as _protocols
@@ -98,6 +99,7 @@ from .notification_kind import *
 from .obstacle import *
 from .pinned import *
 from .plugin_constraint import *
+from .policy import *
 from .problem import *
 from .problem_severity import *
 from .protocols import *
@@ -160,6 +162,7 @@ __all__ += _notification_kind.__all__
 __all__ += _obstacle.__all__
 __all__ += _pinned.__all__
 __all__ += _plugin_constraint.__all__
+__all__ += _policy.__all__
 __all__ += _problem.__all__
 __all__ += _problem_severity.__all__
 __all__ += _protocols.__all__

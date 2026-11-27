@@ -32,7 +32,6 @@ from lemonfiber import (
     UnreadableResponseError,
     collect_async,
     expect,
-    is_key_callable,
 )
 from lemonfiber.address import ENCRYPTED, split
 
@@ -42,7 +41,7 @@ if TYPE_CHECKING:
     from collections.abc import Mapping
 
     from homeassistant.core import HomeAssistant
-    from lemonfiber import CapabilitySet
+    from lemonfiber import CapabilitySet, KeyCallableAction
     from lemonfiber.contract import CapabilityState, CredentialScope
 
 BASE: Final = "base"
@@ -195,9 +194,9 @@ class Connected:
     identity: str
     """What an entry for this stack and key is identified by."""
 
-    def may_call(self, action: str) -> bool:
+    def may_call(self, action: KeyCallableAction) -> bool:
         """Tell whether this key may call an action now: one the contract lets a key call, available to it."""
-        return is_key_callable(action) and self.capabilities.of_action(action) == AVAILABLE
+        return self.capabilities.of_action(action) == AVAILABLE
 
     @property
     def technical(self) -> bool:

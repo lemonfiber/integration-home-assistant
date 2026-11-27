@@ -29,8 +29,11 @@ from lemonfiber._protocol.calls import (
     logs_call,
     mint_call,
     picture_call,
+    push_endpoints_call,
     read_call,
     register_device_key_call,
+    register_push_endpoint_call,
+    remove_push_endpoint_call,
     revoke_call,
     revoke_device_key_call,
     session_call,
@@ -41,6 +44,7 @@ if TYPE_CHECKING:
     from collections.abc import Callable, Mapping, Sequence
 
     from lemonfiber._generated import (
+        ActionRequest,
         DeviceChallengeEnvelope,
         DeviceKeyEnvelope,
         DeviceKeysEnvelope,
@@ -50,6 +54,8 @@ if TYPE_CHECKING:
         LogEnvelope,
         MintedKey,
         MintedKeyEnvelope,
+        PushEndpointEnvelope,
+        PushEndpointsEnvelope,
     )
     from lemonfiber._protocol.calls import Json, Query
     from lemonfiber.capabilities import CapabilitySet
@@ -58,6 +64,7 @@ if TYPE_CHECKING:
     from lemonfiber.files import BundleFile, Picture
     from lemonfiber.jobs import JobStanding
     from lemonfiber.keys import Minting
+    from lemonfiber.push_endpoints import PushEndpointRegistering
     from lemonfiber.reads import Read
 
 
@@ -96,9 +103,9 @@ def picture(template: str, name: str, value: str, query: Query | None) -> Operat
     return Operation(picture_call(template, name, value, query), picture_of, again=True)
 
 
-def action(name: str, arguments: Mapping[str, Json] | None) -> Operation[Envelope]:
-    """Tell lemonfiber to do something the command line could also do."""
-    return Operation(action_call(name, arguments), envelope_of)
+def action(action: ActionRequest | str, arguments: Mapping[str, Json] | None) -> Operation[Envelope]:
+    """Tell lemonfiber to do something the command line could also do: a request, or an action by name."""
+    return Operation(action_call(action, arguments), envelope_of)
 
 
 def job(name: str) -> Operation[JobStanding]:
@@ -174,4 +181,29 @@ def revoke_device_key(name: str) -> Operation[DeviceKeysEnvelope]:
     return Operation(
         revoke_device_key_call(name),
         lambda answer: expect(envelope_of(answer), "device-keys"),
+    )
+
+
+def register_push_endpoint(registering: PushEndpointRegistering) -> Operation[PushEndpointEnvelope]:
+    """Register a phone's push endpoint, answered with the endpoint as registered."""
+    return Operation(
+        register_push_endpoint_call(registering),
+        lambda answer: expect(envelope_of(answer), "push-endpoint"),
+    )
+
+
+def push_endpoints() -> Operation[PushEndpointsEnvelope]:
+    """Ask for the push endpoints this credential keeps, in the order they were registered."""
+    return Operation(
+        push_endpoints_call(),
+        lambda answer: expect(envelope_of(answer), "push-endpoints"),
+        again=True,
+    )
+
+
+def remove_push_endpoint(name: str) -> Operation[PushEndpointsEnvelope]:
+    """Remove one push endpoint by its name, answered with the endpoints as they now stand."""
+    return Operation(
+        remove_push_endpoint_call(name),
+        lambda answer: expect(envelope_of(answer), "push-endpoints"),
     )

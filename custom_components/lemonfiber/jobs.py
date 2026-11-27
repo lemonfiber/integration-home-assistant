@@ -11,7 +11,7 @@ from enum import StrEnum
 from typing import TYPE_CHECKING, Final
 
 from homeassistant.exceptions import HomeAssistantError
-from lemonfiber import KEY_CALLABLE, Ended, LemonfiberError, NotAdmittedError, expect, is_key_callable
+from lemonfiber import KEY_CALLABLE, Ended, LemonfiberError, NotAdmittedError, expect
 
 from .connection import refused
 from .const import DOMAIN
@@ -20,7 +20,7 @@ if TYPE_CHECKING:
     from collections.abc import Mapping
 
     from homeassistant.core import HomeAssistant
-    from lemonfiber import AsyncClient, Json
+    from lemonfiber import AsyncClient, Json, KeyCallableAction
 
     from .runtime import LemonfiberConfigEntry
 
@@ -48,7 +48,11 @@ class Outcome(StrEnum):
     """The stack refused the action, or the work failed."""
 
 
-async def offered(client: AsyncClient, action: str, arguments: Mapping[str, Json] | None) -> dict[str, Json]:
+async def offered(
+    client: AsyncClient,
+    action: KeyCallableAction,
+    arguments: Mapping[str, Json] | None,
+) -> dict[str, Json]:
     """Return an action's arguments with the offer its rehearsal answered, for an action that answers one.
 
     The stack refuses the call where what it would do has moved since the
@@ -56,7 +60,7 @@ async def offered(client: AsyncClient, action: str, arguments: Mapping[str, Json
     answers no offer is called with its arguments as they are.
     """
     asked: dict[str, Json] = dict(arguments or {})
-    if not is_key_callable(action) or KEY_CALLABLE[action].moved is None:
+    if KEY_CALLABLE[action].moved is None:
         return asked
     rehearsal = (await client.act(action, {**asked, DRY_RUN: True}))["data"]
     offer = rehearsal.get(OFFER) if isinstance(rehearsal, dict) else None
@@ -68,7 +72,7 @@ async def offered(client: AsyncClient, action: str, arguments: Mapping[str, Json
 async def carry_out(
     hass: HomeAssistant,
     entry: LemonfiberConfigEntry,
-    action: str,
+    action: KeyCallableAction,
     arguments: Mapping[str, Json] | None = None,
 ) -> Outcome:
     """Ask the stack for an action, follow any job it starts to the end, fire what became of it, and return that.

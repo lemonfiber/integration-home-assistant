@@ -35,6 +35,7 @@ __all__ = [
     "KEYS",
     "KEY_CLAIMS",
     "LOGS",
+    "PUSH_ENDPOINTS",
     "REQUESTS_REFERENCE_POSTER",
     "SESSION",
     "Read",
@@ -60,6 +61,9 @@ KEYS: Final = "/api/keys"
 
 DEVICE_KEYS: Final = "/api/device-keys"
 """Where the operator's device keys are listed and registered, and each challenged and revoked by its name."""
+
+PUSH_ENDPOINTS: Final = "/api/push-endpoints"
+"""Where the phones asking to be woken are listed and registered, and each removed by its name."""
 
 KEY_CLAIMS: Final = "/api/keys/claim"
 """Where a key minted as a claim is collected, with the claim alone."""

@@ -7,9 +7,10 @@ and CI fails on any difference.
 
 import typing
 
-from .asking_standing import MemberAsking, Policy
+from .asking_standing import MemberAsking
 from .instant import Instant
 from .obstacle import Obstacle
+from .policy import Policy
 from .title_kind import TitleKind, TitleUnit
 from .unrated import Unrated
 

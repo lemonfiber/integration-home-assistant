@@ -4,12 +4,12 @@
 A pinned address is reached through a connection pool holding the pin as
 `assert_fingerprint`: urllib3 compares the certificate's SHA-256 digest with it
 once the handshake completes and before a byte of the request is written, and
-refuses the connection where they differ. The pool is built here from the
+refuses the connection where they differ. The pool is built in `transport` from the
 address alone, so no argument reaches the transport's options.
 """
 
 import time
-from typing import TYPE_CHECKING, Final, Self
+from typing import TYPE_CHECKING, Self, overload
 
 import urllib3
 import urllib3.exceptions
@@ -19,17 +19,15 @@ from lemonfiber._protocol.calls import (
     DEFAULT_TIMEOUT,
     REFERENCE,
     TITLE,
-    Answer,
     Call,
-    declared_over,
     received,
     with_credential,
 )
 from lemonfiber._protocol.following import DEFAULT_EVERY, job_name, next_wait
-from lemonfiber._protocol.refusals import CERTIFICATE_REFUSED, LAPSED, NOT_ANSWERING, opening_refusal
+from lemonfiber._protocol.refusals import CERTIFICATE_REFUSED, LAPSED, opening_refusal
 from lemonfiber._protocol.retry import Attempts
 from lemonfiber.jobs import Ended, Finished, Running
-from lemonfiber.problems import CertificateRefusedError, ClaimLapsedError, LemonfiberError, UnreachableError
+from lemonfiber.problems import CertificateRefusedError, ClaimLapsedError
 from lemonfiber.reads import ASKABLE_ID_POSTER, HELD_ID_BACKDROP, HELD_ID_POSTER, REQUESTS_REFERENCE_POSTER
 from lemonfiber.stream import FIRST_WAIT, OPENED, RECONNECTS_ALLOWED, SILENCE_ALLOWED, Break, Following
 
@@ -38,6 +36,8 @@ if TYPE_CHECKING:
     from types import TracebackType
 
     from lemonfiber._generated import (
+        ActionName,
+        ActionRequest,
         DeviceChallengeEnvelope,
         DeviceKeyEnvelope,
         DeviceKeysEnvelope,
@@ -48,146 +48,23 @@ if TYPE_CHECKING:
         LogEnvelope,
         MintedKey,
         MintedKeyEnvelope,
+        PushEndpointEnvelope,
+        PushEndpointsEnvelope,
     )
     from lemonfiber._protocol.calls import Json, Query
-    from lemonfiber.address import Address, Route
+    from lemonfiber._sync.transport import Way
+    from lemonfiber.address import Address
     from lemonfiber.capabilities import CapabilitySet
     from lemonfiber.credential import Credential, Session
     from lemonfiber.device_keys import Registering
     from lemonfiber.files import BundleFile, Picture
     from lemonfiber.jobs import JobStanding
     from lemonfiber.keys import KeyLink, Minting
+    from lemonfiber.push_endpoints import PushEndpointRegistering
     from lemonfiber.reads import Read
     from lemonfiber.stream import Arrival, Live, Stale
 
-CHUNK: Final = 65536
-"""The most bytes one read of the stream asks for, so a chunk the server declares larger is not held whole."""
-
-
-VERIFYING: Final = "CERT_REQUIRED"
-"""A certificate a trust store vouches for, as an unpinned https address is held to."""
-
-NOT_VERIFYING: Final = "CERT_NONE"
-"""No trust store asked, as a pinned address is held to its pin alone, whatever the store would say."""
-
-
-type Way = tuple[Route, urllib3.HTTPConnectionPool]
-"""One route to a stack, and the pool its connections are kept in."""
-
-
-def pool_for(address: Address, route: Route) -> urllib3.HTTPConnectionPool:
-    """Return the pool a route is reached through, holding the address's pin where it has one.
-
-    A route that reaches a named stack by an address it resolved to checks the
-    certificate against that name, and names it in the TLS handshake. How long
-    a request waits is given with each request, so the pool holds no timeout.
-    """
-    if address.scheme == "http":
-        return urllib3.HTTPConnectionPool(route.host, address.port)
-    if address.pin is None:
-        return urllib3.HTTPSConnectionPool(
-            route.host,
-            address.port,
-            cert_reqs=VERIFYING,
-            assert_hostname=route.named,
-            server_hostname=route.named,
-        )
-    return urllib3.HTTPSConnectionPool(
-        route.host,
-        address.port,
-        cert_reqs=NOT_VERIFYING,
-        assert_fingerprint=address.pin.hex,
-    )
-
-
-def ways_to(address: Address) -> list[Way]:
-    """Return every route to a stack, each with its pool, in the order they are tried."""
-    return [(route, pool_for(address, route)) for route in address.routes]
-
-
-def attempt(way: Way, prefix: str, call: Call, limit: float) -> Answer | None:
-    """Send one call over one route, waiting at most `limit` seconds, or return nothing where no connection could be made there.
-
-    A failure is raised once urllib3's error is let go, so nothing of the
-    request, its credential included, rides along as the failure's cause.
-    """
-    route, pool = way
-    try:
-        response = pool.urlopen(
-            call.method,
-            prefix + call.path,
-            body=call.body,
-            headers={**call.headers, **route.headers()},
-            retries=False,
-            timeout=urllib3.Timeout(total=limit),
-            preload_content=False,
-        )
-        body = response.data if call.most is None else capped(response, call.most)
-    except urllib3.exceptions.SSLError:
-        failure: LemonfiberError = CertificateRefusedError(CERTIFICATE_REFUSED)
-    except urllib3.exceptions.NewConnectionError:
-        return None
-    except urllib3.exceptions.HTTPError:
-        failure = UnreachableError(NOT_ANSWERING)
-    else:
-        return received(response.status, response.headers, body)
-    raise failure
-
-
-def capped(response: urllib3.BaseHTTPResponse, most: int) -> bytes:
-    """Return at most one byte past `most` of an answer, and none of one that declares more.
-
-    A connection read to its end goes back to the pool; one left part-read is closed.
-    """
-    if declared_over(response.headers, most):
-        response.close()
-        return b""
-    kept = response.read(most + 1)
-    if len(kept) > most:
-        response.close()
-    else:
-        response.release_conn()
-    return kept
-
-
-def exchange(ways: Sequence[Way], prefix: str, call: Call, limit: float) -> Answer:
-    """Send one call over the first route a connection can be made on, following no redirect.
-
-    A route is passed over only where no connection could be made, so nothing
-    was sent; once a connection is made, its outcome is the call's.
-    """
-    for way in ways:
-        answer = attempt(way, prefix, call, limit)
-        if answer is not None:
-            return answer
-    raise UnreachableError(NOT_ANSWERING)
-
-
-def asked(ways: Sequence[Way], prefix: str, call: Call, attempts: Attempts) -> Answer:
-    """Send a call, and send a read again after a passing failure, as `attempts` allows.
-
-    The last attempt's outcome is the call's: its answer, or the failure that
-    nothing answered.
-    """
-    while True:
-        outcome: Answer | UnreachableError
-        try:
-            outcome = exchange(ways, prefix, call, attempts.left(time.monotonic()))
-        except UnreachableError as unanswered:
-            outcome = unanswered
-        pause = attempts.pause(outcome if isinstance(outcome, Answer) else None, time.monotonic())
-        if pause is None:
-            break
-        time.sleep(pause)
-    if isinstance(outcome, UnreachableError):
-        raise outcome
-    return outcome
-
-
-def close_all(ways: Sequence[Way]) -> None:
-    """Close every pool a client holds."""
-    for _, pool in ways:
-        pool.close()
+from lemonfiber._sync.transport import CHUNK, asked, close_all, exchange, ways_to
 
 
 class SyncClient:
@@ -276,8 +153,20 @@ class SyncClient:
         """
         return self._run(operation.picture(REQUESTS_REFERENCE_POSTER, REFERENCE, reference, query))
 
-    def act(self, action: str, arguments: Mapping[str, Json] | None = None) -> Envelope:
-        """Tell lemonfiber to do something the command line could also do. Sent once, never retried."""
+    @overload
+    def act(self, action: ActionRequest) -> Envelope: ...
+    @overload
+    def act(self, action: ActionName, arguments: Mapping[str, Json] | None = None) -> Envelope: ...
+    def act(
+        self,
+        action: ActionRequest | ActionName,
+        arguments: Mapping[str, Json] | None = None,
+    ) -> Envelope:
+        """Tell lemonfiber to do something the command line could also do. Sent once, never retried.
+
+        `action` is a request, its arguments typed as the contract types that action's, or an action the
+        contract lists by name with `arguments` beside it.
+        """
         return self._run(operation.action(action, arguments))
 
     def keys(self) -> KeysEnvelope:
@@ -311,6 +200,18 @@ class SyncClient:
     def revoke_device_key(self, name: str) -> DeviceKeysEnvelope:
         """Revoke one device key by its name; the keys it proved stay. Sent once, never retried."""
         return self._run(operation.revoke_device_key(name))
+
+    def register_push_endpoint(self, registering: PushEndpointRegistering) -> PushEndpointEnvelope:
+        """Register a phone's push endpoint, answered with the endpoint as registered. Sent once."""
+        return self._run(operation.register_push_endpoint(registering))
+
+    def push_endpoints(self) -> PushEndpointsEnvelope:
+        """Return every push endpoint this credential keeps: all for the operator, a member's own for a member."""
+        return self._run(operation.push_endpoints())
+
+    def remove_push_endpoint(self, name: str) -> PushEndpointsEnvelope:
+        """Remove one push endpoint by its name, answered with the endpoints as they now stand. Sent once."""
+        return self._run(operation.remove_push_endpoint(name))
 
     def job(self, job: str) -> JobStanding:
         """Ask where the work a name stands for got to."""

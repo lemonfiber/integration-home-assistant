@@ -17,6 +17,7 @@ from homeassistant.helpers import entity_registry as er
 from pytest_homeassistant_custom_component.common import async_capture_events
 
 from custom_components.lemonfiber.connection import Reason
+from custom_components.lemonfiber.const import DOMAIN
 from custom_components.lemonfiber.jobs import JOB_EVENT
 from tests.conftest import (
     DIAGNOSIS,
@@ -302,6 +303,19 @@ async def test_a_rehearsal_naming_no_offer_is_followed_by_the_call_as_it_was(
     assert stack.bodies == [("/api/actions/restart", {"dry_run": True}), ("/api/actions/restart", {})]
 
 
+async def test_a_rehearsal_answering_no_object_is_followed_by_the_call_as_it_was(
+    hass: HomeAssistant,
+    stack: Stack,
+    entry: MockConfigEntry,
+) -> None:
+    serve(stack, "act")
+    stack.reply("/api/actions/restart", Reply(body=envelope("lifecycle", ["o-restart"])), RESTARTED)
+    stack.reply("/api/jobs/j-2", Reply(body=envelope("lifecycle", {"rehearsed": False})))
+    await set_up(hass, entry)
+    await hass.services.async_call("button", "press", {ATTR_ENTITY_ID: RESTART_STACK}, blocking=True)
+    assert stack.bodies == [("/api/actions/restart", {"dry_run": True}), ("/api/actions/restart", {})]
+
+
 async def test_the_doctor_is_run_without_a_rehearsal(
     hass: HomeAssistant,
     stack: Stack,
@@ -325,6 +339,7 @@ async def test_a_refused_restart_is_said_in_the_stacks_words(
     await set_up(hass, entry)
     with pytest.raises(HomeAssistantError) as raised:
         await hass.services.async_call("button", "press", {ATTR_ENTITY_ID: RESTART_SONARR}, blocking=True)
+    assert raised.value.translation_domain == DOMAIN
     assert raised.value.translation_placeholders == {"sentence": "An update is running."}
 
 

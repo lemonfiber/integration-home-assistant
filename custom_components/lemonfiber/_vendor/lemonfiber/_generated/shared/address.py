@@ -83,7 +83,9 @@ class FrontDoorBeside(typing.TypedDict):
     reaches: FrontDoorReaches
     """Whether the address answers from where the asking came from."""
     service: str
-    """The service, by the name it shows itself under."""
+    """The service, by the name it shows itself under, or for a household member by what
+    it is to them.
+    """
     unaddressed: typing.NotRequired[str | None]
     """Why there is no address, where there is none."""
 
@@ -123,8 +125,9 @@ class FrontDoorReport(typing.TypedDict):
     reaches: FrontDoorReaches
     """Whether the address answers from where the asking came from."""
     service: typing.NotRequired[str | None]
-    """The service the household begins at, by the name it shows itself under.
-    Absent where this stack publishes nothing they could begin at.
+    """The service the household begins at, by the name it shows itself under, or for a
+    household member by what it is to them. Absent where this stack publishes nothing
+    they could begin at.
     """
     standing: FrontDoorStanding
     """Where the front door stands."""

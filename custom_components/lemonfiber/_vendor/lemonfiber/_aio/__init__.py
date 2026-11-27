@@ -11,7 +11,7 @@ context per request for the same reason.
 """
 
 import asyncio
-from typing import TYPE_CHECKING, Self
+from typing import TYPE_CHECKING, Self, overload
 
 import aiohttp
 
@@ -34,6 +34,8 @@ if TYPE_CHECKING:
     from types import TracebackType
 
     from lemonfiber._generated import (
+        ActionName,
+        ActionRequest,
         DeviceChallengeEnvelope,
         DeviceKeyEnvelope,
         DeviceKeysEnvelope,
@@ -44,6 +46,8 @@ if TYPE_CHECKING:
         LogEnvelope,
         MintedKey,
         MintedKeyEnvelope,
+        PushEndpointEnvelope,
+        PushEndpointsEnvelope,
     )
     from lemonfiber._protocol.calls import Json, Query
     from lemonfiber.address import Address, Route
@@ -53,6 +57,7 @@ if TYPE_CHECKING:
     from lemonfiber.files import BundleFile, Picture
     from lemonfiber.jobs import JobStanding
     from lemonfiber.keys import KeyLink, Minting
+    from lemonfiber.push_endpoints import PushEndpointRegistering
     from lemonfiber.reads import Read
     from lemonfiber.stream import Arrival, Live, Stale
 
@@ -153,8 +158,20 @@ class AsyncClient:
         """
         return await self._run(operation.picture(REQUESTS_REFERENCE_POSTER, REFERENCE, reference, query))
 
-    async def act(self, action: str, arguments: Mapping[str, Json] | None = None) -> Envelope:
-        """Tell lemonfiber to do something the command line could also do. Sent once, never retried."""
+    @overload
+    async def act(self, action: ActionRequest) -> Envelope: ...
+    @overload
+    async def act(self, action: ActionName, arguments: Mapping[str, Json] | None = None) -> Envelope: ...
+    async def act(
+        self,
+        action: ActionRequest | ActionName,
+        arguments: Mapping[str, Json] | None = None,
+    ) -> Envelope:
+        """Tell lemonfiber to do something the command line could also do. Sent once, never retried.
+
+        `action` is a request, its arguments typed as the contract types that action's, or an action the
+        contract lists by name with `arguments` beside it.
+        """
         return await self._run(operation.action(action, arguments))
 
     async def keys(self) -> KeysEnvelope:
@@ -188,6 +205,18 @@ class AsyncClient:
     async def revoke_device_key(self, name: str) -> DeviceKeysEnvelope:
         """Revoke one device key by its name; the keys it proved stay. Sent once, never retried."""
         return await self._run(operation.revoke_device_key(name))
+
+    async def register_push_endpoint(self, registering: PushEndpointRegistering) -> PushEndpointEnvelope:
+        """Register a phone's push endpoint, answered with the endpoint as registered. Sent once."""
+        return await self._run(operation.register_push_endpoint(registering))
+
+    async def push_endpoints(self) -> PushEndpointsEnvelope:
+        """Return every push endpoint this credential keeps: all for the operator, a member's own for a member."""
+        return await self._run(operation.push_endpoints())
+
+    async def remove_push_endpoint(self, name: str) -> PushEndpointsEnvelope:
+        """Remove one push endpoint by its name, answered with the endpoints as they now stand. Sent once."""
+        return await self._run(operation.remove_push_endpoint(name))
 
     async def job(self, job: str) -> JobStanding:
         """Ask where the work a name stands for got to."""
