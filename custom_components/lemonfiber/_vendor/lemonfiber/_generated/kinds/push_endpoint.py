@@ -23,8 +23,10 @@ class PushEndpointEnvelope(typing.TypedDict):
 class RegisteredPushEndpoint(typing.TypedDict):
     """A push endpoint registered."""
 
-    endpoint: str
-    """The `https` address its distributor gave."""
+    fingerprint: str
+    """The first sixteen lower-case hexadecimal digits of the SHA-256 of that address."""
+    host: str
+    """The host the address its distributor gave reaches."""
     name: str
     """The name it was registered under."""
     registered: Instant

@@ -275,18 +275,6 @@ type PluginPuts = typing.Literal["directory", "document", "key", "secrets", "sta
 """What an install puts at one path."""
 
 
-class PluginReachedHousehold(typing.TypedDict):
-    """From the household, through the stack's own proxy, at this label."""
-
-    group: typing.NotRequired[str | None]
-    """The group on the bundled dashboard, where the manifest named one."""
-    hostname: str
-    """The single label in front of the operator's domain."""
-    port: int
-    """The port the service listens on."""
-    tier: typing.Literal["household"]
-
-
 class PluginRecipe(typing.TypedDict):
     """One recipe, as an operator agrees to what it does."""
 
@@ -295,7 +283,9 @@ class PluginRecipe(typing.TypedDict):
     inputs: typing.NotRequired[list[PluginRecipeInput]]
     """Every value it asks the operator for when it runs, in the order it declares them."""
     on: typing.NotRequired[PluginRecipeOn]
-    """When it runs: as part of an install and an update, or only when asked for by name."""
+    """When it runs: as part of an install and an update, only when asked for by name, or
+    once the part its plugin claims is lemonfiber's.
+    """
     pairs: list[PluginPair]
     """Every value it could carry, and where to."""
     steps: list[PluginStep]
@@ -321,7 +311,7 @@ class PluginRecipeInput(typing.TypedDict):
     """Whether the value may be a secret, so a surface takes it without showing it."""
 
 
-type PluginRecipeOn = typing.Literal["install", "demand"]
+type PluginRecipeOn = typing.Literal["install", "demand", "claim"]
 """When a recipe runs."""
 
 
@@ -534,7 +524,6 @@ __all__ = [
     "PluginPlaceholder",
     "PluginPlaceholderForm",
     "PluginPuts",
-    "PluginReachedHousehold",
     "PluginRecipe",
     "PluginRecipeInput",
     "PluginRecipeOn",
