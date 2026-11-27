@@ -8,9 +8,9 @@ and CI fails on any difference.
 import typing
 
 
-type TitleKind = typing.Literal["tv", "movies", "music", "books"]
+type TitleKind = typing.Literal["tv", "movies", "music", "books", "audiobooks", "podcasts"]
 """What kind of title a curator files, a member asks for and a media server holds: a
-series, a film, music or books.
+series, a film, music, books, an audiobook or a podcast.
 """
 
 
