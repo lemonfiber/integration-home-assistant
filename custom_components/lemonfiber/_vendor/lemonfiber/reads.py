@@ -48,7 +48,7 @@ ACTIONS: Final = "/api/actions"
 """Where every action is asked for, by name."""
 
 JOBS: Final = "/api/jobs"
-"""Where work already begun is asked about and released, by name."""
+"""Where work already begun is asked about, released and forgotten, by name."""
 
 SESSION: Final = "/api/session"
 """Where a password is exchanged, once, for a session."""

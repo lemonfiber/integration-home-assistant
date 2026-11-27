@@ -22,6 +22,7 @@ from lemonfiber.problems import (
 
 if TYPE_CHECKING:
     from lemonfiber._generated import CapabilityState, Envelope, LogEnvelope, MintedKey
+    from lemonfiber._generated.refusals.listed import RefusalCode
     from lemonfiber._protocol.calls import Answer
 
 REFUSED_AT_THE_DOOR: Final = "That is not the password, or none is configured."
@@ -32,6 +33,10 @@ CLAIM_REFUSED: Final = (
     "Ask for the key to be minted as a claim again."
 )
 """What a refused claim is told where the stack said nothing readable."""
+
+
+NO_SUCH_JOB: Final[RefusalCode] = "ASK-7"
+"""The code the refusal of a job's name itself carries."""
 
 
 def succeeded(answer: Answer) -> bool:
@@ -82,8 +87,14 @@ def picture_of(answer: Answer) -> Picture:
 
 
 def standing_of(job: str, answer: Answer) -> JobStanding:
-    """Read where work stands from the status and the kind together."""
-    if answer.status == HTTPStatus.NOT_FOUND and problem_in(answer.body) is None:
+    """Read where work stands from the status and the kind together.
+
+    A `404` that is the refusal of the name itself, by its code or said in prose, is no such job:
+    a name nobody minted, one forgotten, and one another credential started alike.
+    """
+    if answer.status == HTTPStatus.NOT_FOUND and (
+        problem_in(answer.body) is None or code_in(answer.body) == NO_SUCH_JOB
+    ):
         raise NoSuchJobError(job)
     envelope = envelope_of(answer)
     if envelope["kind"] != "job":
