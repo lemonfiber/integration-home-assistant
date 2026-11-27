@@ -50,6 +50,19 @@ class Reader(typing.TypedDict):
     """
 
 
+class ReaderDefault(typing.TypedDict):
+    """One reader's own default for a setting."""
+
+    default: typing.NotRequired[str | None]
+    """What its manifest declares while no value is recorded, where it declares one."""
+    met: bool
+    """Whether the settings it needs hold what it needs, so the variable is written."""
+    service: str
+    """The service."""
+    variable: str
+    """The variable it is read into."""
+
+
 type SecretFrom = typing.Literal["operator", "recipe", "granted", "minted"]
 """Where a secret's value came from."""
 
@@ -77,11 +90,53 @@ class SettingChange(typing.TypedDict):
     """The services held back once the change is made, each with what it waits for."""
 
 
+type SettingDefault = (
+    SettingDefaultCore | SettingDefaultDeclared | SettingDefaultPerReader | SettingDefaultNone
+)
+"""What a setting falls back to while it holds no operator value."""
+
+
+class SettingDefaultCore(typing.TypedDict):
+    """One of the core's own settings, with what the core reads while none is recorded."""
+
+    of: typing.Literal["core"]
+    value: str
+    """The value."""
+
+
+class SettingDefaultDeclared(typing.TypedDict):
+    """The one default every reader whose `needs` are met declares. Empty is empty by
+    default.
+    """
+
+    of: typing.Literal["declared"]
+    value: str
+    """The value."""
+
+
+class SettingDefaultNone(typing.TypedDict):
+    """Nothing declares one, so nothing is written for it."""
+
+    of: typing.Literal["none"]
+
+
+class SettingDefaultPerReader(typing.TypedDict):
+    """Each reader's own, where the readers whose `needs` are met declare different ones."""
+
+    of: typing.Literal["per-reader"]
+    readers: list[ReaderDefault]
+    """Every reader, those whose `needs` are unmet included."""
+
+
 class SettingMove(typing.TypedDict):
     """One setting a change moves."""
 
     consequence: typing.NotRequired[str | None]
     """What moving it costs, where it costs anything."""
+    default: SettingDefault
+    """What it falls back to while it holds no operator value, read with the change in
+    place.
+    """
     setting: str
     """The setting."""
     value: typing.NotRequired[str | None]
@@ -165,9 +220,15 @@ __all__ = [
     "OwnerCore",
     "OwnerNamespace",
     "Reader",
+    "ReaderDefault",
     "SecretFrom",
     "SecretRead",
     "SettingChange",
+    "SettingDefault",
+    "SettingDefaultCore",
+    "SettingDefaultDeclared",
+    "SettingDefaultNone",
+    "SettingDefaultPerReader",
     "SettingMove",
     "SettingRead",
     "SettingsEnvelope",

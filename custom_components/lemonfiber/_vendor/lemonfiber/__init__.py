@@ -17,6 +17,7 @@ from lemonfiber._generated import (
     REFUSAL_CODES,
     ActionDescribed,
     ActionName,
+    ActionRequest,
     Envelope,
     KeyCallable,
     KeyCallableAction,
@@ -64,6 +65,7 @@ from lemonfiber.problems import (
     UnreachableError,
     UnreadableResponseError,
 )
+from lemonfiber.push_endpoints import PushEndpointRegistering
 from lemonfiber.reads import Read
 from lemonfiber.stream import HEARTBEAT, SILENCE_ALLOWED, Arrival, Break, Gap, Live, Stale, Unrecognised
 
@@ -80,6 +82,7 @@ __all__ = [
     "SPOKEN_API_VERSION",
     "ActionDescribed",
     "ActionName",
+    "ActionRequest",
     "Address",
     "AddressRefusedError",
     "AndroidAttestation",
@@ -123,6 +126,7 @@ __all__ = [
     "NotAdmittedError",
     "PasswordRefusedError",
     "Picture",
+    "PushEndpointRegistering",
     "Query",
     "Read",
     "RefusalCode",

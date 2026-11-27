@@ -9,15 +9,27 @@ from dataclasses import dataclass, field
 from http import HTTPMethod, HTTPStatus
 from typing import TYPE_CHECKING, Final
 
-from lemonfiber._generated import READS
+from lemonfiber._generated import READS, ActionRequest
 from lemonfiber.files import PICTURE_MOST, PICTURE_TYPES
 from lemonfiber.problems import MisaskedError
-from lemonfiber.reads import ACTIONS, BUNDLE, CAPABILITIES, DEVICE_KEYS, JOBS, KEY_CLAIMS, KEYS, LOGS, SESSION
+from lemonfiber.reads import (
+    ACTIONS,
+    BUNDLE,
+    CAPABILITIES,
+    DEVICE_KEYS,
+    JOBS,
+    KEY_CLAIMS,
+    KEYS,
+    LOGS,
+    PUSH_ENDPOINTS,
+    SESSION,
+)
 
 if TYPE_CHECKING:
     from lemonfiber.credential import Credential
     from lemonfiber.device_keys import Registering
     from lemonfiber.keys import Minting
+    from lemonfiber.push_endpoints import PushEndpointRegistering
     from lemonfiber.reads import Read
 
 type Scalar = str | int | bool
@@ -181,9 +193,14 @@ def picture_call(template: str, name: str, value: str, query: Query | None) -> C
     return Call(HTTPMethod.GET, path + search(query), {"Accept": ", ".join(PICTURE_TYPES)}, most=PICTURE_MOST)
 
 
-def action_call(name: str, arguments: Mapping[str, Json] | None) -> Call:
-    """Tell lemonfiber to do something the command line could also do."""
-    return posted(f"{ACTIONS}/{segment(name)}", arguments or {})
+def action_call(action: ActionRequest | str, arguments: Mapping[str, Json] | None) -> Call:
+    """Tell lemonfiber to do something the command line could also do: a request, or an action by name."""
+    if isinstance(action, str):
+        return posted(f"{ACTIONS}/{segment(action)}", arguments or {})
+    if arguments is not None:
+        sentence = "An action's request carries its own arguments, and was given more beside it."
+        raise MisaskedError(sentence, status=HTTPStatus.BAD_REQUEST)
+    return posted(f"{ACTIONS}/{segment(action.ACTION)}", action.arguments())
 
 
 def job_call(job: str, method: HTTPMethod) -> Call:
@@ -244,6 +261,32 @@ def revoke_device_key_call(name: str) -> Call:
     return Call(HTTPMethod.DELETE, device_key_path(name), {"Accept": JSON_TYPE})
 
 
+def register_push_endpoint_call(registering: PushEndpointRegistering) -> Call:
+    """Register a push endpoint with its name, its address, and its WebPush key and secret in base64url."""
+    return posted(
+        PUSH_ENDPOINTS,
+        {
+            "name": registering.name,
+            "endpoint": registering.endpoint,
+            "p256dh": base64url(registering.p256dh),
+            "auth": base64url(registering.auth),
+        },
+    )
+
+
+def push_endpoints_call() -> Call:
+    """Ask for the push endpoints this credential keeps."""
+    return Call(HTTPMethod.GET, PUSH_ENDPOINTS, {"Accept": JSON_TYPE})
+
+
+def remove_push_endpoint_call(name: str) -> Call:
+    """Remove one push endpoint, by its name as one path segment, refusing a name a URL would resolve away."""
+    if name in UNKEPT_SEGMENTS:
+        sentence = "A push endpoint is named by its name, and what was given is not a name that can be sent."
+        raise MisaskedError(sentence, status=HTTPStatus.BAD_REQUEST)
+    return Call(HTTPMethod.DELETE, f"{PUSH_ENDPOINTS}/{segment(name)}", {"Accept": JSON_TYPE})
+
+
 def device_key_path(name: str) -> str:
     """Return the door of one device key, refusing a name a URL would resolve away."""
     if name in UNKEPT_SEGMENTS:
@@ -270,7 +313,7 @@ def collect_call(claim: str) -> Call:
     return posted(KEY_CLAIMS, {"claim": claim})
 
 
-def posted(path: str, body: Mapping[str, Json]) -> Call:
+def posted(path: str, body: Mapping[str, object]) -> Call:
     """Send a JSON body to a door that takes one, asking to be answered in JSON."""
     headers = {"Accept": JSON_TYPE, "Content-Type": JSON_TYPE}
     return Call(HTTPMethod.POST, path, headers, json.dumps(dict(body)).encode())

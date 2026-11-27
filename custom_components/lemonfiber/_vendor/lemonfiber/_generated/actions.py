@@ -1,10 +1,11 @@
 # Copyright (c) 2026 NightWorksIO
-"""Every action the web API takes, and what the contract says of each.
+"""Every action the web API takes, what the contract says of each, and what each request is.
 
 Generated from the contract vendored in `contract/`. Do not edit: `just generate` rewrites it,
 and CI fails on any difference.
 """
 
+import dataclasses
 import types
 import typing
 
@@ -172,9 +173,26 @@ def is_action_name(value: str) -> typing.TypeIs[ActionName]:
     return value in ACTIONS
 
 
+@dataclasses.dataclass(frozen=True, kw_only=True, slots=True)
+class ActionRequest:
+    """One action the web API takes, with the arguments it is posted with."""
+
+    ACTION: typing.ClassVar[ActionName]
+    """The name it is posted to under `/api/actions/`."""
+
+    def arguments(self) -> dict[str, object]:
+        """Return the arguments it is posted with, each under the name the contract gives it.
+
+        An argument Python reserves the name of is a field spelled with a trailing underscore,
+        as `pass_` is posted as `pass`.
+        """
+        return {one.name.removesuffix("_"): getattr(self, one.name) for one in dataclasses.fields(self)}
+
+
 __all__ = [
     "ACTIONS",
     "ActionDescribed",
     "ActionName",
+    "ActionRequest",
     "is_action_name",
 ]

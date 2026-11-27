@@ -7,6 +7,7 @@ and CI fails on any difference.
 
 import typing
 
+from ..shared.policy import Policy
 from ..shared.unrated import Unrated
 
 
@@ -117,6 +118,13 @@ class InvitationApplied(typing.TypedDict):
     is two shapes a client has to be told are about the same thing.
     """
 
+    asking: typing.NotRequired[Policy | None]
+    """What happens to what they ask for, in the words the household read gives a
+    member's policy: `everything-waits` once the request service holds them.
+
+    Absent where it does not hold them: no request service, or one that could not
+    be reached.
+    """
     filtering: str
     """What a limit here is, and what it is not.
 
@@ -136,6 +144,9 @@ class InvitationApplied(typing.TypedDict):
     may *ask for* is a second service's business, and that service can be down while
     the media server is not. `NotTried` here is a service with no account for them
     yet — nothing to hold rather than a failure to hold something.
+
+    On a rehearsal, what the run would do: `Made` where a request service is wired
+    and can be asked, `NotTried` where there is none.
     """
     unrated: Unrated
     """What becomes of content the media server has no rating for.
