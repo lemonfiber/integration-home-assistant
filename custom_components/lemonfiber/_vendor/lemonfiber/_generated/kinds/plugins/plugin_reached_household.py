@@ -12,9 +12,7 @@ from .expected import (
     Expect,
     PluginAsking,
     PluginBuiltOn,
-    PluginChangedCheck,
     PluginDeclaration,
-    PluginReachedHousehold,
     PluginRecipe,
     PluginRequest,
     ServiceConstant,
@@ -163,6 +161,18 @@ of the system rather than a request a plugin made.
 """
 
 
+class PluginReachedHousehold(typing.TypedDict):
+    """From the household, through the stack's own proxy, at this label."""
+
+    group: typing.NotRequired[str | None]
+    """The group on the bundled dashboard, where the manifest named one."""
+    hostname: str
+    """The single label in front of the operator's domain."""
+    port: int
+    """The port the service listens on."""
+    tier: typing.Literal["household"]
+
+
 class PluginReachedLoopback(typing.TypedDict):
     """From this machine and nowhere else. No route, and no label to route to."""
 
@@ -268,26 +278,6 @@ class PluginTaking(typing.TypedDict):
     """The service taking it."""
     shape: PluginShape
     """The shape it takes."""
-
-
-class PluginVerification(typing.TypedDict):
-    """What the stack's own checks made of an install."""
-
-    broke: list[PluginChangedCheck]
-    """Every check this install made worse.
-
-    Empty is the answer an install needs, and it is the common one. What is here
-    is what takes the install back.
-    """
-    unsettled: list[PluginChangedCheck]
-    """Every check nothing could be concluded about across the two readings.
-
-    Reported and never acted on. *I could not tell* is not *it is still broken*,
-    and an install reversed because a check could not reach a provider it also
-    could not reach an hour ago would be punishing a plugin for the weather. It is
-    said out loud rather than dropped, because the assurance an operator thought
-    they had is the thing that went.
-    """
 
 
 type RecordedWith = str | int | bool
@@ -511,6 +501,7 @@ __all__ = [
     "PluginPlaced",
     "PluginProving",
     "PluginReached",
+    "PluginReachedHousehold",
     "PluginReachedLoopback",
     "PluginReachedProxied",
     "PluginRequestProof",
@@ -519,7 +510,6 @@ __all__ = [
     "PluginShape",
     "PluginSharing",
     "PluginTaking",
-    "PluginVerification",
     "RecordedWith",
     "Schedule",
     "ServiceCertificate",

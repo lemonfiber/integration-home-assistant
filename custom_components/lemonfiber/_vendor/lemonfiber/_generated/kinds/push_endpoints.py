@@ -13,8 +13,10 @@ from ..shared.instant import Instant
 class ListedPushEndpoint(typing.TypedDict):
     """One push endpoint as the listing shows it."""
 
-    endpoint: str
-    """The `https` address its distributor gave."""
+    fingerprint: str
+    """The first sixteen lower-case hexadecimal digits of the SHA-256 of that address."""
+    host: str
+    """The host the address its distributor gave reaches."""
     name: str
     """The name it was registered under."""
     registered: Instant
