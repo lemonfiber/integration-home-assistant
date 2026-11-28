@@ -29,6 +29,7 @@ type RefusalCode = typing.Literal[
     "ASK-11",
     "ASK-12",
     "ASK-13",
+    "ASK-14",
     "ASK-2",
     "ASK-3",
     "ASK-4",

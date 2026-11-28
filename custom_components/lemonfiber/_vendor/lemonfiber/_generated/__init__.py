@@ -13,6 +13,7 @@ from . import kinds as _kinds
 from . import narrowing as _narrowing
 from . import reads as _reads
 from . import refusals as _refusals
+from . import routes as _routes
 from . import shared as _shared
 
 from .actions import *
@@ -23,6 +24,7 @@ from .kinds import *
 from .narrowing import *
 from .reads import *
 from .refusals import *
+from .routes import *
 from .shared import *
 
 __all__: list[str] = []
@@ -34,4 +36,5 @@ __all__ += _kinds.__all__
 __all__ += _narrowing.__all__
 __all__ += _reads.__all__
 __all__ += _refusals.__all__
+__all__ += _routes.__all__
 __all__ += _shared.__all__

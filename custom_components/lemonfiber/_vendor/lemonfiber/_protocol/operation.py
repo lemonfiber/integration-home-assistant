@@ -147,9 +147,9 @@ def mint_claim(minting: Minting) -> Operation[KeyClaimEnvelope]:
     return Operation(mint_call(minting, claim=True), lambda answer: expect(envelope_of(answer), "key-claim"))
 
 
-def revoke(name: str) -> Operation[KeysEnvelope]:
-    """Revoke one integration key by its name, answered with the keys as they now stand."""
-    return Operation(revoke_call(name), lambda answer: expect(envelope_of(answer), "keys"))
+def revoke(name: str, *, dry_run: bool = False) -> Operation[KeysEnvelope]:
+    """Revoke one integration key by its name, or rehearse it, answered with the keys as they would then stand."""
+    return Operation(revoke_call(name, dry_run=dry_run), lambda answer: expect(envelope_of(answer), "keys"))
 
 
 def collection(claim: str) -> Operation[MintedKey]:
@@ -182,10 +182,10 @@ def device_key_challenge(name: str) -> Operation[DeviceChallengeEnvelope]:
     )
 
 
-def revoke_device_key(name: str) -> Operation[DeviceKeysEnvelope]:
-    """Revoke one device key by its name, answered with the device keys as they now stand."""
+def revoke_device_key(name: str, *, dry_run: bool = False) -> Operation[DeviceKeysEnvelope]:
+    """Revoke one device key by its name, or rehearse it, answered with the device keys as they would then stand."""
     return Operation(
-        revoke_device_key_call(name),
+        revoke_device_key_call(name, dry_run=dry_run),
         lambda answer: expect(envelope_of(answer), "device-keys"),
     )
 
@@ -207,9 +207,9 @@ def push_endpoints() -> Operation[PushEndpointsEnvelope]:
     )
 
 
-def remove_push_endpoint(name: str) -> Operation[PushEndpointsEnvelope]:
-    """Remove one push endpoint by its name, answered with the endpoints as they now stand."""
+def remove_push_endpoint(name: str, *, dry_run: bool = False) -> Operation[PushEndpointsEnvelope]:
+    """Remove one push endpoint by its name, or rehearse it, answered with the endpoints as they would then stand."""
     return Operation(
-        remove_push_endpoint_call(name),
+        remove_push_endpoint_call(name, dry_run=dry_run),
         lambda answer: expect(envelope_of(answer), "push-endpoints"),
     )
