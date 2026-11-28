@@ -31,6 +31,9 @@ ASK: typing.Final[typing.Mapping[RefusalCode, ListedRefusal]] = {
         400,
         "Raised where an `Idempotency-Key` already sent with one action and its arguments is sent with another.",
     ),
+    "ASK-14": ListedRefusal(
+        "NOT_A_REVOCATION", 400, "Raised where the body of a revocation is not `dry_run` alone."
+    ),
     "ASK-2": ListedRefusal(
         "MISSING_ARGUMENT", 400, "Raised where an action was not given an argument it needs."
     ),

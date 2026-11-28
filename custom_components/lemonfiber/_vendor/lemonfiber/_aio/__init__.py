@@ -186,9 +186,9 @@ class AsyncClient:
         """Mint one integration key as a claim, answered with the key link that collects it and no secret."""
         return await self._run(operation.mint_claim(minting))
 
-    async def revoke(self, name: str) -> KeysEnvelope:
-        """Revoke one integration key by its name, answered with the keys as they now stand."""
-        return await self._run(operation.revoke(name))
+    async def revoke(self, name: str, *, dry_run: bool = False) -> KeysEnvelope:
+        """Revoke one integration key by its name, answered with the keys as they now stand. With `dry_run`, nothing is removed and the answer says what removing would come to."""
+        return await self._run(operation.revoke(name, dry_run=dry_run))
 
     async def register_device_key(self, registering: Registering) -> DeviceKeyEnvelope:
         """Register a phone's key pair as a device key. Sent once, never retried."""
@@ -202,9 +202,9 @@ class AsyncClient:
         """Ask a challenge for one device key, good for one mint within a minute. Sent once."""
         return await self._run(operation.device_key_challenge(name))
 
-    async def revoke_device_key(self, name: str) -> DeviceKeysEnvelope:
-        """Revoke one device key by its name; the keys it proved stay. Sent once, never retried."""
-        return await self._run(operation.revoke_device_key(name))
+    async def revoke_device_key(self, name: str, *, dry_run: bool = False) -> DeviceKeysEnvelope:
+        """Revoke one device key by its name; the keys it proved stay. Sent once, never retried. With `dry_run`, nothing is removed and the answer says what removing would come to."""
+        return await self._run(operation.revoke_device_key(name, dry_run=dry_run))
 
     async def register_push_endpoint(self, registering: PushEndpointRegistering) -> PushEndpointEnvelope:
         """Register a phone's push endpoint, answered with the endpoint as registered. Sent once."""
@@ -214,9 +214,9 @@ class AsyncClient:
         """Return every push endpoint this credential keeps: all for the operator, a member's own for a member."""
         return await self._run(operation.push_endpoints())
 
-    async def remove_push_endpoint(self, name: str) -> PushEndpointsEnvelope:
-        """Remove one push endpoint by its name, answered with the endpoints as they now stand. Sent once."""
-        return await self._run(operation.remove_push_endpoint(name))
+    async def remove_push_endpoint(self, name: str, *, dry_run: bool = False) -> PushEndpointsEnvelope:
+        """Remove one push endpoint by its name, answered with the endpoints as they now stand. Sent once. With `dry_run`, nothing is removed and the answer says what removing would come to."""
+        return await self._run(operation.remove_push_endpoint(name, dry_run=dry_run))
 
     async def job(self, job: str) -> JobStanding:
         """Ask where the work a name stands for got to."""

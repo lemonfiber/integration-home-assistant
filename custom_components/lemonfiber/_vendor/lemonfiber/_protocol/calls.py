@@ -278,9 +278,9 @@ def device_key_challenge_call(name: str) -> Call:
     return Call(HTTPMethod.POST, f"{device_key_path(name)}/challenge", {"Accept": JSON_TYPE})
 
 
-def revoke_device_key_call(name: str) -> Call:
+def revoke_device_key_call(name: str, *, dry_run: bool = False) -> Call:
     """Revoke one device key, by its name as one path segment."""
-    return Call(HTTPMethod.DELETE, device_key_path(name), {"Accept": JSON_TYPE})
+    return removed(device_key_path(name), dry_run=dry_run)
 
 
 def register_push_endpoint_call(registering: PushEndpointRegistering) -> Call:
@@ -301,10 +301,10 @@ def push_endpoints_call() -> Call:
     return Call(HTTPMethod.GET, PUSH_ENDPOINTS, {"Accept": JSON_TYPE})
 
 
-def remove_push_endpoint_call(name: str) -> Call:
+def remove_push_endpoint_call(name: str, *, dry_run: bool = False) -> Call:
     """Remove one push endpoint, by its name as one path segment, refusing a name a URL would resolve away."""
     sentence = "A push endpoint is named by its name, and what was given is not a name that can be sent."
-    return Call(HTTPMethod.DELETE, f"{PUSH_ENDPOINTS}/{held(name, sentence)}", {"Accept": JSON_TYPE})
+    return removed(f"{PUSH_ENDPOINTS}/{held(name, sentence)}", dry_run=dry_run)
 
 
 def device_key_path(name: str) -> str:
@@ -318,15 +318,23 @@ def base64url(raw: bytes) -> str:
     return base64.urlsafe_b64encode(raw).rstrip(b"=").decode()
 
 
-def revoke_call(name: str) -> Call:
+def revoke_call(name: str, *, dry_run: bool = False) -> Call:
     """Revoke one integration key, by its name as one path segment, refusing a name a URL would resolve away."""
     sentence = "A key is revoked by its name, and what was given is not a name that can be sent."
-    return Call(HTTPMethod.DELETE, f"{KEYS}/{held(name, sentence)}", {"Accept": JSON_TYPE})
+    return removed(f"{KEYS}/{held(name, sentence)}", dry_run=dry_run)
 
 
 def collect_call(claim: str) -> Call:
     """Collect the key a claim was minted for, with the claim alone."""
     return posted(KEY_CLAIMS, {"claim": claim})
+
+
+def removed(path: str, *, dry_run: bool) -> Call:
+    """Remove what `path` names, or, where `dry_run` asks, answer with what removing it would come to."""
+    if not dry_run:
+        return Call(HTTPMethod.DELETE, path, {"Accept": JSON_TYPE})
+    headers = {"Accept": JSON_TYPE, "Content-Type": JSON_TYPE}
+    return Call(HTTPMethod.DELETE, path, headers, json.dumps({"dry_run": True}).encode())
 
 
 def posted(path: str, body: Mapping[str, object]) -> Call:
